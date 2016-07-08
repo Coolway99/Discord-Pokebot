@@ -1,9 +1,7 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.types.Types;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
 
 public enum Moves{
 	//ENUM_NAME("Textual Name", Type, isSpecial", PP, Power, Accuracy (either int or double)
@@ -131,7 +129,7 @@ public enum Moves{
 					Pokebot.sendMessage(channel, attacker.getUser().mention()+" attacked "+defender.getUser().mention()
 							+" "+timesHit+" times for a total of "+damage+"HP of damage!");
 					defender.HP = Math.max(0, defender.HP - damage);
-					//Fainting will take place in the turn area
+					faintMessage(channel, defender);
 				} else {
 					Pokebot.sendMessage(channel, "But "+attacker.getUser().mention()+" missed!");
 				}
@@ -171,15 +169,23 @@ public enum Moves{
 		int damage = getDamage(attacker, move, defender);
 		defender.HP = Math.max(0, defender.HP - damage);
 		if(move.hasAfter()) move.runAfter(channel, attacker, defender, damage);
-		Pokebot.sendMessage(channel, attacker.getUser().mention()
-				+" attacked "+defender.getUser().mention()+" with "+move.getName()
-				+" for "+damage+" damage!");
+		attackMessage(channel, attacker, move, defender, damage);
 		if(defender.HP == 0){
-			Pokebot.sendMessage(channel, defender.getUser().mention()+" has fainted!");
+			faintMessage(channel, defender);
 		} else {
 			Pokebot.sendMessage(channel, defender.getUser().mention()+" has "+defender.HP+"HP left!");
 		}
 		
+	}
+	
+	private static void attackMessage(IChannel channel, Player attacker, Moves move, Player defender, int damage){
+		Pokebot.sendMessage(channel, attacker.getUser().mention()
+				+" attacked "+defender.getUser().mention()+" with "+move.getName()
+				+" for "+damage+" damage!");
+	}
+	
+	private static void faintMessage(IChannel channel, Player defender){
+		Pokebot.sendMessage(channel, defender.getUser().mention()+" has fainted!");
 	}
 	
 	public static int getDamage(Player attacker, Moves move, Player defender){

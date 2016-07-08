@@ -27,4 +27,11 @@ public class PlayerHandler{
 		playerMap.remove(user.getID()).saveData();
 	}
 	
+	public static void saveAll(){
+		for(Player player : playerMap.values()){
+			player.saveData();
+		}
+		playerMap.clear();
+	}
+	
 }

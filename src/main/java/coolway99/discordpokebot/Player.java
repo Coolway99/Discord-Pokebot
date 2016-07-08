@@ -18,7 +18,7 @@ public class Player{
 	public Types primary = Types.NORMAL;
 	public Types secondary = Types.NULL;
 	public int HP = 0;
-	public int level = 50;
+	public int level = 50; //TODO
 	//Physical Stats
 	/**
 	 * An array containing all the stats of the player, they go in this order:
@@ -35,33 +35,13 @@ public class Player{
 	 * EV
 	 */
 	public int[][] stats = new int[6][3];
-	/*
-	public int health = 1;
-	public int speed = 1;
-	public int defense = 1;
-	public int sDefense = 1;
-	public int attack = 1;
-	public int sAttack = 1;
-	
-	public int healthIV = 1;
-	public int speedIV = 1;
-	public int defenseIV = 1;
-	public int sDefenseIV = 1;
-	public int attackIV = 1;
-	public int sAttackIV = 1;
-	
-	public int healthEV = 0;
-	public int speedEV = 0;
-	public int defenseEV = 0;
-	public int sDefenseEV = 0;
-	public int attackEV = 0;
-	public int sAttackEV = 0;
-	*/
 	
 	public int numOfAttacks = 0;
 	//This array is manually done out as to make sure they are "null" type moves, to prevent errors
 	public Moves[] moves = new Moves[]{Moves.NULL, Moves.NULL, Moves.NULL, Moves.NULL};
 	public int[] PP = new int[4];
+	
+	public Battle battle = null;
 	
 	public Player(IUser user){
 		//Set the default values
@@ -84,6 +64,10 @@ public class Player{
 	
 	public boolean hasSecondaryType(){
 		return this.secondary != Types.NULL;
+	}
+	
+	public boolean inBattle(){
+		return this.battle != null;
 	}
 	
 	public int getMaxHP(){
@@ -118,26 +102,11 @@ public class Player{
 			this.primary = Types.valueOf(in.nextLine());
 			this.secondary = Types.valueOf(in.nextLine());
 			
-			this.stats[Stats.HEALTH.getIndex()][SubStats.BASE.getIndex()] = in.nextInt();
-			this.stats[Stats.ATTACK.getIndex()][SubStats.BASE.getIndex()] = in.nextInt();
-			this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.BASE.getIndex()] = in.nextInt();
-			this.stats[Stats.DEFENSE.getIndex()][SubStats.BASE.getIndex()] = in.nextInt();
-			this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.BASE.getIndex()] = in.nextInt();
-			this.stats[Stats.SPEED.getIndex()][SubStats.BASE.getIndex()] = in.nextInt();
-			
-			this.stats[Stats.HEALTH.getIndex()][SubStats.IV.getIndex()] = in.nextInt();
-			this.stats[Stats.ATTACK.getIndex()][SubStats.IV.getIndex()] = in.nextInt();
-			this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.IV.getIndex()] = in.nextInt();
-			this.stats[Stats.DEFENSE.getIndex()][SubStats.IV.getIndex()] = in.nextInt();
-			this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.IV.getIndex()] = in.nextInt();
-			this.stats[Stats.SPEED.getIndex()][SubStats.IV.getIndex()] = in.nextInt();
-			
-			this.stats[Stats.HEALTH.getIndex()][SubStats.EV.getIndex()] = in.nextInt();
-			this.stats[Stats.ATTACK.getIndex()][SubStats.EV.getIndex()] = in.nextInt();
-			this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.EV.getIndex()] = in.nextInt();
-			this.stats[Stats.DEFENSE.getIndex()][SubStats.EV.getIndex()] = in.nextInt();
-			this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.EV.getIndex()] = in.nextInt();
-			this.stats[Stats.SPEED.getIndex()][SubStats.EV.getIndex()] = in.nextInt();
+			for(int y = 0; y < this.stats.length; y++){
+				for(int x = 0; x < this.stats[0].length; x++){
+					this.stats[y][x] = in.nextInt();
+				}
+			}
 			
 			this.numOfAttacks = in.nextInt();
 			in.nextLine(); //nextInt tends to leave over the \n, it seems
@@ -166,26 +135,11 @@ public class Player{
 			out.println(this.primary.toString());
 			out.println(this.secondary.toString());
 			
-			out.println(this.stats[Stats.HEALTH.getIndex()][SubStats.BASE.getIndex()]);
-			out.println(this.stats[Stats.ATTACK.getIndex()][SubStats.BASE.getIndex()]);
-			out.println(this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.BASE.getIndex()]);
-			out.println(this.stats[Stats.DEFENSE.getIndex()][SubStats.BASE.getIndex()]);
-			out.println(this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.BASE.getIndex()]);
-			out.println(this.stats[Stats.SPEED.getIndex()][SubStats.BASE.getIndex()]);
-			
-			out.println(this.stats[Stats.HEALTH.getIndex()][SubStats.IV.getIndex()]);
-			out.println(this.stats[Stats.ATTACK.getIndex()][SubStats.IV.getIndex()]);
-			out.println(this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.IV.getIndex()]);
-			out.println(this.stats[Stats.DEFENSE.getIndex()][SubStats.IV.getIndex()]);
-			out.println(this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.IV.getIndex()]);
-			out.println(this.stats[Stats.SPEED.getIndex()][SubStats.IV.getIndex()]);
-			
-			out.println(this.stats[Stats.HEALTH.getIndex()][SubStats.EV.getIndex()]);
-			out.println(this.stats[Stats.ATTACK.getIndex()][SubStats.EV.getIndex()]);
-			out.println(this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.EV.getIndex()]);
-			out.println(this.stats[Stats.DEFENSE.getIndex()][SubStats.EV.getIndex()]);
-			out.println(this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.EV.getIndex()]);
-			out.println(this.stats[Stats.SPEED.getIndex()][SubStats.EV.getIndex()]);
+			for(int y = 0; y < this.stats.length; y++){
+				for(int x = 0; x < this.stats[0].length; x++){
+					out.println(this.stats[y][x]);
+				}
+			}
 			
 			out.println(this.numOfAttacks);
 			for(int x = 0; x < this.moves.length; x++){

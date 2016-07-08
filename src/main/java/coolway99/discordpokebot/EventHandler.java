@@ -35,9 +35,9 @@ public class EventHandler{
 				break;
 			}
 			case "type":{
-				IUser user = message.getAuthor();
-				Player player = PlayerHandler.getPlayer(user);
-				Pokebot.sendMessage(message.getChannel(), user.mention()+" is type "+player.primary.toString()
+				Player player = PlayerHandler.getPlayer((message.getMentions().isEmpty() ?
+						message.getAuthor() : message.getMentions().get(0)));
+				Pokebot.sendMessage(message.getChannel(), player.getUser().mention()+" is type "+player.primary.toString()
 						+(player.hasSecondaryType() ? " with secondary type "+player.secondary.toString()
 						 : ""));
 				break;
@@ -64,11 +64,15 @@ public class EventHandler{
 			}
 			case "setstat":
 			case "ss":{
+				Player player = PlayerHandler.getPlayer(message.getAuthor());
+				if(player.inBattle()){
+					inBattleMessage(message);
+					return;
+				}
 				if(args.length < 3){
 					message.reply("Usage: setstat <statname> <amount> (optional EV or IV modifier)"); 
 					return;
 				}
-				Player player = PlayerHandler.getPlayer(message.getAuthor());
 				try{
 					StatHandler.setStats(message.getChannel(), player, args[1], Integer.parseInt(args[2]),
 							(args.length > 3 ? args[3] : null));
@@ -106,6 +110,10 @@ public class EventHandler{
 			case "sm":
 			case "setmove":{
 				Player player = PlayerHandler.getPlayer(message.getAuthor());
+				if(player.inBattle()){
+					inBattleMessage(message);
+					return;
+				}
 				if(args.length < 3){
 					message.reply("Use: <slotnumber> <move>");
 					return;
@@ -211,6 +219,25 @@ public class EventHandler{
 						return;
 					}
 					Moves move = attacker.moves[slot];
+					//If the player is in a battle, we want to pass on the message
+					if(attacker.inBattle()){
+						if(defender.inBattle()){
+							if(attacker.battle == defender.battle){
+								attacker.battle.onAttack(attacker, move, defender);
+								return; //We don't want the standard logic to run
+							}
+							message.reply("you two in different battles!");
+							return;
+						}
+						message.reply("you can only attack those in your battle!");
+						return;
+					}
+					//at this point, we know the attacker is not in battle
+					if(defender.inBattle()){
+						message.reply("you unable to hit them because they are in a battle!");
+						return;
+					}
+					//This is the normal neither-in-battle mess around attack
 					Moves.attack(message.getChannel(), attacker, move, defender);
 					attacker.PP[slot]--;
 				}catch(NumberFormatException e){
@@ -218,6 +245,31 @@ public class EventHandler{
 				}
 				break;
 			}
+			case "revive":
+			case "heal":{
+				if(PlayerHandler.getPlayer(message.getAuthor()).inBattle()){
+					inBattleMessage(message);
+					return;
+				}
+				Player player = PlayerHandler.getPlayer((message.getMentions().isEmpty() ?
+						message.getAuthor() : message.getMentions().get(0)));
+				//At this point, we know the person sending the message isn't in battle
+				if(player.inBattle()){
+					message.reply("unable to heal them because they are in a battle!");
+					return;
+				}
+				player.HP = player.getMaxHP();
+				message.reply(" fully healed "+player.getUser().mention());
+				break;
+			}
+			case "battle":{
+				//if()
+				break;
+			}
+			/*case "saveall":{
+				PlayerHandler.saveAll();
+				break;
+			}*/ //TODO
 			case "help":{
 				Pokebot.sendMessage(message.getChannel(), "No.");
 				return;
@@ -232,5 +284,8 @@ public class EventHandler{
 		}
 	}
 	
+	private static void inBattleMessage(IMessage message) throws MissingPermissionsException, HTTP429Exception, DiscordException{
+		message.reply("you can't use this because you're in a battle!");
+	}
 	
 }
