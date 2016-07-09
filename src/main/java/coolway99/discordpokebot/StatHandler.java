@@ -34,13 +34,14 @@ public class StatHandler{
 	};
 	
 	
-	public static int calcStatValue(int statpoints, int ivpoints, int evpoints, int level, boolean isHP){
+	public static int calcStatValue(int statpoints, int ivpoints, int evpoints, int level, boolean isHP, byte modifier){
 		//TODO Nature
-		int firstStage =  (int) Math.floor(((2*statpoints+ivpoints+evpoints)*level)/100D);
-		return Math.min((isHP ?
+		double firstStage =  Math.floor(((2*statpoints+ivpoints+evpoints)*level)/100D);
+		return (int) Math.max((isHP ?
 				(firstStage + level + 10) 
 				: ((firstStage+5)/*TODO *nature */))
-				, 999); //The highest a single stat can go is 999
+				* getModifierChange(modifier)
+				, 1D); //Setting a hard limit here for the lowest a stat can go is 1, to prevent errors
 	}
 	
 	public static int getTotalPoints(Player player){
@@ -90,13 +91,31 @@ public class StatHandler{
 		player.stats[s.getIndex()][subS.getIndex()] = newStat;
 	}
 	
+	public static double getModifierChange(byte mod){
+		if(mod == 0 || mod > 6 || mod < -6) return 1D;
+		double res = (Math.abs(mod+2D)/2D);
+		if(mod < 0) res = 1D/res;
+		return res;
+	}
+	
+	//This is used for accuracy and evasion
+	public static double getHitModifierChange(byte mod){
+		if(mod == 0 || mod > 6 || mod < -6) return 1D;
+		double res = (Math.abs(mod+3D)/3D);
+		if(mod < 0) res = 1D/res;
+		return res;
+	}
+	
 	public static enum Stats{
 		HEALTH(0),
 		ATTACK(1),
 		SPECIAL_ATTACK(2),
 		DEFENSE(3),
 		SPECIAL_DEFENSE(4),
-		SPEED(5);
+		SPEED(5),
+		//These shouldn't be used in normal stats
+		ACCURACY(6),
+		EVASION(7);
 		
 		private final int index;
 		
@@ -118,6 +137,10 @@ public class StatHandler{
 					return SPECIAL_DEFENSE;
 				case 5:
 					return SPEED;
+				case 6:
+					return ACCURACY;
+				case 7:
+					return EVASION;
 				default:
 					return null;
 			}

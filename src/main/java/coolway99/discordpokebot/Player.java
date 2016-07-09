@@ -37,6 +37,11 @@ public class Player{
 	 */
 	public int[][] stats = new int[6][3];
 	
+	/**
+	 * An array holding the modifiers for each stat
+	 */
+	public byte[] modifiers = new byte[8];
+	
 	public int numOfAttacks = 0;
 	//This array is manually done out as to make sure they are "null" type moves, to prevent errors
 	public Moves[] moves = new Moves[]{Moves.NULL, Moves.NULL, Moves.NULL, Moves.NULL};
@@ -45,12 +50,6 @@ public class Player{
 	public Battle battle = null;
 	
 	public Player(IUser user){
-		//Set the default values
-		for(int y = 0; y < 6; y++){
-			for(int x = 0; x < 2; x++){ //we skip the EV's
-				this.stats[y][x] = 1;
-			}
-		}
 		this.user = user;
 		this.loadData();
 		this.HP = this.getMaxHP();
@@ -72,27 +71,65 @@ public class Player{
 	}
 	
 	public int getMaxHP(){
-		return StatHandler.calcStatValue(this.stats[Stats.HEALTH.getIndex()][SubStats.BASE.getIndex()], this.stats[Stats.HEALTH.getIndex()][SubStats.IV.getIndex()], this.stats[Stats.HEALTH.getIndex()][SubStats.EV.getIndex()], this.level, true);
+		return StatHandler.calcStatValue(this.stats[Stats.HEALTH.getIndex()][SubStats.BASE.getIndex()],
+				this.stats[Stats.HEALTH.getIndex()][SubStats.IV.getIndex()],
+				this.stats[Stats.HEALTH.getIndex()][SubStats.EV.getIndex()],
+				this.level,
+				true,
+				this.modifiers[Stats.HEALTH.getIndex()]);
 	}
 	
 	public int getAttackStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.ATTACK.getIndex()][SubStats.BASE.getIndex()], this.stats[Stats.ATTACK.getIndex()][SubStats.IV.getIndex()], this.stats[Stats.ATTACK.getIndex()][SubStats.EV.getIndex()], this.level, false);
+		return StatHandler.calcStatValue(this.stats[Stats.ATTACK.getIndex()][SubStats.BASE.getIndex()],
+				this.stats[Stats.ATTACK.getIndex()][SubStats.IV.getIndex()],
+				this.stats[Stats.ATTACK.getIndex()][SubStats.EV.getIndex()],
+				this.level,
+				false,
+				this.modifiers[Stats.ATTACK.getIndex()]);
 	}
 	
 	public int getSpecialAttackStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.BASE.getIndex()], this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.IV.getIndex()], this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.EV.getIndex()], this.level, false);
+		return StatHandler.calcStatValue(this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.BASE.getIndex()],
+				this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.IV.getIndex()],
+				this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.EV.getIndex()],
+				this.level,
+				false,
+				this.modifiers[Stats.SPECIAL_ATTACK.getIndex()]);
 	}
 	
 	public int getDefenseStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.DEFENSE.getIndex()][SubStats.BASE.getIndex()], this.stats[Stats.DEFENSE.getIndex()][SubStats.IV.getIndex()], this.stats[Stats.DEFENSE.getIndex()][SubStats.EV.getIndex()], this.level, false);
+		return StatHandler.calcStatValue(this.stats[Stats.DEFENSE.getIndex()][SubStats.BASE.getIndex()],
+				this.stats[Stats.DEFENSE.getIndex()][SubStats.IV.getIndex()],
+				this.stats[Stats.DEFENSE.getIndex()][SubStats.EV.getIndex()],
+				this.level,
+				false,
+				this.modifiers[Stats.DEFENSE.getIndex()]);
 	}
 	
 	public int getSpecialDefenseStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.BASE.getIndex()], this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.IV.getIndex()], this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.EV.getIndex()], this.level, false);
+		return StatHandler.calcStatValue(this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.BASE.getIndex()],
+				this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.IV.getIndex()],
+				this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.EV.getIndex()],
+				this.level,
+				false,
+				this.modifiers[Stats.SPECIAL_DEFENSE.getIndex()]);
 	}
 	
 	public int getSpeedStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.SPEED.getIndex()][SubStats.BASE.getIndex()], this.stats[Stats.SPEED.getIndex()][SubStats.IV.getIndex()], this.stats[Stats.SPEED.getIndex()][SubStats.EV.getIndex()], this.level, false);
+		return StatHandler.calcStatValue(this.stats[Stats.SPEED.getIndex()][SubStats.BASE.getIndex()],
+				this.stats[Stats.SPEED.getIndex()][SubStats.IV.getIndex()],
+				this.stats[Stats.SPEED.getIndex()][SubStats.EV.getIndex()],
+				this.level,
+				false,
+				this.modifiers[Stats.SPEED.getIndex()]);
+	}
+	
+	public double getAccuracy(){
+		return StatHandler.getHitModifierChange(this.modifiers[Stats.ACCURACY.getIndex()]);
+	}
+	
+	public double getEvasion(){
+		return StatHandler.getModifierChange(this.modifiers[Stats.EVASION.getIndex()]);
 	}
 	
 	public void loadData(){

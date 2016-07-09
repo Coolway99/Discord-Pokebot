@@ -216,13 +216,15 @@ public enum Moves{
 				+2)
 				*Types.getAttackMultiplier(attacker, move, defender))
 				*((Pokebot.ran.nextInt(255-217)+217)/255D));
-		//return 0;
 	}
 	
 	//Dice rolls for a hit, if not factoring in changes to accuracy and evasion, you can safely
 	//pass in null for Attacker and Defender
 	public static boolean willHit(Moves move, Player attacker, Player defender, boolean factorChanges){
-		//TODO factor in evasion
-		return (Pokebot.ran.nextDouble() < move.getAccuracy());
+		double accuracy = move.getAccuracy();
+		if(factorChanges){
+			accuracy *= attacker.getAccuracy() / defender.getEvasion();
+		}
+		return (Pokebot.ran.nextDouble() < accuracy);
 	}	
 }
