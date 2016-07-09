@@ -2,6 +2,7 @@ package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.StatHandler.Stats;
 import coolway99.discordpokebot.StatHandler.SubStats;
+import coolway99.discordpokebot.battle.BattleManager;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.api.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;

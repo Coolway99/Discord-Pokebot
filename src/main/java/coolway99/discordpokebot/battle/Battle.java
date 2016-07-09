@@ -1,4 +1,4 @@
-package coolway99.discordpokebot;
+package coolway99.discordpokebot.battle;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
+import coolway99.discordpokebot.IAttack;
+import coolway99.discordpokebot.Moves;
+import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.Pokebot;
 import sx.blah.discord.handle.obj.IChannel;
 
 public class Battle implements Comparator<Player>{

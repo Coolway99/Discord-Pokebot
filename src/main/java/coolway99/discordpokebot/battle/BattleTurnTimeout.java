@@ -1,4 +1,4 @@
-package coolway99.discordpokebot;
+package coolway99.discordpokebot.battle;
 
 import java.util.TimerTask;
 

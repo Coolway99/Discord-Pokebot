@@ -8,6 +8,7 @@ import java.util.Scanner;
 
 import coolway99.discordpokebot.StatHandler.Stats;
 import coolway99.discordpokebot.StatHandler.SubStats;
+import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.types.Types;
 import sx.blah.discord.handle.obj.IUser;
 

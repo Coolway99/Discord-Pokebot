@@ -1,10 +1,12 @@
-package coolway99.discordpokebot;
+package coolway99.discordpokebot.battle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
