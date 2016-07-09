@@ -3,6 +3,8 @@ package coolway99.discordpokebot;
 import java.io.File;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -19,6 +21,10 @@ public class Pokebot{
 	public static IDiscordClient client;
 	public static final Scanner in = new Scanner(System.in);
 	public static final Random ran = new Random();
+	public static final Timer timer = new Timer("Pokebot Timer Thread", true);
+	//TODO this creates a bottleneck of only one message at a time
+	private static IChannel batchMessagesForBattle = null;
+	private static StringBuilder builder = null;
 	
 	public static void main(String... args) throws Exception{
 		if(args.length < 1){
@@ -47,5 +53,34 @@ public class Pokebot{
 			e.printStackTrace();
 		}
 	}
-
+	
+	public static void startBatchMessages(Battle battle){
+		batchMessagesForBattle = battle.channel;
+		builder = new StringBuilder();
+	}
+	
+	public static void sendBatchableMessage(IChannel channel, String message){
+		if(batchMessagesForBattle != null && channel.getID().equals(batchMessagesForBattle.getID())){
+			builder.append(message);
+			builder.append('\n');
+			return;
+		}
+		Pokebot.sendMessage(channel, message);
+	}
+	
+	
+	public static void endBatchMessages(){
+		IChannel channel = batchMessagesForBattle;
+		batchMessagesForBattle = null;
+		sendMessage(channel, builder.toString());
+		builder = null;
+	}
+	
+	public static long minutesToMiliseconds(int minutes){
+		return secondsToMiliseconds(minutes * 60L);
+	}
+	
+	public static long secondsToMiliseconds(long seconds){
+		return seconds * 1000L;
+	}	
 }

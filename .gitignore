@@ -1,8 +1,6 @@
 target/*
 .settings/*
 modules/*
-.classpath
-.project
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -50,3 +48,6 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+/target/
+# Don't ignore .gitignores
+!*/.gitignore

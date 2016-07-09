@@ -131,6 +131,7 @@ public class StatHandler{
 					return Stats.HEALTH;
 				}
 				case "a":
+				case "att":
 				case "attack":{
 					return Stats.ATTACK;
 				}

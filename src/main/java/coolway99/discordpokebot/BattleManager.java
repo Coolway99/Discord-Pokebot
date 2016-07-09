@@ -13,19 +13,33 @@ public class BattleManager{
 	
 	public static final int BATTLE_TIMEOUT = 10; //In Minutes
 	
-	private static final ArrayList<Battle> battles = new ArrayList<>();
-	private static final HashMap<IUser, PreBattle> preBattles = new HashMap<>(2); 
+	public static final ArrayList<Battle> battles = new ArrayList<>();
+	public static final HashMap<IUser, PreBattle> preBattles = new HashMap<>(2); 
 	
 	public static void createBattle(IChannel channel, IUser user, List<IUser> invites, int turnTime){
+		if(preBattles.containsKey(user)){
+			Pokebot.sendMessage(channel, "You already have a battle pending!");
+			return;
+		}
 		battleInviteMessage(channel, user, invites);
 		PreBattle pre = new PreBattle(channel, PlayerHandler.getPlayer(user), turnTime);
 		preBattles.put(user, pre);
 	}
 	
-	public static void onJoinBattle(IUser user, IUser host){
+	public static void onJoinBattle(IChannel channel, IUser user, IUser host){
+		PreBattle pre = preBattles.get(host);
+		if(pre == null){
+			Pokebot.sendMessage(channel, user.mention()+" there is no battle pending for that person!");
+			return;
+		}
+		if(!pre.channel.getID().equals(channel.getID())){
+			Pokebot.sendMessage(channel, " you must do this in the same channel the battle is being hosted in!");
+			return;
+		}
 		List<Player> list = preBattles.get(host).participants;
 		Player player = PlayerHandler.getPlayer(user);
 		if(!list.contains(player)) list.add(player);
+		Pokebot.sendMessage(channel, user.mention()+" joined the battle hosted by "+host.mention());
 	}
 	
 	public static void onStartBattle(IChannel channel, IUser host){
@@ -51,13 +65,15 @@ public class BattleManager{
 	}
 	
 	//Idealy only ever called from the command
+	//TODO
+	/*
 	public static void onLeaveBattle(Player player){
 		if(player.battle == null) return;
-		player.battle.removeParticipant(player);
-	}
+		player.battle.playerFainted(player);
+	}*/
 	
 	public static void onBattleWon(Battle battle, Player player){
-		Pokebot.sendMessage(battle.channel, player.getUser().mention()+" won the battle!");
+		Pokebot.sendBatchableMessage(battle.channel, player.getUser().mention()+" won the battle!");
 		battles.remove(battle);
 	}
 	
@@ -82,7 +98,9 @@ public class BattleManager{
 		builder.append("to battle in a free for all, last one standing wins!\n");
 		builder.append("To join, type ");
 		builder.append(Pokebot.COMMAND_PREFIX);
-		builder.append("joinbattle\n");
+		builder.append("joinbattle ");
+		builder.append(host.mention());
+		builder.append('\n');
 		builder.append(host.mention());
 		builder.append(" type ");
 		builder.append(Pokebot.COMMAND_PREFIX);

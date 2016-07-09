@@ -130,12 +130,15 @@ public class EventHandler{
 						message.reply("You already have that move!");
 						return;
 					}
-					slot = Math.max(slot-1, player.numOfAttacks);
+					if(player.numOfAttacks < 4){
+						slot = player.numOfAttacks++;
+						message.reply("Less than 4 moves detected, setting slot to the last slot in the list...");
+					} else {
+						slot--;
+					}
 					player.moves[slot] = move;
 					player.PP[slot] = move.getPP();
-					if(player.numOfAttacks < 4) player.numOfAttacks++;
-					message.reply("Set move "+(slot+1)+" to "+move.getName()+"\n"
-							+ "No, the slot changing is not a bug");
+					message.reply("Set move "+(slot+1)+" to "+move.getName());
 				}catch(NumberFormatException e){
 					message.reply("That is not a valid number!");
 				}catch(IllegalArgumentException e){
@@ -223,7 +226,7 @@ public class EventHandler{
 					if(attacker.inBattle()){
 						if(defender.inBattle()){
 							if(attacker.battle == defender.battle){
-								attacker.battle.onAttack(attacker, move, defender);
+								attacker.battle.onAttack(message.getChannel(), attacker, move, defender);
 								return; //We don't want the standard logic to run
 							}
 							message.reply("you two in different battles!");
@@ -263,7 +266,34 @@ public class EventHandler{
 				break;
 			}
 			case "battle":{
-				//if()
+				if(PlayerHandler.getPlayer(message.getAuthor()).inBattle()){
+					message.reply("You're already in a battle!");
+					return;
+				}
+				try{
+					if(args.length < 3 || message.getMentions().isEmpty()){
+						message.reply("Usage: "+Pokebot.COMMAND_PREFIX+"battle <time for turns> "
+								+ "<@User, @User, @User...>");
+						return;
+					}
+					BattleManager.createBattle(message.getChannel(), message.getAuthor(),
+							message.getMentions(), Integer.parseInt(args[1]));
+				}catch(NumberFormatException e){
+					message.reply("That's not a valid number!");
+				}
+				break;
+			}
+			case "startbattle":{
+				BattleManager.onStartBattle(message.getChannel(), message.getAuthor());
+				break;
+			}
+			case "joinbattle":{
+				if(message.getMentions().isEmpty()){
+					message.reply("Usage: "+Pokebot.COMMAND_PREFIX+"joinbattle <@host>");
+					return;
+				}
+				BattleManager.onJoinBattle(message.getChannel(),
+						message.getAuthor(), message.getMentions().get(0)); 
 				break;
 			}
 			/*case "saveall":{

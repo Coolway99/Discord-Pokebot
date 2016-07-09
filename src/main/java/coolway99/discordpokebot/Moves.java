@@ -126,27 +126,26 @@ public enum Moves{
 							}
 						}
 					}
-					Pokebot.sendMessage(channel, attacker.getUser().mention()+" attacked "+defender.getUser().mention()
+					Pokebot.sendBatchableMessage(channel, attacker.getUser().mention()+" attacked "+defender.getUser().mention()
 							+" "+timesHit+" times for a total of "+damage+"HP of damage!");
 					defender.HP = Math.max(0, defender.HP - damage);
-					faintMessage(channel, defender);
 				} else {
-					Pokebot.sendMessage(channel, "But "+attacker.getUser().mention()+" missed!");
+					missMessage(channel, attacker);
 				}
 				return false;
 			}
 			case GUILLOTINE:{
 				//Can only safely pass in null if last arg is false
 				if(willHit(this, null, null, false)){
-					Pokebot.sendMessage(channel, attacker.getUser().mention()+" one-hit KO'd "+defender.getUser().mention());
+					Pokebot.sendBatchableMessage(channel, attacker.getUser().mention()+" one-hit KO'd "+defender.getUser().mention());
 					defender.HP = 0; //Guillotine is a one-hit KO if it hits, and it's accuracy is based on the level of the pokemon
 				} else {
-					Pokebot.sendMessage(channel, "But "+attacker.getUser().mention()+" missed!");
+					missMessage(channel, attacker);
 				}
 				return false;
 			}
 			case SPLASH:{
-				Pokebot.sendMessage(channel, attacker.getUser().mention()+" used Splash!... but nothing happened.");
+				Pokebot.sendBatchableMessage(channel, attacker.getUser().mention()+" used Splash!... but nothing happened.");
 				return false;
 			}
 			default:
@@ -163,29 +162,46 @@ public enum Moves{
 		}
 	}
 	
-	public static void attack(IChannel channel, Player attacker, Moves move, Player defender){
-		if(move.hasBefore() && !move.runBefore(channel, attacker, defender)) return;
-		//Do battle attack logic
-		int damage = getDamage(attacker, move, defender);
-		defender.HP = Math.max(0, defender.HP - damage);
-		if(move.hasAfter()) move.runAfter(channel, attacker, defender, damage);
-		attackMessage(channel, attacker, move, defender, damage);
+	public static boolean attack(IChannel channel, Player attacker, Moves move, Player defender){
+		boolean cont = true;
+		if(move.hasBefore()){
+			cont = move.runBefore(channel, attacker, defender);
+		}
+		if(cont){
+			//Do battle attack logic
+			int damage = getDamage(attacker, move, defender);
+			defender.HP = Math.max(0, defender.HP - damage);
+			if(move.hasAfter()) move.runAfter(channel, attacker, defender, damage);
+			attackMessage(channel, attacker, move, defender, damage);
+		}
+		if(attacker.HP == 0 && !attacker.inBattle()){
+			//Checking for things like recoil
+			faintMessage(channel, attacker);
+		}
 		if(defender.HP == 0){
 			faintMessage(channel, defender);
-		} else {
-			Pokebot.sendMessage(channel, defender.getUser().mention()+" has "+defender.HP+"HP left!");
+			return true;
 		}
-		
+		Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+" has "+defender.HP+"HP left!");
+		return false;
+	}
+	
+	public static boolean attack(IChannel channel, IAttack attack){
+		return attack(channel, attack.attacker, attack.move, attack.defender);
 	}
 	
 	private static void attackMessage(IChannel channel, Player attacker, Moves move, Player defender, int damage){
-		Pokebot.sendMessage(channel, attacker.getUser().mention()
+		Pokebot.sendBatchableMessage(channel, attacker.getUser().mention()
 				+" attacked "+defender.getUser().mention()+" with "+move.getName()
 				+" for "+damage+" damage!");
 	}
 	
 	private static void faintMessage(IChannel channel, Player defender){
-		Pokebot.sendMessage(channel, defender.getUser().mention()+" has fainted!");
+		Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+" has fainted!");
+	}
+	
+	private static void missMessage(IChannel channel, Player attacker){
+		Pokebot.sendBatchableMessage(channel, "But "+attacker.getUser().mention()+" missed!");
 	}
 	
 	public static int getDamage(Player attacker, Moves move, Player defender){
