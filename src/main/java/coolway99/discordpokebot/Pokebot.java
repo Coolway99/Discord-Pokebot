@@ -3,12 +3,14 @@ package coolway99.discordpokebot;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -23,6 +25,7 @@ public class Pokebot{
 	public static final String COMMAND_PREFIX = "==";
 	public static final long SAVE_DELAY = minutesToMiliseconds(1);
 	public static final long MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
+	public static final long GAME_DELAY = minutesToMiliseconds(1);
 	
 	public static IDiscordClient client;
 	public static final Scanner in = new Scanner(System.in);
@@ -68,6 +71,12 @@ public class Pokebot{
 				}
 			}
 		}, MESSAGE_DELAY, MESSAGE_DELAY);
+		timer.scheduleAtFixedRate(new TimerTask(){
+			@Override
+			public void run(){
+				Pokebot.client.updatePresence(false, Optional.of(Pokebot.getRandomGame()));
+			}
+		}, GAME_DELAY, GAME_DELAY);
 	}
 	
 	public static IDiscordClient getClient(String token) throws Exception{
@@ -119,5 +128,10 @@ public class Pokebot{
 	
 	public static long secondsToMiliseconds(long seconds){
 		return seconds * 1000L;
-	}	
+	}
+	
+	public static String getRandomGame(){
+		GameList[] vals = GameList.values();
+		return vals[Pokebot.ran.nextInt(vals.length)].getName();
+	}
 }
