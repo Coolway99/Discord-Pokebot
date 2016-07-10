@@ -63,7 +63,7 @@ public enum Moves{
 		this.power = power;
 		this.isSpecial = isSpecial;
 		this.PP = PP;
-		this.accuracy = accuracy;
+		this.accuracy = accuracy; //TODO make it 0-100D
 		this.hasBeforeEffect = hasBefore;
 		this.hasAfterEffect = hasAfter;
 	}
@@ -121,7 +121,7 @@ public enum Moves{
 				//TODO when items are in, each attack can be blocked
 				//TODO protect and the stuff
 				if(willHit(this, attacker, defender, true)){
-					int timesHit = getTimesHit(5, 100D, 33.3D, 33.3D, 16.7D, 16.7D);
+					int timesHit = getTimesHit(5, 100, 33.3, 33.3, 16.7, 16.7);
 					int damage = getDamage(attacker, this, defender)*timesHit;
 					Pokebot.sendBatchableMessage(channel, attacker.getUser().mention()+" attacked "+defender.getUser().mention()
 							+" "+timesHit+" times for a total of "+damage+"HP of damage!");
@@ -143,6 +143,7 @@ public enum Moves{
 			case SWORDS_DANCE:{
 				if(!defender.inBattle()){
 					Pokebot.sendBatchableMessage(channel, "But it doesn't work here!");
+					return false;
 				}
 				StatHandler.raiseStat(channel, defender, Stats.ATTACK, true);
 				return false;
@@ -162,21 +163,19 @@ public enum Moves{
 			case FIRE_PUNCH:{
 				if(defender.inBattle() && diceRoll(10)){
 					if(!isType(defender, Types.FIRE)) defender.effect = Effects.BURN;
-					burnMessage(channel, defender, isType(defender, Types.FIRE));
+					burn(channel, defender);
 				}
 				break;
 			}
 			case ICE_PUNCH:{
 				if(defender.inBattle() && diceRoll(10)){
-					if(!isType(defender, Types.ICE)) defender.effect = Effects.FROZEN;
-					freezeMessage(channel, defender, isType(defender, Types.ICE));
+					freeze(channel, defender);
 				}
 				break;
 			}
 			case THUNDER_PUNCH:{
 				if(defender.inBattle() && diceRoll(10)){
-					if(!isType(defender, Types.ELECTRIC)) defender.effect = Effects.PARALYSIS;
-					paralyzedMessage(channel, defender, isType(defender, Types.ELECTRIC));
+					paralyze(channel, defender);
 				}
 				break;
 			}
@@ -229,16 +228,36 @@ public enum Moves{
 		Pokebot.sendBatchableMessage(channel, "But "+attacker.getUser().mention()+" missed!");
 	}
 	
-	private static void burnMessage(IChannel channel, Player defender, boolean isImmune){
+	private static void burn(IChannel channel, Player defender){
+		boolean isImmune = isType(defender, Types.FIRE);
+		if(!isImmune){
+			defender.effect = Effects.BURN;
+		}
 		effectMessage(channel, defender, isImmune, "burns", "burned");
 	}
 	
-	private static void freezeMessage(IChannel channel, Player defender, boolean isImmune){
+	private static void freeze(IChannel channel, Player defender){
+		boolean isImmune = isType(defender, Types.ICE);
+		if(!isImmune){
+			defender.effect = Effects.FROZEN;
+		}
 		effectMessage(channel, defender, isImmune, "freezing", "frozen");
 	}
 	
-	private static void paralyzedMessage(IChannel channel, Player defender, boolean isImmune){
+	private static void paralyze(IChannel channel, Player defender){
+		boolean isImmune = isType(defender, Types.ELECTRIC);
+		if(!isImmune){
+			defender.effect = Effects.PARALYSIS;
+		}
 		effectMessage(channel, defender, isImmune, "paralysis", "paralyzed");
+	}
+	
+	private static void poison(IChannel channel, Player defender){
+		boolean isImmune = isType(defender, Types.POISON);
+		if(!isImmune){
+			defender.effect = Effects.POISON;
+		}
+		effectMessage(channel, defender, isImmune, "poison", "poisoned");
 	}
 	
 	private static void effectMessage(IChannel channel, Player defender, boolean isImmune, String immune, String afflicted){
@@ -250,17 +269,24 @@ public enum Moves{
 	}
 	
 	public static int getDamage(Player attacker, Moves move, Player defender){
-		return (int) //We just drop the remainder, no rounding 
-				(((((((attacker.level/5D) + 2) //The D on the 5 makes this entire calculation a double
-				*(move.isSpecial() ? attacker.getSpecialAttackStat() :
-					attacker.getAttackStat())
-				*move.getPower())
-				/(move.isSpecial() ? defender.getSpecialDefenseStat() :
-					defender.getDefenseStat())
-				/50) //This is a constant
-				+2)
-				*Types.getAttackMultiplier(attacker, move, defender))
-				*((Pokebot.ran.nextInt(255-217)+217)/255D));
+		double modifier =
+				(isType(attacker, move.getType()) ? 1.5D : 1D) //STAB
+				* Types.getTypeMultiplier(move, defender) //Effectiveness
+				//TODO other
+				* ((Pokebot.ran.nextInt(100-85)+85) / 100D) //Random chance
+				;
+		
+		double a = ((2*attacker.level) + 10D) / 250D;
+		double b;
+		if(move.isSpecial()){
+			b = attacker.getSpecialAttackStat();
+			b /= defender.getSpecialDefenseStat();
+		} else {
+			b = attacker.getAttackStat();
+			b /= defender.getDefenseStat();
+		}
+		
+		return (int) (((a*b*move.getPower()) + 2)*modifier);
 	}
 	
 	//Dice rolls for a hit, if not factoring in changes to accuracy and evasion, you can safely

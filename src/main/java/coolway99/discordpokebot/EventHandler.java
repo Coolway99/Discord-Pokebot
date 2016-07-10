@@ -49,11 +49,19 @@ public class EventHandler{
 			case "getstats":{
 				Player player = PlayerHandler.getPlayer((message.getMentions().isEmpty() ?
 						message.getAuthor() : message.getMentions().get(0)));
-				Pokebot.sendMessage(message.getChannel(), player.getUser().mention() 
-						+" has "+player.getMaxHP()+" MAX HP, "+player.getAttackStat()+" attack, "
-						+player.getSpecialAttackStat()+" special attack, "+player.getDefenseStat()
-						+" defense, "+player.getSpecialDefenseStat()+" special defense, and "
-						+player.getSpeedStat()+" speed");
+				StringBuilder builder = new StringBuilder(player.getUser().mention());
+				builder.append(" has:\n");
+				builder.append(Stats.HEALTH.toString()).append(": ");
+				builder.append(player.HP).append('/').append(player.getMaxHP()).append("HP");
+				for(int x = 1; x < player.stats.length; x++){
+					builder.append('\n');
+					builder.append(Stats.getStatFromIndex(x).toString()).append(": ");
+					builder.append(player.getStatFromIndex(x));
+					if(player.modifiers[x] != 0){
+						builder.append(String.format(" (%+d)",player.modifiers[x]));
+					}
+				}
+				Pokebot.sendMessage(message.getChannel(), builder.toString());
 				break;
 			}
 			case "setstats":

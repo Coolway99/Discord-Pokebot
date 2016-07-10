@@ -142,6 +142,25 @@ public class Player{
 		return StatHandler.getModifierChange(this.modifiers[Stats.EVASION.getIndex()]);
 	}
 	
+	public int getStatFromIndex(int x){
+		switch(x){
+			case 0:
+				return this.getMaxHP();
+			case 1:
+				return this.getAttackStat();
+			case 2:
+				return this.getSpecialAttackStat();
+			case 3:
+				return this.getDefenseStat();
+			case 4:
+				return this.getSpecialDefenseStat();
+			case 5:
+				return this.getSpeedStat();
+			default:
+				return 0;
+		}
+	}
+	
 	public void loadData(){
 		System.out.println("Loading");
 		File file = Pokebot.getSaveFile(this.user);

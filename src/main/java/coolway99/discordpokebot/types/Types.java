@@ -346,7 +346,8 @@ public enum Types{
 		}
 	}
 	
-	public static double getAttackMultiplier(Player attacker, Moves move, Player defender){
+	//THIS DOES NOT FACTOR IN STAB
+	public static double getTypeMultiplier(Moves move, Player defender){
 		for(Types type : getImmune(defender.primary)){
 			if(move.getType() == type){
 				return 0;
@@ -391,11 +392,6 @@ public enum Types{
 				}
 			}
 		}
-		
-		if(attacker.primary == move.getType() || attacker.secondary == move.getType()){
-			multiplier *= 1.5D; //TODO if a pokemon has adaptabilitity, then they get a +100% boost
-		}
-		
 		return multiplier;	
 	}
 }
