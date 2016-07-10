@@ -7,16 +7,16 @@ public enum Moves{
 	//ENUM_NAME("Textual Name", Type, isSpecial", PP, Power, Accuracy (either int or double)
 	NULL("", Types.NULL, false, 0, 0, 0), //TODO perhaps make this Struggle
 	POUND("pound", Types.NORMAL, false, 35, 40, 100),
-	//TODO Karate Chop
-	DOUBLE_SLAP("double_slap", Types.NORMAL, false, 10, 15, 85), //TODO
-	COMET_PUNCH("comet_punch", Types.NORMAL, false, 15, 18, 85, true, false),
-	MEGA_PUNCH("mega_punch", Types.NORMAL, false, 20, 80, 85),
-	PAY_DAY("pay_day", Types.NORMAL, false, 20, 80, 85),
-	FIRE_PUNCH("fire_punch", Types.FIRE, false, 15, 75, 100, false, true), //TODO
-	//TODO Ice Punch
-	//TODO Thunder Punch
+	KARATE_CHOP("karate chop", Types.FIGHTING, false, 25, 50, 100),
+	DOUBLE_SLAP("double slap", Types.NORMAL, false, 10, 15, 85), //TODO
+	COMET_PUNCH("comet punch", Types.NORMAL, false, 15, 18, 85, true, false),
+	MEGA_PUNCH("mega punch", Types.NORMAL, false, 20, 80, 85),
+	PAY_DAY("pay day", Types.NORMAL, false, 20, 80, 85),
+	FIRE_PUNCH("fire punch", Types.FIRE, false, 15, 75, 100, false, true), //TODO
+	ICE_PUNCH("ice punch", Types.ICE, false, 15, 75, 100, false, true),
+	THUNDER_PUNCH("thunder punch", Types.ELECTRIC, false, 15, 75, 100, false, true),
 	SCRATCH("scratch", Types.NORMAL, false, 35, 40, 100),
-	VICE_GRIP("vice_grip", Types.NORMAL, false, 30, 55, 100),
+	VICE_GRIP("vice grip", Types.NORMAL, false, 30, 55, 100),
 	GUILLOTINE("guillotine", Types.NORMAL, false, 5, -1, 30, true, false),
 	SPLASH("splash", Types.WATER, false, 999, 0, 100, true, false), //Fine, you people win
 	;
@@ -156,7 +156,13 @@ public enum Moves{
 	
 	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
 		switch(this){
-			
+			case FIRE_PUNCH:{
+				if(Pokebot.ran.nextDouble()*100D < 30D){
+					defender.effect = Effects.BURN;
+					burnMessage(channel, defender, isType(defender, Types.FIRE));
+				}
+				break;
+			}
 			default:
 				break;
 		}
@@ -204,6 +210,14 @@ public enum Moves{
 		Pokebot.sendBatchableMessage(channel, "But "+attacker.getUser().mention()+" missed!");
 	}
 	
+	private static void burnMessage(IChannel channel, Player defender, boolean isImmune){
+		if(isImmune){
+			Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+" is immune to burns!");
+		} else {
+			Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+" was burned!");
+		}
+	}
+	
 	public static int getDamage(Player attacker, Moves move, Player defender){
 		return (int) //We just drop the remainder, no rounding 
 				(((((((attacker.level/5D) + 2) //The D on the 5 makes this entire calculation a double
@@ -226,5 +240,9 @@ public enum Moves{
 			accuracy *= attacker.getAccuracy() / defender.getEvasion();
 		}
 		return (Pokebot.ran.nextDouble() < accuracy);
-	}	
+	}
+	
+	public static boolean isType(Player player, Types type){
+		return player.primary == type || player.secondary == type;
+	}
 }

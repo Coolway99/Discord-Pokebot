@@ -34,14 +34,27 @@ public class StatHandler{
 	};
 	
 	
-	public static int calcStatValue(int statpoints, int ivpoints, int evpoints, int level, boolean isHP, byte modifier){
+	public static int calcStatValue(int statpoints, int ivpoints, int evpoints, int level,
+			Stats type, byte modifier, Effects effect){
 		//TODO Nature
 		double firstStage =  Math.floor(((2*statpoints+ivpoints+evpoints)*level)/100D);
-		return (int) Math.max((isHP ?
+		double ret = Math.max((type == Stats.HEALTH ?
 				(firstStage + level + 10) 
 				: ((firstStage+5)/*TODO *nature */))
 				* getModifierChange(modifier)
 				, 1D); //Setting a hard limit here for the lowest a stat can go is 1, to prevent errors
+		switch(type){
+			case ATTACK:{
+				if(effect == Effects.BURN) ret /= 2;
+				break;
+			}
+			case SPEED:{
+				if(effect == Effects.PARALYSIS) ret /= 4;
+			}
+			default:
+				break;
+		}
+		return (int) ret;
 	}
 	
 	public static int getTotalPoints(Player player){

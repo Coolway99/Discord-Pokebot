@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.battle.BattleManager;
 import sx.blah.discord.handle.obj.IUser;
 
 //TODO
@@ -33,7 +34,7 @@ public class PlayerHandler{
 		while(i.hasNext()){
 			Player player = i.next();
 			player.saveData();
-			if(!player.inBattle()) i.remove();
+			if(!player.inBattle() || !BattleManager.hasBattlePending(player.user)) i.remove();
 		}
 	}
 }

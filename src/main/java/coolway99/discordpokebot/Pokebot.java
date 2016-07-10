@@ -1,6 +1,8 @@
 package coolway99.discordpokebot;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Timer;
@@ -20,11 +22,13 @@ public class Pokebot{
 	
 	public static final String COMMAND_PREFIX = "==";
 	public static final long SAVE_DELAY = minutesToMiliseconds(1);
+	public static final long MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
 	
 	public static IDiscordClient client;
 	public static final Scanner in = new Scanner(System.in);
 	public static final Random ran = new Random();
 	public static final Timer timer = new Timer("Pokebot Timer Thread", true);
+	public static final HashMap<IChannel, StringBuilder> buffers = new HashMap<>();
 	//TODO this creates a bottleneck of only one message at a time
 	private static IChannel batchMessagesForBattle = null;
 	private static StringBuilder builder = null;
@@ -45,6 +49,25 @@ public class Pokebot{
 				PlayerHandler.saveAll();
 			}
 		}, SAVE_DELAY, SAVE_DELAY);
+		timer.scheduleAtFixedRate(new TimerTask(){
+			@Override
+			public void run(){
+				Iterator<IChannel> i = buffers.keySet().iterator();
+				while(i.hasNext()){
+					IChannel channel = i.next();
+					StringBuilder builder = buffers.get(channel);
+					if(builder.length() > 0){
+						try {
+							channel.sendMessage(builder.toString());
+							i.remove();
+						} catch(MissingPermissionsException | HTTP429Exception
+								| DiscordException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}, MESSAGE_DELAY, MESSAGE_DELAY);
 	}
 	
 	public static IDiscordClient getClient(String token) throws Exception{
@@ -56,10 +79,15 @@ public class Pokebot{
 	}
 	
 	public static void sendMessage(IChannel channel, String message){
-		try{
+		/*try{
 			channel.sendMessage(message);
 		}catch(DiscordException | HTTP429Exception | MissingPermissionsException e){
 			e.printStackTrace();
+		}*/
+		if(!buffers.containsKey(channel)){
+			buffers.put(channel, (new StringBuilder(message)).append('\n'));
+		} else {
+			buffers.get(channel).append(message).append('\n');
 		}
 	}
 	

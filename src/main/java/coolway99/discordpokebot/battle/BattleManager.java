@@ -18,8 +18,12 @@ public class BattleManager{
 	public static final ArrayList<Battle> battles = new ArrayList<>();
 	public static final HashMap<IUser, PreBattle> preBattles = new HashMap<>(2); 
 	
+	public static boolean hasBattlePending(IUser user){
+		return preBattles.containsKey(user);
+	}
+	
 	public static void createBattle(IChannel channel, IUser user, List<IUser> invites, int turnTime){
-		if(preBattles.containsKey(user)){
+		if(hasBattlePending(user)){
 			Pokebot.sendMessage(channel, "You already have a battle pending!");
 			return;
 		}

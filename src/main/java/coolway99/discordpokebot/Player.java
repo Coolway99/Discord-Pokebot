@@ -41,6 +41,10 @@ public class Player{
 	 * An array holding the modifiers for each stat
 	 */
 	public byte[] modifiers = new byte[8];
+	/**
+	 * What effect is the player currently under?
+	 */
+	public Effects effect = Effects.NORMAL;
 	
 	public int numOfAttacks = 0;
 	//This array is manually done out as to make sure they are "null" type moves, to prevent errors
@@ -75,8 +79,9 @@ public class Player{
 				this.stats[Stats.HEALTH.getIndex()][SubStats.IV.getIndex()],
 				this.stats[Stats.HEALTH.getIndex()][SubStats.EV.getIndex()],
 				this.level,
-				true,
-				this.modifiers[Stats.HEALTH.getIndex()]);
+				Stats.HEALTH,
+				this.modifiers[Stats.HEALTH.getIndex()],
+				this.effect);
 	}
 	
 	public int getAttackStat(){
@@ -84,8 +89,9 @@ public class Player{
 				this.stats[Stats.ATTACK.getIndex()][SubStats.IV.getIndex()],
 				this.stats[Stats.ATTACK.getIndex()][SubStats.EV.getIndex()],
 				this.level,
-				false,
-				this.modifiers[Stats.ATTACK.getIndex()]);
+				Stats.ATTACK,
+				this.modifiers[Stats.ATTACK.getIndex()],
+				this.effect);
 	}
 	
 	public int getSpecialAttackStat(){
@@ -93,8 +99,9 @@ public class Player{
 				this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.IV.getIndex()],
 				this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.EV.getIndex()],
 				this.level,
-				false,
-				this.modifiers[Stats.SPECIAL_ATTACK.getIndex()]);
+				Stats.SPECIAL_ATTACK,
+				this.modifiers[Stats.SPECIAL_ATTACK.getIndex()],
+				this.effect);
 	}
 	
 	public int getDefenseStat(){
@@ -102,8 +109,9 @@ public class Player{
 				this.stats[Stats.DEFENSE.getIndex()][SubStats.IV.getIndex()],
 				this.stats[Stats.DEFENSE.getIndex()][SubStats.EV.getIndex()],
 				this.level,
-				false,
-				this.modifiers[Stats.DEFENSE.getIndex()]);
+				Stats.DEFENSE,
+				this.modifiers[Stats.DEFENSE.getIndex()],
+				this.effect);
 	}
 	
 	public int getSpecialDefenseStat(){
@@ -111,8 +119,9 @@ public class Player{
 				this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.IV.getIndex()],
 				this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.EV.getIndex()],
 				this.level,
-				false,
-				this.modifiers[Stats.SPECIAL_DEFENSE.getIndex()]);
+				Stats.SPECIAL_DEFENSE,
+				this.modifiers[Stats.SPECIAL_DEFENSE.getIndex()],
+				this.effect);
 	}
 	
 	public int getSpeedStat(){
@@ -120,8 +129,9 @@ public class Player{
 				this.stats[Stats.SPEED.getIndex()][SubStats.IV.getIndex()],
 				this.stats[Stats.SPEED.getIndex()][SubStats.EV.getIndex()],
 				this.level,
-				false,
-				this.modifiers[Stats.SPEED.getIndex()]);
+				Stats.SPEED,
+				this.modifiers[Stats.SPEED.getIndex()],
+				this.effect);
 	}
 	
 	public double getAccuracy(){
