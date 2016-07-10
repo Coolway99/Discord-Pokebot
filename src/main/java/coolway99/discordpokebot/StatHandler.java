@@ -119,6 +119,22 @@ public class StatHandler{
 		return res;
 	}
 	
+	public static void raiseStat(IChannel channel, Player player, Stats stat, boolean sharply){
+		player.modifiers[stat.getIndex()] = (byte) Math.min(
+				player.modifiers[stat.getIndex()]+(sharply ? 2 : 1),
+				6);
+		Pokebot.sendBatchableMessage(channel, player.getUser().mention()+"'s "+stat.toString()
+		+" increased"+(sharply ? " sharply" : "")+'!');
+	}
+	
+	public static void lowerStat(IChannel channel, Player player, Stats stat, boolean harshly){
+		player.modifiers[stat.getIndex()] = (byte) Math.max(
+				player.modifiers[stat.getIndex()]-(harshly ? 2 : 1),
+				-6);
+		Pokebot.sendBatchableMessage(channel, player.getUser().mention()+"'s "+stat.toString()
+		+" decreased"+(harshly ? " harshly" : "")+'!');
+	}
+	
 	public static enum Stats{
 		HEALTH(0),
 		ATTACK(1),

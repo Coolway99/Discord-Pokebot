@@ -1,5 +1,6 @@
 package coolway99.discordpokebot;
 
+import coolway99.discordpokebot.StatHandler.Stats;
 import coolway99.discordpokebot.types.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -8,16 +9,27 @@ public enum Moves{
 	NULL("", Types.NULL, false, 0, 0, 0), //TODO perhaps make this Struggle
 	POUND("pound", Types.NORMAL, false, 35, 40, 100),
 	KARATE_CHOP("karate chop", Types.FIGHTING, false, 25, 50, 100),
-	DOUBLE_SLAP("double slap", Types.NORMAL, false, 10, 15, 85), //TODO
+	DOUBLE_SLAP("double slap", Types.NORMAL, false, 10, 15, 85, true, false),
 	COMET_PUNCH("comet punch", Types.NORMAL, false, 15, 18, 85, true, false),
 	MEGA_PUNCH("mega punch", Types.NORMAL, false, 20, 80, 85),
 	PAY_DAY("pay day", Types.NORMAL, false, 20, 80, 85),
-	FIRE_PUNCH("fire punch", Types.FIRE, false, 15, 75, 100, false, true), //TODO
+	FIRE_PUNCH("fire punch", Types.FIRE, false, 15, 75, 100, false, true),
 	ICE_PUNCH("ice punch", Types.ICE, false, 15, 75, 100, false, true),
 	THUNDER_PUNCH("thunder punch", Types.ELECTRIC, false, 15, 75, 100, false, true),
 	SCRATCH("scratch", Types.NORMAL, false, 35, 40, 100),
 	VICE_GRIP("vice grip", Types.NORMAL, false, 30, 55, 100),
 	GUILLOTINE("guillotine", Types.NORMAL, false, 5, -1, 30, true, false),
+	RAZOR_WIND("razor wind", Types.NORMAL, true, 10, 80, 100), //TODO It's a multiturn-attack
+	SWORDS_DANCE("swords dance", Types.NORMAL, false, 20, -1, -1, true, false), //Status attack
+	CUT("cut", Types.NORMAL, false, 30, 50, 95),
+	GUST("gust", Types.FLYING, true, 35, 40, 100), //TODO affects fly
+	WING_ATTACK("wing attack", Types.FLYING, true, 35, 60, 100),
+	//WHIRLWIND does not apply
+	FLY("fly", Types.FLYING, false, 15, 90, 95), //TODO Multiturn
+	BIND("bind", Types.NORMAL, false, 20, 15, 85), //TODO Multiturn
+	SLAM("slam", Types.NORMAL, false, 20, 80, 75),
+	VINE_WHIP("vine whip", Types.GRASS, false, 25, 45, 100),
+	STOMP("stomp", Types.NORMAL, false, 20, 65, 100, true, false),
 	SPLASH("splash", Types.WATER, false, 999, 0, 100, true, false), //Fine, you people win
 	;
 	
@@ -104,28 +116,13 @@ public enum Moves{
 	//Thankfully, there's still the getDamage() function that only gets the raw damage
 	public boolean runBefore(IChannel channel, Player attacker, Player defender){
 		switch(this){
+			case DOUBLE_SLAP:
 			case COMET_PUNCH:{
 				//TODO when items are in, each attack can be blocked
 				//TODO protect and the stuff
 				if(willHit(this, attacker, defender, true)){
-					byte timesHit = 1;
-					int damage = getDamage(attacker, this, defender);
-					if(Pokebot.ran.nextDouble() < (33.3/100D)){
-						timesHit++;
-						damage += getDamage(attacker, this, defender);
-						if(Pokebot.ran.nextDouble() < (33.3/100D)){
-							timesHit++;
-							damage += getDamage(attacker, this, defender);
-							if(Pokebot.ran.nextDouble() < (16.7/100D)){
-								timesHit++;
-								damage += getDamage(attacker, this, defender);
-								if(Pokebot.ran.nextDouble() < (16.7/100D)){
-									timesHit++;
-									damage += getDamage(attacker, this, defender);
-								}
-							}
-						}
-					}
+					int timesHit = getTimesHit(5, 100D, 33.3D, 33.3D, 16.7D, 16.7D);
+					int damage = getDamage(attacker, this, defender)*timesHit;
 					Pokebot.sendBatchableMessage(channel, attacker.getUser().mention()+" attacked "+defender.getUser().mention()
 							+" "+timesHit+" times for a total of "+damage+"HP of damage!");
 					defender.HP = Math.max(0, defender.HP - damage);
@@ -135,13 +132,19 @@ public enum Moves{
 				return false;
 			}
 			case GUILLOTINE:{
-				//Can only safely pass in null if last arg is false
-				if(willHit(this, null, null, false)){
+				if(willHit(this, attacker, defender, false)){
 					Pokebot.sendBatchableMessage(channel, attacker.getUser().mention()+" one-hit KO'd "+defender.getUser().mention());
 					defender.HP = 0; //Guillotine is a one-hit KO if it hits, and it's accuracy is based on the level of the pokemon
 				} else {
 					missMessage(channel, attacker);
 				}
+				return false;
+			}
+			case SWORDS_DANCE:{
+				if(!defender.inBattle()){
+					Pokebot.sendBatchableMessage(channel, "But it doesn't work here!");
+				}
+				StatHandler.raiseStat(channel, defender, Stats.ATTACK, true);
 				return false;
 			}
 			case SPLASH:{
@@ -157,9 +160,23 @@ public enum Moves{
 	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
 		switch(this){
 			case FIRE_PUNCH:{
-				if(Pokebot.ran.nextDouble()*100D < 30D){
-					defender.effect = Effects.BURN;
+				if(defender.inBattle() && diceRoll(10)){
+					if(!isType(defender, Types.FIRE)) defender.effect = Effects.BURN;
 					burnMessage(channel, defender, isType(defender, Types.FIRE));
+				}
+				break;
+			}
+			case ICE_PUNCH:{
+				if(defender.inBattle() && diceRoll(10)){
+					if(!isType(defender, Types.ICE)) defender.effect = Effects.FROZEN;
+					freezeMessage(channel, defender, isType(defender, Types.ICE));
+				}
+				break;
+			}
+			case THUNDER_PUNCH:{
+				if(defender.inBattle() && diceRoll(10)){
+					if(!isType(defender, Types.ELECTRIC)) defender.effect = Effects.PARALYSIS;
+					paralyzedMessage(channel, defender, isType(defender, Types.ELECTRIC));
 				}
 				break;
 			}
@@ -173,12 +190,14 @@ public enum Moves{
 		if(move.hasBefore()){
 			cont = move.runBefore(channel, attacker, defender);
 		}
-		if(cont){
+		if(cont && willHit(move, attacker, defender, true)){
 			//Do battle attack logic
 			int damage = getDamage(attacker, move, defender);
 			defender.HP = Math.max(0, defender.HP - damage);
 			if(move.hasAfter()) move.runAfter(channel, attacker, defender, damage);
 			attackMessage(channel, attacker, move, defender, damage);
+		} else if(cont){ //we check here again to make sure cont wasn't what made it not run
+			missMessage(channel, attacker);
 		}
 		if(attacker.HP == 0 && !attacker.inBattle()){
 			//Checking for things like recoil
@@ -211,10 +230,22 @@ public enum Moves{
 	}
 	
 	private static void burnMessage(IChannel channel, Player defender, boolean isImmune){
+		effectMessage(channel, defender, isImmune, "burns", "burned");
+	}
+	
+	private static void freezeMessage(IChannel channel, Player defender, boolean isImmune){
+		effectMessage(channel, defender, isImmune, "freezing", "frozen");
+	}
+	
+	private static void paralyzedMessage(IChannel channel, Player defender, boolean isImmune){
+		effectMessage(channel, defender, isImmune, "paralysis", "paralyzed");
+	}
+	
+	private static void effectMessage(IChannel channel, Player defender, boolean isImmune, String immune, String afflicted){
 		if(isImmune){
-			Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+" is immune to burns!");
+			Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+"'s type is immune to "+immune+"!");
 		} else {
-			Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+" was burned!");
+			Pokebot.sendBatchableMessage(channel, defender.getUser().mention()+" was "+afflicted+"!");
 		}
 	}
 	
@@ -222,10 +253,10 @@ public enum Moves{
 		return (int) //We just drop the remainder, no rounding 
 				(((((((attacker.level/5D) + 2) //The D on the 5 makes this entire calculation a double
 				*(move.isSpecial() ? attacker.getSpecialAttackStat() :
-					attacker.getAttackStat()) //TODO - be affected by stat changes
+					attacker.getAttackStat())
 				*move.getPower())
 				/(move.isSpecial() ? defender.getSpecialDefenseStat() :
-					defender.getDefenseStat()) //TODO - be affected by stat changes
+					defender.getDefenseStat())
 				/50) //This is a constant
 				+2)
 				*Types.getAttackMultiplier(attacker, move, defender))
@@ -244,5 +275,20 @@ public enum Moves{
 	
 	public static boolean isType(Player player, Types type){
 		return player.primary == type || player.secondary == type;
+	}
+	
+	public static boolean diceRoll(double chance){
+		return Pokebot.ran.nextDouble()*100D <= chance;
+	}
+	
+	public static int getTimesHit(int maxTimes, double...chances){
+		int times = 0;
+		while(times < maxTimes){
+			if(!diceRoll(chances[times])){
+				break;
+			}
+			times++;
+		}
+		return times;
 	}
 }

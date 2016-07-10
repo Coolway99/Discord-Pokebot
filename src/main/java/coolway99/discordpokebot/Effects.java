@@ -6,6 +6,7 @@ public enum Effects{
 	POISON,
 	TOXIC,
 	BURN,
+	FROZEN,
 	//LEECH SEED is done pokemon-wise
 	
 }
