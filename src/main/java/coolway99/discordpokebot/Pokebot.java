@@ -7,6 +7,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -18,6 +19,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 public class Pokebot{
 	
 	public static final String COMMAND_PREFIX = "==";
+	public static final long SAVE_DELAY = minutesToMiliseconds(1);
 	
 	public static IDiscordClient client;
 	public static final Scanner in = new Scanner(System.in);
@@ -37,6 +39,12 @@ public class Pokebot{
 		System.out.println("Logging in");
 		//client = getClient(TOKEN);
 		client.getDispatcher().registerListener(new BotReadyHandler());
+		timer.schedule(new TimerTask(){
+			@Override
+			public void run(){
+				PlayerHandler.saveAll();
+			}
+		}, SAVE_DELAY, SAVE_DELAY);
 	}
 	
 	public static IDiscordClient getClient(String token) throws Exception{

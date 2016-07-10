@@ -4,6 +4,7 @@ import coolway99.discordpokebot.StatHandler.Stats;
 import coolway99.discordpokebot.StatHandler.SubStats;
 import coolway99.discordpokebot.battle.BattleManager;
 import coolway99.discordpokebot.storage.PlayerHandler;
+import coolway99.discordpokebot.types.Types;
 import sx.blah.discord.api.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
@@ -19,22 +20,14 @@ public class EventHandler{
 	public void onMessage(MessageReceivedEvent event) throws MissingPermissionsException, HTTP429Exception, DiscordException{
 		IMessage message = event.getMessage();
 		if(message.mentionsEveryone()) return;
+		/*if(message.toString().toLowerCase().contains("pokemon go")){
+			Pokebot.sendMessage(message.getChannel(), "Our servers are experiencing issues. Please come back later");
+			return;
+		}*/
 		if(!message.toString().startsWith(Pokebot.COMMAND_PREFIX)) return;
 		String[] args = message.toString().split(" ");
 		try{
 		switch(args[0].toLowerCase().replace(Pokebot.COMMAND_PREFIX, "")){
-			case "testload":{
-				IUser user = message.getAuthor();
-				Player player = PlayerHandler.getPlayer(user);
-				message.reply("Loaded, trying to extract info");
-				message.getChannel().sendMessage(user.mention()+" loaded, they have "+player.HP);
-				break;
-			}
-			case "testsave":{
-				message.getChannel().sendMessage("removing user "+message.getAuthor().mention());
-				PlayerHandler.removePlayer(message.getAuthor());
-				break;
-			}
 			case "type":{
 				Player player = PlayerHandler.getPlayer((message.getMentions().isEmpty() ?
 						message.getAuthor() : message.getMentions().get(0)));
@@ -63,6 +56,7 @@ public class EventHandler{
 						+player.getSpeedStat()+" speed");
 				break;
 			}
+			case "setstats":
 			case "setstat":
 			case "ss":{
 				Player player = PlayerHandler.getPlayer(message.getAuthor());
@@ -144,6 +138,55 @@ public class EventHandler{
 					message.reply("That is not a valid number!");
 				}catch(IllegalArgumentException e){
 					message.reply("That is not a valid move!");
+				}
+				break;
+			}
+			case "gm":
+			case "getmove":{
+				Player player = PlayerHandler.getPlayer((message.getMentions().isEmpty() ?
+						message.getAuthor() : message.getMentions().get(0)));
+				try{
+					if(args.length < 2){
+						message.reply("Usage: <slot> (@user)");
+						return;
+					}
+					int slot = Integer.parseInt(args[1]);
+					if(slot < 1 || slot > 4){
+						message.reply("Slots range from 1-4");
+						return;
+					}
+					if(slot > player.numOfAttacks){
+						message.reply("They don't have a move in that slot!");
+						return;
+					}
+					Pokebot.sendMessage(message.getChannel(), player.user.mention()
+							+" has "+player.moves[slot-1].getName()
+							+" in slot "+slot);
+					return;
+				}catch(NumberFormatException e){
+					message.reply("That's not a number!");
+				}
+				break;
+			}
+			case "st":
+			case "settype":{
+				if(args.length < 2){
+					message.reply("Usage: "+Pokebot.COMMAND_PREFIX+" <type> (type)");
+					return;
+				}
+				try{
+					Player player = PlayerHandler.getPlayer(message.getAuthor());
+					Types type = Types.valueOf(args[1].toUpperCase());
+					if(type == Types.NULL) throw new IllegalArgumentException("Null type");
+					Types type2 = Types.NULL;
+					if(args.length >= 3){
+						type2 = Types.valueOf(args[2].toUpperCase());
+						if(type2 == Types.NULL) throw new IllegalArgumentException("Null type");
+					}
+					player.primary = type;
+					player.secondary = type2;
+				}catch(IllegalArgumentException e){
+					message.reply("That's not a valid type!");
 				}
 				break;
 			}
@@ -284,10 +327,12 @@ public class EventHandler{
 				}
 				break;
 			}
+			case "sb":
 			case "startbattle":{
 				BattleManager.onStartBattle(message.getChannel(), message.getAuthor());
 				break;
 			}
+			case "jb":
 			case "joinbattle":{
 				if(message.getMentions().isEmpty()){
 					message.reply("Usage: "+Pokebot.COMMAND_PREFIX+"joinbattle <@host>");
@@ -302,8 +347,53 @@ public class EventHandler{
 				break;
 			}*/ //TODO
 			case "help":{
-				Pokebot.sendMessage(message.getChannel(), "No.");
+				IUser user = message.getAuthor();
+				StringBuilder builder = new StringBuilder("Here are the commands I know:\n");
+				builder.append("Arguments in <> are manditory, arguments in () are optional\n");
+				builder.append("alternative spellings are shown in []\n");
+				builder.append("All commands start with \"");
+				builder.append(Pokebot.COMMAND_PREFIX);
+				builder.append("\"\n");
+				builder.append("All commands are case insensitive");
+				builder.append(" If a command has only an optional @mention \"(@mention)\"");
+				builder.append(" then excluding it will show relevant info for yourself\n");
+				builder.append('\n');
+				builder.append("help : Shows this dialog\n");
+				builder.append('\n');
+				builder.append("getUsedPoints [gup] (@mention) : Displays the point of the user\n");
+				builder.append("getStats [stats] [gs] (@mention) : Displays the stats of the user\n");
+				builder.append("setStat [ss] <statname> <amount> (ev or iv) :");
+				builder.append(" Sets your stats, if the subtype is excluded, it's assume to be base stats\n");
+				builder.append("printStats [ps] : Sends you a PM with your stats in detail.");
+				builder.append(" Instead of showing you the total value, this breaks it down by every favor\n");
+				builder.append('\n');
+				builder.append("setMove [sm] <slot> <move_name> : Sets the slot to this move.");
+				builder.append(" Slots are 1-4, and will be ignored if you don't yet have 4 moves\n");
+				builder.append("getMove [gm] <slot> (@mention) : Displays the move in that user's slot\n");
+				builder.append("listMoves [lm] (@mention) : Displays a list of the user's moves\n");
+				builder.append("listAllMoves [lam] : Sends you a list of every move I know\n");
+				builder.append('\n');
+				builder.append("type (@mention) : Displays the type(s) of the user\n");
+				builder.append("setType [st] <type> (type2) : Sets your type(s)\n");
+				builder.append('\n');
+				builder.append("getPP [gpp] [gp] (@mention) : Displays the remaining PP for the user's moves\n");
+				builder.append("attack <slot> <@mention> : Attacks the user with the move in your given slot\n");
+				builder.append("heal [revive] (@mention) : Heals the given user to full HP, PP, and removes all status effects\n");
+				builder.append('\n');
+				builder.append("battle <turnTime> <@mention> (@mention...) : Starts a battle with the given turn time.");
+				builder.append(" The turnTime is how many seconds before the turn is forcefully ended.");
+				builder.append(" You need at to invite least one person, you can invite more, and it's not limited to those you invite\n");
+				builder.append("joinBattle [jb] <@mention> : Joins the battle that person opened\n");
+				builder.append("startBattle [sb] : Starts the battle you previously opened");
+				Pokebot.client.getOrCreatePMChannel(user).sendMessage(builder.toString());
+				message.reply("I sent you a PM with my help menu");
 				return;
+			}
+			case "pgs":
+			case "pokemongo":
+			case "pokemongosimulator":{
+				Pokebot.sendMessage(message.getChannel(), "Our servers are experiencing issues. Please come back later");
+				break;
 			}
 			default:
 				Pokebot.sendMessage(message.getChannel(), "invalid command");

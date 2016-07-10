@@ -1,6 +1,7 @@
 package coolway99.discordpokebot.storage;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import coolway99.discordpokebot.Player;
 import sx.blah.discord.handle.obj.IUser;
@@ -28,10 +29,11 @@ public class PlayerHandler{
 	}
 	
 	public static void saveAll(){
-		for(Player player : playerMap.values()){
+		Iterator<Player> i = playerMap.values().iterator();
+		while(i.hasNext()){
+			Player player = i.next();
 			player.saveData();
+			if(!player.inBattle()) i.remove();
 		}
-		playerMap.clear();
 	}
-	
 }
