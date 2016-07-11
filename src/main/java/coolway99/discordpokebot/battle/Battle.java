@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 
 import coolway99.discordpokebot.IAttack;
+import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Moves;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
@@ -70,16 +71,29 @@ public class Battle implements Comparator<Player>{
 	}
 	
 	public void onAttack(IChannel channel, Player attacker, Moves move, Player defender){
+		if(this.attacks.containsKey(attacker)){
+			Pokebot.sendMessage(channel, attacker.user.mention()+" you've already sent your attack!");
+			return;
+		}
 		this.attacks.put(attacker, new IAttack(attacker, move, defender));
 		if(!channel.getID().equals(this.channel.getID())){
 			Pokebot.sendMessage(this.channel, attacker.user.mention()+" sent in their attack from another channel!");
 		} else {
 			Pokebot.sendMessage(this.channel, attacker.user.mention()+" submitted their attack");
 		}
+		attacker.lastMove = move;
+		attacker.lastTarget = defender;
+		defender.lastAttacker = attacker; //TODO free-for-all battles might make this weird...
 		if(this.attacks.size() == this.participants.size()){
 			this.timer.cancel();
 			this.onTurn();
 		}
+	}
+	
+	//Called for moves that auto-set themselves
+	public void onAutoAttack(Player attacker, Moves move, Player defender){
+		this.attacks.put(attacker, new IAttack(attacker, move, defender));
+		Pokebot.sendMessage(this.channel, attacker.user.mention()+" has a multiturn attack!");
 	}
 	
 	//This is called every time the BattleTurnTimer times out, or if onAttack is completely filled
@@ -130,37 +144,72 @@ public class Battle implements Comparator<Player>{
 		this.threatenTimeout.removeAll(this.attacks.keySet());
 		for(Player player : this.threatenTimeout){
 			Pokebot.sendBatchableMessage(this.channel, "If "+player.user.mention()+" doesn't attack the next turn, they're out!");
+			player.lastTarget = null;
+			player.lastMove = Moves.NULL;
+			player.lastAttacker = null;
 		}
 		this.attacks.clear();
 		Pokebot.sendBatchableMessage(this.channel, "Begin next turn, you have "+this.turnTime+" seconds to make your attack");
 		Pokebot.endBatchMessages();
 		this.timer = new BattleTurnTimeout(this);
 		Pokebot.timer.schedule(this.timer, Pokebot.secondsToMiliseconds(this.turnTime));
+		for(Player player : this.participants){
+			this.onPostTurn(player);
+		}
 	}
 	
 	/**
 	 * Returns true if the battle has ended
 	 */
 	public boolean playerFainted(Player player){
-		//It's good to be thorough
-		this.participants.remove(player);
-		this.attacks.remove(player);
-		this.threatenTimeout.remove(player);
-		
-		player.battle = null; //TODO perhaps heal them?
+		onLeaveBattle(player);
 		if(this.participants.size() == 1){
 			player = this.participants.get(0);
 			this.participants.clear();
 			BattleManager.onBattleWon(this, player);
-			player.battle = null;
 			this.timer.cancel();
 			return true;
 		}
 		return false;
 	}
 	
+	public void onLeaveBattle(Player player){
+		BattleManager.onExitBattle(player);
+		this.participants.remove(player);
+		this.attacks.remove(player);
+		this.threatenTimeout.remove(player);
+	}
+	
 	public void addParticipant(Player player){
 		this.participants.add(player);
+	}
+	
+	//This is ran after all the battle logic
+	/**
+	 * Used to run things like post-turn damage.
+	 * 
+	 * Attacks are already reset by this point, 
+	 * so any multi-turn attacks can auto-queue themselves without consequence
+	 */
+	public void onPostTurn(Player player){
+		
+		switch(player.lastMove){
+			case FLY:{
+				switch(player.lastMovedata){
+					case MoveConstants.FLYING:{
+						//This attack has charged up
+						this.onAutoAttack(player, player.lastMove, player.lastTarget);
+						break;
+					}
+					default:{
+						break;
+					}
+				}
+				break;
+			}
+			default:
+				break;
+		}
 	}
 
 	@Override

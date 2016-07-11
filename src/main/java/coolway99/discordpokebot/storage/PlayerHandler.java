@@ -34,7 +34,11 @@ public class PlayerHandler{
 		while(i.hasNext()){
 			Player player = i.next();
 			player.saveData();
-			if(!player.inBattle() || !BattleManager.hasBattlePending(player.user)) i.remove();
+			//If play is not in a battle, and the player does not have a battle pending
+			if(!(player.inBattle() || BattleManager.hasBattlePending(player.user))){
+				System.out.println("Removing player");
+				i.remove();
+			}
 		}
 	}
 }

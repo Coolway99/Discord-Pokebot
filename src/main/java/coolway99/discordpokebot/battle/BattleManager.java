@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import coolway99.discordpokebot.Effects;
+import coolway99.discordpokebot.Moves;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.storage.PlayerHandler;
@@ -17,9 +19,10 @@ public class BattleManager{
 	
 	public static final ArrayList<Battle> battles = new ArrayList<>();
 	public static final HashMap<IUser, PreBattle> preBattles = new HashMap<>(2); 
+	private static final ArrayList<IUser> inPreBattle = new ArrayList<>();
 	
 	public static boolean hasBattlePending(IUser user){
-		return preBattles.containsKey(user);
+		return inPreBattle.contains(user);
 	}
 	
 	public static void createBattle(IChannel channel, IUser user, List<IUser> invites, int turnTime){
@@ -30,6 +33,7 @@ public class BattleManager{
 		battleInviteMessage(channel, user, invites);
 		PreBattle pre = new PreBattle(channel, PlayerHandler.getPlayer(user), turnTime);
 		preBattles.put(user, pre);
+		inPreBattle.add(user);
 	}
 	
 	public static void onJoinBattle(IChannel channel, IUser user, IUser host){
@@ -44,7 +48,10 @@ public class BattleManager{
 		}
 		List<Player> list = preBattles.get(host).participants;
 		Player player = PlayerHandler.getPlayer(user);
-		if(!list.contains(player)) list.add(player);
+		if(!list.contains(player)){
+			list.add(player);
+			inPreBattle.add(user);
+		}
 		Pokebot.sendMessage(channel, user.mention()+" joined the battle hosted by "+host.mention());
 	}
 	
@@ -78,9 +85,24 @@ public class BattleManager{
 		player.battle.playerFainted(player);
 	}*/
 	
+	public static void onExitBattle(Player player){
+		player.HP = player.getMaxHP();
+		player.effect = Effects.NORMAL;
+		player.isSemiInvunerable = false;
+		player.lastAttacker = null;
+		player.lastMove = Moves.NULL;
+		player.lastMovedata = 0;
+		for(int x = 0; x < player.numOfAttacks; x++){
+			player.PP[x] = player.moves[x].getPP();
+		}
+		player.battle = null;
+		inPreBattle.remove(player);
+	}
+
 	public static void onBattleWon(Battle battle, Player player){
 		Pokebot.sendBatchableMessage(battle.channel, player.getUser().mention()+" won the battle!");
 		battles.remove(battle);
+		onExitBattle(player);
 	}
 	
 	public static void battleInviteMessage(IChannel channel, IUser host, List<IUser> users){

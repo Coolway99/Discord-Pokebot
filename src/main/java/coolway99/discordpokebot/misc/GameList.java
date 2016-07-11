@@ -3,8 +3,9 @@ package coolway99.discordpokebot.misc;
 public enum GameList{
 	POKEMON("Pokémon"),
 	PKMN("Pkmn"),
-	GO("Pokémon go"),
+	GO("Pokémon Go"),
 	GO2("our servers are down"),
+	GO3("Pokémon Go Fuck Yourself"),
 	POKERMON("some poker, mon"),
 	POKE_A_MON("poke a mon"),
 	RYGB("Red/Yellow/Green/Blue"),

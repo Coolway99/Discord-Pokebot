@@ -1,7 +1,6 @@
 package coolway99.discordpokebot;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.Scanner;
@@ -52,6 +51,11 @@ public class Player{
 	public int[] PP = new int[4];
 	
 	public Battle battle = null;
+	public boolean isSemiInvunerable = false; //Set by moves, is not used outside of a battle
+	public Moves lastMove = Moves.NULL; //Isn't set outside of a battle
+	public int lastMovedata = 0; //Can be used by moves for whatever they want
+	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
+	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
 	
 	public Player(IUser user){
 		this.user = user;
@@ -165,7 +169,7 @@ public class Player{
 		System.out.println("Loading");
 		File file = Pokebot.getSaveFile(this.user);
 		if(!file.exists()) return; //Use defaults
-		try(Scanner in = new Scanner(new FileInputStream(file))){
+		try(Scanner in = new Scanner(file)){
 			this.primary = Types.valueOf(in.nextLine());
 			this.secondary = Types.valueOf(in.nextLine());
 			

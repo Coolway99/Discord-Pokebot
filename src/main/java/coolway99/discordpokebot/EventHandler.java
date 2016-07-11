@@ -178,12 +178,16 @@ public class EventHandler{
 			}
 			case "st":
 			case "settype":{
+				Player player = PlayerHandler.getPlayer(message.getAuthor());
+				if(player.inBattle()){
+					inBattleMessage(message);
+					return;
+				}
 				if(args.length < 2){
 					message.reply("Usage: "+Pokebot.COMMAND_PREFIX+" <type> (type)");
 					return;
 				}
 				try{
-					Player player = PlayerHandler.getPlayer(message.getAuthor());
 					Types type = Types.valueOf(args[1].toUpperCase());
 					if(type == Types.NULL) throw new IllegalArgumentException("Null type");
 					Types type2 = Types.NULL;
@@ -274,6 +278,12 @@ public class EventHandler{
 						return;
 					}
 					Moves move = attacker.moves[slot];
+					//Before anything else, lets see if the target is ourselves
+					if(defender.user.getID().equals(Pokebot.client.getOurUser().getID())){
+						Pokebot.sendMessage(message.getChannel(), 
+								message.getAuthor().mention()+" tried hurting me!");
+						return;
+					}
 					//If the player is in a battle, we want to pass on the message
 					if(attacker.inBattle()){
 						if(defender.inBattle()){
@@ -281,7 +291,7 @@ public class EventHandler{
 								attacker.battle.onAttack(message.getChannel(), attacker, move, defender);
 								return; //We don't want the standard logic to run
 							}
-							message.reply("you two in different battles!");
+							message.reply("you two are in different battles!");
 							return;
 						}
 						message.reply("you can only attack those in your battle!");
@@ -314,6 +324,9 @@ public class EventHandler{
 					return;
 				}
 				player.HP = player.getMaxHP();
+				for(int x = 0; player.numOfAttacks < x; x++){
+					player.PP[x] = player.moves[x].getPP();
+				}
 				message.reply(" fully healed "+player.getUser().mention());
 				break;
 			}
@@ -415,6 +428,10 @@ public class EventHandler{
 	
 	private static void inBattleMessage(IMessage message) throws MissingPermissionsException, HTTP429Exception, DiscordException{
 		message.reply("you can't use this because you're in a battle!");
+	}
+	
+	private static void reply(IMessage message, String reply){
+		Pokebot.sendMessage(message.getChannel(), message.getAuthor().mention()+", "+reply);
 	}
 	
 }

@@ -11,6 +11,7 @@ import java.util.TimerTask;
 
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.misc.GameList;
+import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -52,31 +53,13 @@ public class Pokebot{
 				PlayerHandler.saveAll();
 			}
 		}, SAVE_DELAY, SAVE_DELAY);
-		timer.scheduleAtFixedRate(new TimerTask(){
-			@Override
-			public void run(){
-				Iterator<IChannel> i = buffers.keySet().iterator();
-				while(i.hasNext()){
-					IChannel channel = i.next();
-					StringBuilder builder = buffers.get(channel);
-					if(builder.length() > 0){
-						try {
-							channel.sendMessage(builder.toString());
-							i.remove();
-						} catch(MissingPermissionsException | HTTP429Exception
-								| DiscordException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		}, MESSAGE_DELAY, MESSAGE_DELAY);
+		timer.scheduleAtFixedRate(new MessageTimer(), MESSAGE_DELAY, MESSAGE_DELAY);
 		timer.scheduleAtFixedRate(new TimerTask(){
 			@Override
 			public void run(){
 				Pokebot.client.updatePresence(false, Optional.of(Pokebot.getRandomGame()));
 			}
-		}, GAME_DELAY, GAME_DELAY);
+		}, secondsToMiliseconds(5), GAME_DELAY);
 	}
 	
 	public static IDiscordClient getClient(String token) throws Exception{
@@ -94,9 +77,9 @@ public class Pokebot{
 			e.printStackTrace();
 		}*/
 		if(!buffers.containsKey(channel)){
-			buffers.put(channel, (new StringBuilder(message)).append('\n'));
+			buffers.put(channel, (new StringBuilder(message)));
 		} else {
-			buffers.get(channel).append(message).append('\n');
+			buffers.get(channel).append('\n').append(message);
 		}
 	}
 	
@@ -133,5 +116,25 @@ public class Pokebot{
 	public static String getRandomGame(){
 		GameList[] vals = GameList.values();
 		return vals[Pokebot.ran.nextInt(vals.length)].getName();
+	}
+	
+	public static class MessageTimer extends TimerTask{
+		@Override
+		public void run(){
+			Iterator<IChannel> i = buffers.keySet().iterator();
+			while(i.hasNext()){
+				IChannel channel = i.next();
+				StringBuilder builder = buffers.get(channel);
+				if(builder.length() > 0){
+					try {
+						channel.sendMessage(builder.toString());
+						i.remove();
+					} catch(MissingPermissionsException | HTTP429Exception
+							| DiscordException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 }
