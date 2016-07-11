@@ -23,12 +23,14 @@ import sx.blah.discord.util.MissingPermissionsException;
 
 public class Pokebot{
 	
+	public static final String NAME = "Pok�bot";
 	public static final String COMMAND_PREFIX = "==";
 	public static final long SAVE_DELAY = minutesToMiliseconds(1);
 	public static final long MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
 	public static final long GAME_DELAY = minutesToMiliseconds(1);
 	
 	public static IDiscordClient client;
+	public static final ConfigHandler config = new ConfigHandler();
 	public static final Scanner in = new Scanner(System.in);
 	public static final Random ran = new Random();
 	public static final Timer timer = new Timer("Pokebot Timer Thread", true);

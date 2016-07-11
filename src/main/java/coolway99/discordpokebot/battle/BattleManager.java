@@ -138,4 +138,16 @@ public class BattleManager{
 		builder.append(" minutes, then this request will automatically expire.");
 		Pokebot.sendMessage(channel, builder.toString());
 	}
+
+	public static void nukeBattles(){
+		for(Battle battle : battles){
+			List<Player> players = battle.getParticipants();
+			for(Player player : players){
+				player.battle = null;
+			}
+			Pokebot.sendMessage(battle.channel, "Battle nuked, "+Pokebot.NAME+" going offline");
+		}
+		battles.clear();
+		inPreBattle.clear();
+	}
 }

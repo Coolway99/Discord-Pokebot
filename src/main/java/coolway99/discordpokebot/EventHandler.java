@@ -1,5 +1,7 @@
 package coolway99.discordpokebot;
 
+import java.util.Optional;
+
 import coolway99.discordpokebot.StatHandler.Stats;
 import coolway99.discordpokebot.StatHandler.SubStats;
 import coolway99.discordpokebot.battle.BattleManager;
@@ -414,6 +416,49 @@ public class EventHandler{
 			case "pokemongo":
 			case "pokemongosimulator":{
 				Pokebot.sendMessage(message.getChannel(), "Our servers are experiencing issues. Please come back later");
+				break;
+			}
+			case "stop":{
+				if(message.getAuthor().getID().equals(Pokebot.config.OWNERID)){
+					try{
+						reply(message, "Shutting down");
+						System.out.println("Shutting down by owner request");
+						Pokebot.client.updatePresence(true, Optional.of("Currently Offline"));
+						Pokebot.timer.cancel();
+						BattleManager.nukeBattles();
+						new Pokebot.MessageTimer().run();
+						PlayerHandler.saveAll();
+						Pokebot.client.logout();
+					}catch(Exception e){
+						e.printStackTrace();
+						System.err.println("Error while shutting down");
+					}
+					System.out.println("Terminated");
+					System.exit(0);
+				} else {
+					reply(message, "You aren't the owner, shoo!");
+				}
+				break;
+			}
+			case "music":{
+				if(args.length < 2){
+					message.reply("Usage: music <song> (optional prefix text)");
+					return;
+				}
+				switch(args[1]){
+					case "masterquest":
+					case "mq":{
+						final String link = "https://www.youtube.com/watch?v=GD1dusdGFco";
+						Pokebot.sendMessage(message.getChannel(), ((args.length > 3) ? args[2]+" "+args[3] : "")+" "+link);
+						break;
+					}
+					case "unbeatable":{
+						final String link = "https://www.youtube.com/watch?v=M7DhyZ7h1yc";
+						break;
+					}
+					default:
+						break;
+				}
 				break;
 			}
 			default:
