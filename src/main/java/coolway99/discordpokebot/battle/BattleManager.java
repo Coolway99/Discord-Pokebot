@@ -125,13 +125,13 @@ public class BattleManager{
 		if(users.size() > 1) builder.append("all ");
 		builder.append("to battle in a free for all, last one standing wins!\n");
 		builder.append("To join, type ");
-		builder.append(Pokebot.COMMAND_PREFIX);
+		builder.append(Pokebot.config.COMMAND_PREFIX);
 		builder.append("joinbattle ");
 		builder.append(host.mention());
 		builder.append('\n');
 		builder.append(host.mention());
 		builder.append(" type ");
-		builder.append(Pokebot.COMMAND_PREFIX);
+		builder.append(Pokebot.config.COMMAND_PREFIX);
 		builder.append("startbattle to begin.\n");
 		builder.append("If the battle is not started in ");
 		builder.append(BATTLE_TIMEOUT);
@@ -145,7 +145,7 @@ public class BattleManager{
 			for(Player player : players){
 				player.battle = null;
 			}
-			Pokebot.sendMessage(battle.channel, "Battle nuked, "+Pokebot.NAME+" going offline");
+			Pokebot.sendMessage(battle.channel, "Battle nuked, "+Pokebot.config.BOTNAME+" going offline");
 		}
 		battles.clear();
 		inPreBattle.clear();

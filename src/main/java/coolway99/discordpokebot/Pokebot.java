@@ -22,9 +22,7 @@ import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MissingPermissionsException;
 
 public class Pokebot{
-	
-	public static final String NAME = "Pok�bot";
-	public static final String COMMAND_PREFIX = "==";
+	//TODO make the rest of these configs
 	public static final long SAVE_DELAY = minutesToMiliseconds(1);
 	public static final long MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
 	public static final long GAME_DELAY = minutesToMiliseconds(1);
@@ -35,9 +33,6 @@ public class Pokebot{
 	public static final Random ran = new Random();
 	public static final Timer timer = new Timer("Pokebot Timer Thread", true);
 	public static final HashMap<IChannel, StringBuilder> buffers = new HashMap<>();
-	//TODO this creates a bottleneck of only one message at a time
-	private static IChannel batchMessagesForBattle = null;
-	private static StringBuilder builder = null;
 	
 	public static void main(String... args) throws Exception{
 		if(args.length < 1){
@@ -85,6 +80,15 @@ public class Pokebot{
 		}
 	}
 	
+	public static void startBatchMessages(Battle battle){}
+	
+	public static void sendBatchableMessage(IChannel channel, String message){
+		sendMessage(channel, message);
+	}
+	
+	public static void endBatchMessages(){}
+	//I wanna try just sending raw messages for now
+	/*
 	public static void startBatchMessages(Battle battle){
 		batchMessagesForBattle = battle.channel;
 		builder = new StringBuilder();
@@ -105,7 +109,7 @@ public class Pokebot{
 		batchMessagesForBattle = null;
 		sendMessage(channel, builder.toString());
 		builder = null;
-	}
+	}*/
 	
 	public static long minutesToMiliseconds(int minutes){
 		return secondsToMiliseconds(minutes * 60L);

@@ -105,7 +105,7 @@ public enum Moves{
 	//TODO
 	@SuppressWarnings("static-method")
 	public int getCost(){
-		return 0;
+		return this.power; //TODO
 	}
 	
 	public double getAccuracy(){

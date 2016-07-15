@@ -53,7 +53,7 @@ public class Player{
 	public Battle battle = null;
 	public boolean isSemiInvunerable = false; //Set by moves, is not used outside of a battle
 	public Moves lastMove = Moves.NULL; //Isn't set outside of a battle
-	public int lastMovedata = 0; //Can be used by moves for whatever they want
+	public int lastMovedata = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
 	
@@ -199,7 +199,7 @@ public class Player{
 	public void saveData(){
 		System.out.println("Beginning to save");
 		File file = Pokebot.getSaveFile(this.user);
-		if(!file.exists()){
+		if(!file.exists() && file.getParentFile() != null){
 			file.getParentFile().mkdirs();
 		}
 		try(PrintStream out = new PrintStream(file)){
