@@ -1,7 +1,10 @@
-package coolway99.discordpokebot;
+package coolway99.discordpokebot.states;
 
-import coolway99.discordpokebot.StatHandler.Stats;
-import coolway99.discordpokebot.types.Types;
+import coolway99.discordpokebot.MoveConstants;
+import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.battle.IAttack;
 import sx.blah.discord.handle.obj.IChannel;
 
 public enum Moves{

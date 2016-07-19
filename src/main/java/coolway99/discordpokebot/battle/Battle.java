@@ -7,11 +7,10 @@ import java.util.List;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
-import coolway99.discordpokebot.IAttack;
 import coolway99.discordpokebot.MoveConstants;
-import coolway99.discordpokebot.Moves;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.states.Moves;
 import sx.blah.discord.handle.obj.IChannel;
 
 public class Battle implements Comparator<Player>{

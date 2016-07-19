@@ -1,5 +1,9 @@
 package coolway99.discordpokebot;
 
+import coolway99.discordpokebot.states.Effects;
+import coolway99.discordpokebot.states.Natures;
+import coolway99.discordpokebot.states.Stats;
+import coolway99.discordpokebot.states.SubStats;
 import sx.blah.discord.handle.obj.IChannel;
 
 //The lowest pokemon have stats of 180, while the highest (legendaries) are 780
@@ -154,136 +158,5 @@ public class StatHandler{
 				-6);
 		Pokebot.sendBatchableMessage(channel, player.user.mention()+"'s "+stat.toString()
 		+" decreased"+(harshly ? " harshly" : "")+'!');
-	}
-	
-	public static enum Stats{
-		HEALTH(0),
-		ATTACK(1),
-		SPECIAL_ATTACK(2),
-		DEFENSE(3),
-		SPECIAL_DEFENSE(4),
-		SPEED(5),
-		//These shouldn't be used in normal stats
-		ACCURACY(6),
-		EVASION(7);
-		
-		private final int index;
-		
-		private Stats(int x){
-			this.index = x;
-		}
-		
-		public static Stats getStatFromIndex(int i){
-			switch(i){
-				case 0:
-					return HEALTH;
-				case 1:
-					return ATTACK;
-				case 2:
-					return SPECIAL_ATTACK;
-				case 3:
-					return DEFENSE;
-				case 4:
-					return SPECIAL_DEFENSE;
-				case 5:
-					return SPEED;
-				case 6:
-					return ACCURACY;
-				case 7:
-					return EVASION;
-				default:
-					return null;
-			}
-		}
-		
-		public static Stats getStatFromString(String s){
-			switch(s.toLowerCase()){
-				case "health":
-				case "h":
-				case "hp":{
-					return Stats.HEALTH;
-				}
-				case "a":
-				case "att":
-				case "attack":{
-					return Stats.ATTACK;
-				}
-				case "special attack":
-				case "special_attack":
-				case "sattack":
-				case "sa":{
-					return Stats.SPECIAL_ATTACK;
-				}
-				case "defense":
-				case "d":{
-					return Stats.DEFENSE;
-				}
-				case "special defense":
-				case "special_defense":
-				case "sdefense":
-				case "sd":{
-					return Stats.SPECIAL_DEFENSE;
-				}
-				case "speed":
-				case "sp":{
-					return Stats.SPEED;
-				}
-				default:{
-					return null;
-				}
-			}
-		}
-		
-		public int getIndex(){
-			return this.index;
-		}
-	}
-	
-	public static enum SubStats{
-		BASE(0),
-		IV(1),
-		EV(2);
-		
-		private final int index;
-		
-		private SubStats(int x){
-			this.index = x;
-		}
-		
-		public int getIndex(){
-			return this.index;
-		}
-		
-		public static SubStats getSubStatFromIndex(int i){
-			switch(i){
-				case 0:
-					return BASE;
-				case 1:
-					return IV;
-				case 2:
-					return EV;
-				default:
-					return null;
-			}
-		}
-		
-		public static SubStats getSubStatFromString(String s){
-			if(s == null) return SubStats.BASE;
-			switch(s.toLowerCase()){
-				case "d": //Sometimes called "DV"
-				case "dv":
-				case "i":
-				case "iv":{
-					return SubStats.IV;
-				}
-				case "ev":
-				case "e":{
-					return SubStats.EV;
-				}
-				default:{
-					return SubStats.BASE;
-				}
-			}
-		}
 	}
 }

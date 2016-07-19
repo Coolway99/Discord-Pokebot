@@ -6,10 +6,13 @@ import java.io.PrintStream;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import coolway99.discordpokebot.StatHandler.Stats;
-import coolway99.discordpokebot.StatHandler.SubStats;
 import coolway99.discordpokebot.battle.Battle;
-import coolway99.discordpokebot.types.Types;
+import coolway99.discordpokebot.states.Effects;
+import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.states.Natures;
+import coolway99.discordpokebot.states.Stats;
+import coolway99.discordpokebot.states.SubStats;
+import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IUser;
 
 //TODO

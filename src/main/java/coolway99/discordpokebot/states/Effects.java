@@ -1,4 +1,4 @@
-package coolway99.discordpokebot;
+package coolway99.discordpokebot.states;
 
 //TODO Look at how effects stack
 public enum Effects{

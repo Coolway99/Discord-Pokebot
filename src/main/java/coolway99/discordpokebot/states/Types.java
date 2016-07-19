@@ -1,6 +1,5 @@
-package coolway99.discordpokebot.types;
+package coolway99.discordpokebot.states;
 
-import coolway99.discordpokebot.Moves;
 import coolway99.discordpokebot.Player;
 
 public enum Types{

@@ -1,6 +1,4 @@
-package coolway99.discordpokebot;
-
-import coolway99.discordpokebot.StatHandler.Stats;
+package coolway99.discordpokebot.states;
 
 public enum Natures{ //In this case, "Health" is null, since nature never applies to health
 	LONELY(Stats.ATTACK, Stats.DEFENSE),

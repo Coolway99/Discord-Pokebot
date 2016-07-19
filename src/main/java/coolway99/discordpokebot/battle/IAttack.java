@@ -1,4 +1,7 @@
-package coolway99.discordpokebot;
+package coolway99.discordpokebot.battle;
+
+import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.states.Moves;
 
 //Just a storage class for everything
 //I make the fields public because they're final anyways, you can't change them so
