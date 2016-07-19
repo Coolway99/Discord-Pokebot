@@ -19,7 +19,7 @@ public class PreBattle{
 	
 	public PreBattle(IChannel channel, Player host, int turnTimer){
 		this.channel = channel;
-		this.host = host.getUser();
+		this.host = host.user;
 		this.turnTimer = turnTimer;
 		this.participants = new ArrayList<>();
 		this.participants.add(host);

@@ -3,6 +3,7 @@ package coolway99.discordpokebot;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import coolway99.discordpokebot.StatHandler.Stats;
@@ -12,13 +13,14 @@ import coolway99.discordpokebot.types.Types;
 import sx.blah.discord.handle.obj.IUser;
 
 //TODO
+//The variables all contain the default states
 public class Player{
 	
 	public IUser user;
 	public Types primary = Types.NORMAL;
 	public Types secondary = Types.NULL;
 	public int HP = 0;
-	public int level = 50; //TODO
+	public int level = StatHandler.MAX_LEVEL;
 	//Physical Stats
 	/**
 	 * An array containing all the stats of the player, they go in this order:
@@ -40,6 +42,10 @@ public class Player{
 	 * An array holding the modifiers for each stat
 	 */
 	public byte[] modifiers = new byte[8];
+	/**
+	 * The nature of the player
+	 */
+	public Natures nature = Natures.values()[Pokebot.ran.nextInt(Natures.values().length)];
 	/**
 	 * What effect is the player currently under?
 	 */
@@ -66,9 +72,10 @@ public class Player{
 		}
 	}
 	
-	public IUser getUser(){
+	//the user object is public final anyways
+	/*public IUser getUser(){
 		return this.user;
-	}
+	}*/
 	
 	public boolean hasSecondaryType(){
 		return this.secondary != Types.NULL;
@@ -85,7 +92,8 @@ public class Player{
 				this.level,
 				Stats.HEALTH,
 				this.modifiers[Stats.HEALTH.getIndex()],
-				this.effect);
+				this.effect,
+				this.nature);
 	}
 	
 	public int getAttackStat(){
@@ -95,7 +103,8 @@ public class Player{
 				this.level,
 				Stats.ATTACK,
 				this.modifiers[Stats.ATTACK.getIndex()],
-				this.effect);
+				this.effect,
+				this.nature);
 	}
 	
 	public int getSpecialAttackStat(){
@@ -105,7 +114,8 @@ public class Player{
 				this.level,
 				Stats.SPECIAL_ATTACK,
 				this.modifiers[Stats.SPECIAL_ATTACK.getIndex()],
-				this.effect);
+				this.effect,
+				this.nature);
 	}
 	
 	public int getDefenseStat(){
@@ -115,7 +125,8 @@ public class Player{
 				this.level,
 				Stats.DEFENSE,
 				this.modifiers[Stats.DEFENSE.getIndex()],
-				this.effect);
+				this.effect,
+				this.nature);
 	}
 	
 	public int getSpecialDefenseStat(){
@@ -125,7 +136,8 @@ public class Player{
 				this.level,
 				Stats.SPECIAL_DEFENSE,
 				this.modifiers[Stats.SPECIAL_DEFENSE.getIndex()],
-				this.effect);
+				this.effect,
+				this.nature);
 	}
 	
 	public int getSpeedStat(){
@@ -135,7 +147,8 @@ public class Player{
 				this.level,
 				Stats.SPEED,
 				this.modifiers[Stats.SPEED.getIndex()],
-				this.effect);
+				this.effect,
+				this.nature);
 	}
 	
 	public double getAccuracy(){
@@ -166,6 +179,9 @@ public class Player{
 	}
 	
 	public void loadData(){
+		//If the file is "incomplete", which should only result when the save format is updated
+		//with more info, then this will error out and close the file, with the default values
+		//being intact for the values not found
 		System.out.println("Loading");
 		File file = Pokebot.getSaveFile(this.user);
 		if(!file.exists()) return; //Use defaults
@@ -184,8 +200,13 @@ public class Player{
 			for(int x = 0; x < this.moves.length; x++){
 				this.moves[x] = Moves.valueOf(in.nextLine());
 			}
+			this.level = in.nextInt();
+			in.nextLine();
+			this.nature = Natures.valueOf(in.nextLine());
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
+		}catch(NoSuchElementException e){
+			System.err.println("We read from an incomplete or invalid file");
 		}
 	}
 	
@@ -216,6 +237,8 @@ public class Player{
 			for(int x = 0; x < this.moves.length; x++){
 				out.println(this.moves[x].toString());
 			}
+			out.println(this.level);
+			out.println(this.nature);
 			out.flush();
 			out.close();
 			System.out.println(Pokebot.getSaveFile(this.user).getAbsolutePath());

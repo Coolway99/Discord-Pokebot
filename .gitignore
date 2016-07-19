@@ -51,3 +51,4 @@ Temporary Items
 /target/
 # Don't ignore .gitignores
 !*/.gitignore
+pokebot.conf

@@ -1,35 +1,41 @@
 <!-- I have no fucking idea how to use maven XD -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>coolway99.pokebot</groupId>
-  <artifactId>discordpokebot</artifactId>
-  <version>0.1-ALPHA</version>
-  <name>Discord Pokemon Battle Bot</name>
-  <description>A bot for discord adding better pokemon battles</description>
-  <repositories>
-      <repository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>central</id>
-      <name>Central Repository</name>
-      <url>https://repo.maven.apache.org/maven2</url>
-    </repository>
-  <repository> <!-- This repo fixes issues with transitive dependencies -->
-    <id>jcenter</id>
-    <url>http://jcenter.bintray.com</url>
-  </repository>
-  <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
-  </repository>
-</repositories>
-<dependencies>
-  <dependency>
-    <groupId>com.github.austinv11</groupId>
-    <artifactId>Discord4j</artifactId>
-    <version>2.4.9</version>
-   <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
-  </dependency>
-</dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>coolway99</groupId>
+	<artifactId>discordpokebot</artifactId>
+	<name>Discord Pokemon Battle Bot</name>
+	<description>A bot for discord adding better pokemon battles</description>
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>Central Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository> <!-- This repo fixes issues with transitive dependencies -->
+			<id>jcenter</id>
+			<url>http://jcenter.bintray.com</url>
+		</repository>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+	<dependencies>
+		<dependency>
+			<groupId>com.github.austinv11</groupId>
+			<artifactId>Discord4j</artifactId>
+			<version>2.4.9</version>
+			<classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies 
+				bundled into one jar) -->
+		</dependency>
+	</dependencies>
+	<version>0.5</version>
+	<url>https://github.com/Coolway99/Discord-Pokebot</url>
+	<properties>
+		<java.version>1.8</java.version>
+	</properties>
 </project>

@@ -78,12 +78,11 @@ public class BattleManager{
 	}
 	
 	//Idealy only ever called from the command
-	//TODO
-	/*
 	public static void onLeaveBattle(Player player){
 		if(player.battle == null) return;
-		player.battle.playerFainted(player);
-	}*/
+		Pokebot.sendMessage(player.battle.channel, player.user.mention()+" left the battle!");
+		player.battle.onLeaveBattle(player);
+	}
 	
 	public static void onExitBattle(Player player){
 		player.HP = player.getMaxHP();
@@ -100,7 +99,7 @@ public class BattleManager{
 	}
 
 	public static void onBattleWon(Battle battle, Player player){
-		Pokebot.sendBatchableMessage(battle.channel, player.getUser().mention()+" won the battle!");
+		Pokebot.sendBatchableMessage(battle.channel, player.user.mention()+" won the battle!");
 		battles.remove(battle);
 		onExitBattle(player);
 	}

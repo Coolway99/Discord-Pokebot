@@ -80,8 +80,24 @@ public class Pokebot{
 		}
 	}
 	
+	public static void sendPrivateMessage(IUser user, String message){
+		try{
+			sendMessage(client.getOrCreatePMChannel(user), message);
+		}catch(HTTP429Exception e){
+			System.err.println("Unable to send PM, hit 429 rate limit");
+		} catch(DiscordException e) {
+			e.printStackTrace();
+			System.err.println("\nUnable to send PM");
+		}
+	}
+	
+	@SuppressWarnings("unused")
 	public static void startBatchMessages(Battle battle){}
 	
+	//TODO perhaps make "Batchable" messages use a builder inside each battle.
+	//I don't think this is needed anyways, it's a single timer thread so
+	//if the Battle thread takes long enough that the messages are sent, then
+	//the message thread won't run until after the battle is done processing
 	public static void sendBatchableMessage(IChannel channel, String message){
 		sendMessage(channel, message);
 	}
@@ -135,9 +151,16 @@ public class Pokebot{
 					try {
 						channel.sendMessage(builder.toString());
 						i.remove();
-					} catch(MissingPermissionsException | HTTP429Exception
-							| DiscordException e) {
+					}catch(HTTP429Exception e){
+						System.err.println("We are being rate limited in channel "
+								+channel.getGuild().getID()+'/'+channel.getID());
+					}catch(MissingPermissionsException e){
+						System.err.println("We do not have permission to send messages in channel "
+								+channel.getGuild().getID()+'/'+channel.getID());
+					}catch(DiscordException e) {
 						e.printStackTrace();
+						System.err.println("\nWe were unable to send messages in channel "
+								+channel.getGuild().getID()+'/'+channel.getID());
 					}
 				}
 			}

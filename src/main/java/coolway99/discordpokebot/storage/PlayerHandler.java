@@ -7,7 +7,6 @@ import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.battle.BattleManager;
 import sx.blah.discord.handle.obj.IUser;
 
-//TODO
 public class PlayerHandler{
 	
 	private static final HashMap<String, Player> playerMap = new HashMap<>();

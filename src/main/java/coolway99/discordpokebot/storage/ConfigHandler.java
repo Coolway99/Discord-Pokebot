@@ -68,7 +68,7 @@ public class ConfigHandler{
 		try(OutputStream out = new FileOutputStream(file)){
 			this.prop.store(out, "Full documentation can be found at TODO"
 					+ "\nComment out lines with #"
-					+ "\nCommented out lines will return to default"); //TODO
+					+ "\nCommented out lines will return to default");
 		}catch(IOException e){
 			e.printStackTrace();
 			System.err.println("\nThere was an error writing the config file...");

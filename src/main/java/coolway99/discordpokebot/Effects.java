@@ -1,5 +1,6 @@
 package coolway99.discordpokebot;
 
+//TODO Look at how effects stack
 public enum Effects{
 	NORMAL,
 	PARALYSIS,

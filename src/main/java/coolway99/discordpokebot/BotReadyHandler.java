@@ -13,6 +13,7 @@ public class BotReadyHandler implements IListener<ReadyEvent>{
 	public void handle(ReadyEvent event){
 		System.out.println("The bot is ready");//reggie");
 		Pokebot.client.getDispatcher().registerListener(new EventHandler());
+		Pokebot.client.getDispatcher().unregisterListener(this);
 		Pokebot.client.updatePresence(false, Optional.of(Pokebot.getRandomGame()));
 		try {
 			Pokebot.client.changeUsername(Pokebot.config.BOTNAME);

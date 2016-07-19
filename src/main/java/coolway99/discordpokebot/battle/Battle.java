@@ -46,7 +46,7 @@ public class Battle implements Comparator<Player>{
 		Iterator<Player> i = participants.iterator();
 		while(i.hasNext()){
 			Player player = i.next();
-			builder.append(player.getUser().mention());
+			builder.append(player.user.mention());
 			if(i.hasNext()){
 				builder.append(", "); //TODO make this neater
 			} else {
@@ -126,20 +126,7 @@ public class Battle implements Comparator<Player>{
 			player.battle = null;
 			Pokebot.sendBatchableMessage(this.channel, player.user.mention()+" got eliminated for inactivity!");
 		}
-		if(this.participants.size() < 2){
-			if(this.participants.size() <= 0){
-				Pokebot.sendBatchableMessage(this.channel, "Nobody won...");
-				BattleManager.battles.remove(this);
-				Pokebot.endBatchMessages();
-				return;
-			}
-			//Else, there's one player remaining
-			Pokebot.sendBatchableMessage(this.channel, this.participants.get(0).user.mention()+" won by default");
-			this.participants.get(0).battle = null;
-			BattleManager.battles.remove(this);
-			Pokebot.endBatchMessages();
-			return;
-		}
+		if(checkDefaultWin()) return;
 		this.threatenTimeout.addAll(this.participants);
 		this.threatenTimeout.removeAll(this.attacks.keySet());
 		for(Player player : this.threatenTimeout){
@@ -173,11 +160,29 @@ public class Battle implements Comparator<Player>{
 		return false;
 	}
 	
+	//Should we stop execution?
+	public boolean checkDefaultWin(){
+		if(this.participants.size() == 1){
+			Player player = this.participants.remove(0);
+			this.onLeaveBattle(player);
+			Pokebot.sendBatchableMessage(this.channel, player.user.mention()+" won the battle by default!");
+			BattleManager.battles.remove(this);
+			return true;
+		}
+		if(this.participants.size() <= 0){
+			Pokebot.sendBatchableMessage(this.channel, "Nobody won...");
+			BattleManager.battles.remove(this);
+			return true;
+		}
+		return false;
+	}
+	
 	public void onLeaveBattle(Player player){
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 		this.attacks.remove(player);
 		this.threatenTimeout.remove(player);
+		checkDefaultWin();
 	}
 	
 	public void addParticipant(Player player){
