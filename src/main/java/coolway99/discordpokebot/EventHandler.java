@@ -20,44 +20,43 @@ import sx.blah.discord.handle.obj.IUser;
 @SuppressWarnings("static-method")
 public class EventHandler{
 	
-	public static final String HELP_TEXT = new StringBuilder("Here are the commands I know:\n")
-			.append("Arguments in <> are manditory, arguments in () are optional\n")
-			.append("alternative spellings are shown in []\n")
-			.append("All commands start with \"")
-			.append(Pokebot.config.COMMAND_PREFIX)
-			.append("\"\n")
-			.append("All commands are case insensitive")
-			.append(" If a command has only an optional @mention \"(@mention)\"")
-			.append(" then excluding it will show relevant info for yourself\n")
-			.append('\n')
-			.append("help : Shows this dialog\n")
-			.append('\n')
-			.append("getUsedPoints [gup] (@mention) : Displays the point of the user\n")
-			.append("getStats [stats] [gs] (@mention) : Displays the stats of the user\n")
-			.append("setStat [ss] <statname> <amount> (ev or iv) :")
-			.append(" Sets your stats, if the subtype is excluded, it's assume to be base stats\n")
-			.append("printStats [ps] : Sends you a PM with your stats in detail.")
-			.append(" Instead of showing you the total value, this breaks it down by every favor\n")
-			.append('\n')
-			.append("setMove [sm] <slot> <move_name> : Sets the slot to this move.")
-			.append(" Slots are 1-4, and will be ignored if you don't yet have 4 moves\n")
-			.append("getMove [gm] <slot> (@mention) : Displays the move in that user's slot\n")
-			.append("listMoves [lm] (@mention) : Displays a list of the user's moves\n")
-			.append("listAllMoves [lam] : Sends you a list of every move I know\n")
-			.append('\n')
-			.append("type (@mention) : Displays the type(s) of the user\n")
-			.append("setType [st] <type> (type2) : Sets your type(s)\n")
-			.append('\n')
-			.append("getPP [gpp] [gp] (@mention) : Displays the remaining PP for the user's moves\n")
-			.append("attack <slot> <@mention> : Attacks the user with the move in your given slot\n")
-			.append("heal [revive] (@mention) : Heals the given user to full HP, PP, and removes all status effects\n")
-			.append('\n')
-			.append("battle <turnTime> <@mention> (@mention...) : Starts a battle with the given turn time.")
-			.append(" The turnTime is how many seconds before the turn is forcefully ended.")
-			.append(" You need at to invite least one person, you can invite more, and it's not limited to those you invite\n")
-			.append("joinBattle [jb] <@mention> : Joins the battle that person opened\n")
-			.append("startBattle [sb] : Starts the battle you previously opened")
-			.toString();
+	public static final String HELP_TEXT = "Here are the commands I know:\n"
+			+"Arguments in <> are manditory, arguments in () are optional\n"
+			+"alternative spellings are shown in []\n"
+			+"All commands start with \""
+			+Pokebot.config.COMMAND_PREFIX
+			+"\"\n"
+			+"All commands are case insensitive"
+			+" If a command has only an optional @mention \"(@mention)\""
+			+" then excluding it will show relevant info for yourself\n"
+			+'\n'
+			+"help : Shows this dialog\n"
+			+'\n'
+			+"getUsedPoints [gup] (@mention) : Displays the point of the user\n"
+			+"getStats [stats] [gs] (@mention) : Displays the stats of the user\n"
+			+"setStat [ss] <statname> <amount> (ev or iv) :"
+			+" Sets your stats, if the subtype is excluded, it's assume to be base stats\n"
+			+"printStats [ps] : Sends you a PM with your stats in detail."
+			+" Instead of showing you the total value, this breaks it down by every favor\n"
+			+'\n'
+			+"setMove [sm] <slot> <move_name> : Sets the slot to this move."
+			+" Slots are 1-4, and will be ignored if you don't yet have 4 moves\n"
+			+"getMove [gm] <slot> (@mention) : Displays the move in that user's slot\n"
+			+"listMoves [lm] (@mention) : Displays a list of the user's moves\n"
+			+"listAllMoves [lam] : Sends you a list of every move I know\n"
+			+'\n'
+			+"type (@mention) : Displays the type(s) of the user\n"
+			+"setType [st] <type> (type2) : Sets your type(s)\n"
+			+'\n'
+			+"getPP [gpp] [gp] (@mention) : Displays the remaining PP for the user's moves\n"
+			+"attack <slot> <@mention> : Attacks the user with the move in your given slot\n"
+			+"heal [revive] (@mention) : Heals the given user to full HP, PP, and removes all status effects\n"
+			+'\n'
+			+"battle <turnTime> <@mention> (@mention...) : Starts a battle with the given turn time."
+			+" The turnTime is how many seconds before the turn is forcefully ended."
+			+" You need at to invite least one person, you can invite more, and it's not limited to those you invite\n"
+			+"joinBattle [jb] <@mention> : Joins the battle that person opened\n"
+			+"startBattle [sb] : Starts the battle you previously opened";
 	
 	//TODO: Not all commands have outputs
 	//TODO: Perhaps make this neater somehow
@@ -402,11 +401,8 @@ public class EventHandler{
 				return;
 			}
 			case "attack":{
-				if(args.length < 3 || message.getMentions().isEmpty()){
-					reply(message, "Usage: attack <slotnum> @target");
-					return;
-				}
 				try{
+					//We rely on error catching if there is the incorrect args
 					int slot = Integer.parseInt(args[1]);
 					if(slot < 1 || slot > 4){
 						reply(message, "Slot number is from 1-4");
@@ -422,19 +418,25 @@ public class EventHandler{
 						reply(message, "That slot is empty");
 						return;
 					}
-					Player defender = PlayerHandler.getPlayer(message.getMentions().get(0));
+					if(attacker.PP[slot] < 1){
+						reply(message, "You have no PP left for that move!");
+						return;
+					}
+					Moves move = attacker.moves[slot];
+					Player defender;
+					//If this is a status move, then usually we are targeting ourselves
+					if(!move.hasTarget()){
+						defender = PlayerHandler.getPlayer(author);
+					} else {
+						defender = PlayerHandler.getPlayer(message.getMentions().get(0));
+					}
 					if(attacker.HP < 1 || defender.HP < 1){
 						reply(message, (attacker.HP < 1 ? "You have fainted and are unable to move!"
 								: defender.user.mention()+" has already fainted!"));
 						return;
 					}
 					//At this point, we know there's a valid move in the slot and neither party has fainted
-					if(attacker.PP[slot] < 1){
-						reply(message, "You have no PP left for that move!");
-						return;
-					}
-					Moves move = attacker.moves[slot];
-					//Before anything else, lets see if the target is ourselves
+					//Before anything else, lets see if the target is the bot
 					if(defender.user.getID().equals(Pokebot.client.getOurUser().getID())){
 						Pokebot.sendMessage(channel, 
 								author.mention()+" tried hurting me!");
@@ -467,6 +469,8 @@ public class EventHandler{
 					attacker.PP[slot]--;
 				}catch(NumberFormatException e){
 					reply(message, "That's not a number!");
+				}catch(IndexOutOfBoundsException e){
+					reply(message, "Usage: attack <slotnum> @target");
 				}
 				return;
 			}
@@ -486,7 +490,7 @@ public class EventHandler{
 				for(int x = 0; x < player.numOfAttacks; x++){
 					player.PP[x] = player.moves[x].getPP();
 				}
-				player.effect = Effects.NORMAL;
+				player.nvEffect = Effects.NonVolatile.NORMAL;
 				for(int x = 0; x < player.modifiers.length; x++){
 					player.modifiers[x] = 0;
 				}

@@ -81,8 +81,8 @@ public class Battle implements Comparator<Player>{
 			Pokebot.sendMessage(this.channel, attacker.user.mention()+" submitted their attack");
 		}
 		attacker.lastMove = move;
-		attacker.lastTarget = defender;
-		defender.lastAttacker = attacker; //TODO free-for-all battles might make this weird...
+		attacker.lastTarget = (move.hasTarget() ? defender : null);
+		if(move.hasTarget()) defender.lastAttacker = attacker; //TODO free-for-all battles might make this weird...
 		if(this.attacks.size() == this.participants.size()){
 			this.timer.cancel();
 			this.onTurn();
@@ -116,6 +116,39 @@ public class Battle implements Comparator<Player>{
 			}
 		}
 		//TODO after-turn things
+		//Doing various checks for damage
+		for(Player player : this.participants){
+			switch(player.nvEffect){
+				case BURN:{
+					//TODO Check for ability heatproof
+					player.HP = Math.max(0, player.HP - (player.getMaxHP() / 8));
+					Pokebot.sendBatchableMessage(this.channel,
+							player.mention()+" took damage for it's burn!");
+					break;
+				}
+				case POISON:{
+					//TODO check for poison heal ability
+					player.HP = Math.max(0, player.HP - (player.getMaxHP() / 8));
+					Pokebot.sendBatchableMessage(this.channel,
+							player.mention()+" took damage from poison!");
+					break;
+				}
+				case TOXIC:{
+					//TODO check for poison heal ability
+					player.HP = Math.max(0, player.HP - (player.getMaxHP() * ++player.counter/16));
+					Pokebot.sendBatchableMessage(this.channel,
+							player.mention()+" took damage from poison!");
+					break;
+				}
+				default:
+					break;
+			}
+			if(player.HP <= 0){
+				Moves.faintMessage(this.channel, player);
+				if(playerFainted(player)) return;
+			}
+		}
+		//We check for those who didn't do anything:
 		this.threatenTimeout.removeAll(this.attacks.keySet()); //Those that attacked this turn get forgiven if they were absent previously
 		Iterator<Player> i = this.threatenTimeout.iterator();
 		while(i.hasNext()){

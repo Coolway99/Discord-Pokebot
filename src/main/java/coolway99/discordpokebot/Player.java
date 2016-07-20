@@ -3,6 +3,7 @@ package coolway99.discordpokebot;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.EnumSet;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -50,9 +51,19 @@ public class Player{
 	 */
 	public Natures nature = Natures.values()[Pokebot.ran.nextInt(Natures.values().length)];
 	/**
-	 * What effect is the player currently under?
+	 * What nonvolatile effect is the player currently under?
 	 */
-	public Effects effect = Effects.NORMAL;
+	public Effects.NonVolatile nvEffect = Effects.NonVolatile.NORMAL;
+	/**
+	 * What volatile effects does the player have?
+	 */
+	//public ArrayList<Effects.Volatile> vEffects = new ArrayList<>();
+	public final EnumSet<Effects.Volatile> vEffects;
+	/**
+	 * What battle-effects does the player have?
+	 */
+	//public ArrayList<Effects.VolatileBattle> vBattleEffects = new ArrayList<>(); 
+	public final EnumSet<Effects.VBattle> battleEffects;
 	
 	public int numOfAttacks = 0;
 	//This array is manually done out as to make sure they are "null" type moves, to prevent errors
@@ -60,11 +71,11 @@ public class Player{
 	public int[] PP = new int[4];
 	
 	public Battle battle = null;
-	public boolean isSemiInvunerable = false; //Set by moves, is not used outside of a battle
 	public Moves lastMove = Moves.NULL; //Isn't set outside of a battle
 	public int lastMovedata = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
+	public int counter = 0; //Used for Toxic, Sleep and Freeze
 	
 	public Player(IUser user){
 		this.user = user;
@@ -73,6 +84,8 @@ public class Player{
 		for(int x = 0; x < this.numOfAttacks; x++){
 			this.PP[x] = this.moves[x].getPP();
 		}
+		this.vEffects = EnumSet.noneOf(Effects.Volatile.class);
+		this.battleEffects = EnumSet.noneOf(Effects.VBattle.class);
 	}
 	
 	//the user object is public final anyways
@@ -95,7 +108,7 @@ public class Player{
 				this.level,
 				Stats.HEALTH,
 				this.modifiers[Stats.HEALTH.getIndex()],
-				this.effect,
+				this.nvEffect,
 				this.nature);
 	}
 	
@@ -106,7 +119,7 @@ public class Player{
 				this.level,
 				Stats.ATTACK,
 				this.modifiers[Stats.ATTACK.getIndex()],
-				this.effect,
+				this.nvEffect,
 				this.nature);
 	}
 	
@@ -117,7 +130,7 @@ public class Player{
 				this.level,
 				Stats.SPECIAL_ATTACK,
 				this.modifiers[Stats.SPECIAL_ATTACK.getIndex()],
-				this.effect,
+				this.nvEffect,
 				this.nature);
 	}
 	
@@ -128,7 +141,7 @@ public class Player{
 				this.level,
 				Stats.DEFENSE,
 				this.modifiers[Stats.DEFENSE.getIndex()],
-				this.effect,
+				this.nvEffect,
 				this.nature);
 	}
 	
@@ -139,7 +152,7 @@ public class Player{
 				this.level,
 				Stats.SPECIAL_DEFENSE,
 				this.modifiers[Stats.SPECIAL_DEFENSE.getIndex()],
-				this.effect,
+				this.nvEffect,
 				this.nature);
 	}
 	
@@ -150,7 +163,7 @@ public class Player{
 				this.level,
 				Stats.SPEED,
 				this.modifiers[Stats.SPEED.getIndex()],
-				this.effect,
+				this.nvEffect,
 				this.nature);
 	}
 	
@@ -218,6 +231,10 @@ public class Player{
 			if(this.moves[x].equals(move)) return true;
 		}
 		return false;
+	}
+	
+	public String mention(){
+		return this.user.mention();
 	}
 	
 	public void saveData(){

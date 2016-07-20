@@ -86,8 +86,9 @@ public class BattleManager{
 	
 	public static void onExitBattle(Player player){
 		player.HP = player.getMaxHP();
-		player.effect = Effects.NORMAL;
-		player.isSemiInvunerable = false;
+		player.nvEffect = Effects.NonVolatile.NORMAL;
+		player.vEffects.clear();
+		player.battleEffects.clear();
 		player.lastAttacker = null;
 		player.lastMove = Moves.NULL;
 		player.lastMovedata = 0;

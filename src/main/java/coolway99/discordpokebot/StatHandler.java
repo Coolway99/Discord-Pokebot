@@ -42,7 +42,7 @@ public class StatHandler{
 	
 	
 	public static int calcStatValue(int statpoints, int ivpoints, int evpoints, int level,
-			Stats type, byte modifier, Effects effect, Natures nature){
+			Stats type, byte modifier, Effects.NonVolatile effect, Natures nature){
 		double firstStage =  Math.floor(((2*statpoints+ivpoints+evpoints)*level)/100D);
 		double ret = Math.max((type == Stats.HEALTH ?
 				(firstStage + level + 10)
@@ -51,11 +51,11 @@ public class StatHandler{
 				, 1D); //Setting a hard limit here for the lowest a stat can go is 1, to prevent errors
 		switch(type){
 			case ATTACK:{
-				if(effect == Effects.BURN) ret /= 2;
+				if(effect == Effects.NonVolatile.BURN) ret /= 2;
 				break;
 			}
 			case SPEED:{
-				if(effect == Effects.PARALYSIS) ret /= 4;
+				if(effect == Effects.NonVolatile.PARALYSIS) ret /= 4;
 				break;
 			}
 			default:
