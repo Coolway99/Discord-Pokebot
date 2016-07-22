@@ -149,7 +149,7 @@ public class StatHandler{
 		player.modifiers[stat.getIndex()] = (byte) Math.min(
 				player.modifiers[stat.getIndex()]+(sharply ? 2 : 1),
 				6);
-		Pokebot.sendBatchableMessage(channel, player.user.mention()+"'s "+stat.toString()
+		Pokebot.sendMessage(channel, player.user.mention()+"'s "+stat.toString()
 		+" increased"+(sharply ? " sharply" : "")+'!');
 	}
 	
@@ -157,7 +157,7 @@ public class StatHandler{
 		player.modifiers[stat.getIndex()] = (byte) Math.max(
 				player.modifiers[stat.getIndex()]-(harshly ? 2 : 1),
 				-6);
-		Pokebot.sendBatchableMessage(channel, player.user.mention()+"'s "+stat.toString()
+		Pokebot.sendMessage(channel, player.user.mention()+"'s "+stat.toString()
 		+" decreased"+(harshly ? " harshly" : "")+'!');
 	}
 }

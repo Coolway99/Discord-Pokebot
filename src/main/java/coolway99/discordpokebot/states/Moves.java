@@ -260,7 +260,7 @@ public enum Moves{
 						Pokebot.sendMessage(channel, "A soothing aroma wafted through the area, curing everyone of all status effects!");
 						break;
 					case HEAL_BELL:
-						Pokebot.sendBatchableMessage(channel, "A bell chimed, curing everyone of all status effects!");
+						Pokebot.sendMessage(channel, "A bell chimed, curing everyone of all status effects!");
 						break;
 					default:
 						break;
@@ -275,7 +275,7 @@ public enum Moves{
 				if(willHit(this, attacker, defender, true)){
 					int timesHit = getTimesHit(5, 100, 33.3, 33.3, 16.7, 16.7);
 					int damage = getDamage(attacker, this, defender)*timesHit;
-					Pokebot.sendBatchableMessage(channel, attacker.mention()+" attacked "+defender.user.mention()
+					Pokebot.sendMessage(channel, attacker.mention()+" attacked "+defender.user.mention()
 							+" "+timesHit+" times for a total of "+damage+"HP of damage!");
 					defender.HP = Math.max(0, defender.HP - damage);
 				} else {
@@ -284,7 +284,7 @@ public enum Moves{
 				return BeforeResult.STOP;
 			}
 			case DESTINY_BOND:{
-				Pokebot.sendBatchableMessage(channel, attacker.mention()+" will take it's foe down with it!");
+				Pokebot.sendMessage(channel, attacker.mention()+" will take it's foe down with it!");
 				return BeforeResult.STOP;
 			}
 			case GUILLOTINE:{
@@ -317,7 +317,7 @@ public enum Moves{
 				if(willHit(this, attacker, defender, true)){
 					return BeforeResult.CONTINUE;
 				}
-				Pokebot.sendBatchableMessage(channel, attacker.mention()
+				Pokebot.sendMessage(channel, attacker.mention()
 						+" missed and took crash damage instead!");
 				attacker.HP = Math.max(0, attacker.HP - (attacker.getMaxHP()/2));
 				return BeforeResult.STOP;
@@ -328,7 +328,7 @@ public enum Moves{
 					//that it's the same battle
 					switch(attacker.lastMovedata){
 						case MoveConstants.NOTHING:{
-							Pokebot.sendBatchableMessage(channel, attacker.user.mention()+" flew up high!");
+							Pokebot.sendMessage(channel, attacker.user.mention()+" flew up high!");
 							attacker.lastMovedata = MoveConstants.FLYING;
 							attacker.set(Effects.VBattle.SEMI_INVULNERABLE);
 							return BeforeResult.STOP;
@@ -345,7 +345,7 @@ public enum Moves{
 				return BeforeResult.CONTINUE;
 			}
 			case SPLASH:{
-				Pokebot.sendBatchableMessage(channel, attacker.mention()+" used Splash!... but nothing happened.");
+				Pokebot.sendMessage(channel, attacker.mention()+" used Splash!... but nothing happened.");
 				return BeforeResult.STOP;
 			}
 			default:
@@ -387,7 +387,7 @@ public enum Moves{
 					for(int x = 1; x < 6; x++){ //ATTACK through SPEED
 						attacker.modifiers[x] = (byte) Math.min(6, attacker.modifiers[x] + 1);
 					}
-					Pokebot.sendBatchableMessage(channel, attacker.mention()+" raised all of their stats!");
+					Pokebot.sendMessage(channel, attacker.mention()+" raised all of their stats!");
 				}
 				break;
 			}
@@ -430,7 +430,7 @@ public enum Moves{
 	//Returns ifDefenderFainted
 	public static boolean attack(IChannel channel, Player attacker, Moves move, Player defender){
 		if(!attacker.inBattle() && move.getMoveType() == MoveType.STATUS){
-			Pokebot.sendBatchableMessage(channel, "But it doesn't work here!");
+			Pokebot.sendMessage(channel, "But it doesn't work here!");
 			return false;
 		}
 		if(attacker.has(Effects.NonVolatile.FROZEN)){
@@ -438,18 +438,18 @@ public enum Moves{
 			//TODO or Scald, it will thaw them and/or the opponent out
 			if(diceRoll(20)){
 				attacker.cureNV();
-				Pokebot.sendBatchableMessage(channel, attacker.mention()+" thawed out!");
+				Pokebot.sendMessage(channel, attacker.mention()+" thawed out!");
 			} else {
-				Pokebot.sendBatchableMessage(channel, attacker.mention()+" is frozen solid!");
+				Pokebot.sendMessage(channel, attacker.mention()+" is frozen solid!");
 				return false;
 			}
 		}
 		if(attacker.has(Effects.NonVolatile.SLEEP)){
 			//TODO if the move is snore or sleep talk, then it will work
 			if(attacker.counter-- <= 0){
-				Pokebot.sendBatchableMessage(channel, attacker.mention()+" woke up!");
+				Pokebot.sendMessage(channel, attacker.mention()+" woke up!");
 			} else {
-				Pokebot.sendBatchableMessage(channel, attacker.mention()+" is fast asleep!");
+				Pokebot.sendMessage(channel, attacker.mention()+" is fast asleep!");
 				return false;
 			}
 		}
@@ -490,7 +490,7 @@ public enum Moves{
 			faintMessage(channel, defender);
 			return true;
 		}
-		Pokebot.sendBatchableMessage(channel, defender.mention()+" has "+defender.HP+"HP left!");
+		Pokebot.sendMessage(channel, defender.mention()+" has "+defender.HP+"HP left!");
 		return false;
 	}
 	
@@ -507,25 +507,25 @@ public enum Moves{
 	}
 
 	private static void attackMessage(IChannel channel, Player attacker, Moves move, Player defender, int damage){
-		Pokebot.sendBatchableMessage(channel, attacker.mention()
+		Pokebot.sendMessage(channel, attacker.mention()
 				+" attacked "+defender.mention()+" with "+move.getName()
 				+" for "+damage+" damage!");
 	}
 	
 	private static void recoilMessage(IChannel channel, Player attacker){
-		Pokebot.sendBatchableMessage(channel, attacker.mention()+" took damage from recoil!");
+		Pokebot.sendMessage(channel, attacker.mention()+" took damage from recoil!");
 	}
 	
 	public static void faintMessage(IChannel channel, Player defender){
-		Pokebot.sendBatchableMessage(channel, defender.mention()+" has fainted!");
+		Pokebot.sendMessage(channel, defender.mention()+" has fainted!");
 	}
 	
 	private static void missMessage(IChannel channel, Player attacker){
-		Pokebot.sendBatchableMessage(channel, "But "+attacker.mention()+" missed!");
+		Pokebot.sendMessage(channel, "But "+attacker.mention()+" missed!");
 	}
 	
 	private static void failMessage(IChannel channel, Player attacker){
-		Pokebot.sendBatchableMessage(channel, "But "+attacker.mention()+"'s move failed!");
+		Pokebot.sendMessage(channel, "But "+attacker.mention()+"'s move failed!");
 	}
 	//Call AFTER you heal
 	private static void heal(IChannel channel, Player attacker, int heal){
@@ -539,9 +539,9 @@ public enum Moves{
 		}
 		attacker.HP = Math.min(attacker.getMaxHP(), attacker.HP+heal);
 		if(attacker.HP == attacker.getMaxHP()){
-			Pokebot.sendBatchableMessage(channel, attacker.mention()+" was fully healed!");
+			Pokebot.sendMessage(channel, attacker.mention()+" was fully healed!");
 		} else {
-			Pokebot.sendBatchableMessage(channel, attacker.mention()+" restored "+heal+"HP!");
+			Pokebot.sendMessage(channel, attacker.mention()+" restored "+heal+"HP!");
 		}
 	}
 	
@@ -555,12 +555,12 @@ public enum Moves{
 			return;
 		}
 		defender.HP = Math.max(0, defender.HP - damage);
-		Pokebot.sendBatchableMessage(channel, defender.mention()+" hurt themselves for "+damage+" damage!");
+		Pokebot.sendMessage(channel, defender.mention()+" hurt themselves for "+damage+" damage!");
 	}
 	
 	private static void burn(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendBatchableMessage(channel, defender.mention()+"'s subsitute blocked it!");
+			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
 		}
 		boolean isImmune = isType(defender, Types.FIRE);
@@ -572,7 +572,7 @@ public enum Moves{
 	
 	private static void freeze(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendBatchableMessage(channel, defender.mention()+"'s subsitute blocked it!");
+			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
 		}
 		boolean isImmune = isType(defender, Types.ICE);
@@ -584,7 +584,7 @@ public enum Moves{
 	
 	private static void paralyze(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendBatchableMessage(channel, defender.mention()+"'s subsitute blocked it!");
+			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
 		}
 		boolean isImmune = isType(defender, Types.ELECTRIC);
@@ -596,7 +596,7 @@ public enum Moves{
 	
 	private static void poison(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendBatchableMessage(channel, defender.mention()+"'s subsitute blocked it!");
+			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
 		}
 		boolean isImmune = isType(defender, Types.POISON) || isType(defender, Types.STEEL);
@@ -608,7 +608,7 @@ public enum Moves{
 	
 	private static void toxic(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendBatchableMessage(channel, defender.mention()+"'s subsitute blocked it!");
+			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
 		}
 		boolean isImmune = isType(defender, Types.POISON) || isType(defender, Types.STEEL);
@@ -621,7 +621,7 @@ public enum Moves{
 	
 	private static void sleep(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendBatchableMessage(channel, defender.mention()+"'s subsitute blocked it!");
+			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
 		}
 		defender.set(Effects.NonVolatile.SLEEP);
@@ -631,7 +631,7 @@ public enum Moves{
 	
 	private static void flinch(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendBatchableMessage(channel, defender.mention()+"'s subsitute blocked it!");
+			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
 		}
 		defender.set(Effects.Volatile.FLINCH); //TODO Check for abilities
@@ -642,9 +642,9 @@ public enum Moves{
 	
 	private static void effectMessage(IChannel channel, Player defender, boolean isImmune, String immune, String afflicted){
 		if(isImmune){
-			Pokebot.sendBatchableMessage(channel, defender.user.mention()+"'s type is immune to "+immune+"!");
+			Pokebot.sendMessage(channel, defender.user.mention()+"'s type is immune to "+immune+"!");
 		} else {
-			Pokebot.sendBatchableMessage(channel, defender.user.mention()+" was "+afflicted+"!");
+			Pokebot.sendMessage(channel, defender.user.mention()+" was "+afflicted+"!");
 		}
 	}
 	
@@ -723,7 +723,7 @@ public enum Moves{
 	public static boolean willHit(Moves move, Player attacker, Player defender, boolean factorChanges){
 		if(attacker.has(Effects.NonVolatile.PARALYSIS) && diceRoll(25)){
 			//This should only run in-battle
-			Pokebot.sendBatchableMessage(attacker.battle.channel,
+			Pokebot.sendMessage(attacker.battle.channel,
 					attacker.user.mention()+" is paralyzed! They can't move!");
 			return false;
 		}

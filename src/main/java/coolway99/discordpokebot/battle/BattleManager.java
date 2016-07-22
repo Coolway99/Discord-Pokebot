@@ -97,7 +97,7 @@ public class BattleManager{
 	}
 
 	public static void onBattleWon(Battle battle, Player player){
-		Pokebot.sendBatchableMessage(battle.channel, player.user.mention()+" won the battle!");
+		Pokebot.sendMessage(battle.channel, player.mention()+" won the battle!");
 		battles.remove(battle);
 		onExitBattle(player);
 	}

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
@@ -32,7 +33,7 @@ public class Battle implements Comparator<Player>{
 	 * Set the timeout for a turn on the battle
 	 */
 	private final int turnTime;
-	private TimerTask timer;
+	private BattleTurnTimeout timer;
 	
 	public Battle(IChannel channel, int turnTime, List<Player> participants){
 		this.channel = channel;
@@ -59,9 +60,8 @@ public class Battle implements Comparator<Player>{
 		builder.append(this.turnTime*2);
 		builder.append(" seconds to make your first move!");
 		Pokebot.sendMessage(channel, builder.toString());
-		Pokebot.startBatchMessages(this);
 		this.timer = new BattleTurnTimeout(this);
-		Pokebot.timer.schedule(this.timer, Pokebot.secondsToMiliseconds(this.turnTime*2));
+		Pokebot.timer.schedule(this.timer, this.turnTime*2, TimeUnit.SECONDS);
 	}
 	
 	public IChannel getChannel(){
@@ -108,28 +108,27 @@ public class Battle implements Comparator<Player>{
 	
 	//This is called every time the BattleTurnTimer times out, or if onAttack is completely filled
 	public void onTurn(){
+		this.timer.cancel();
 		synchronized(this.attacks){
 			Pokebot.sendMessage(this.channel, "Processing attacks");
-			Pokebot.startBatchMessages(this);
 			//We make a "note" of those who hadAttacks, to prevent flinch from glitching things up
 			//TODO Perhaps make it a single list for the IAttacks, and have flinching remove it on-attack-time
 			final List<Player> hadAttacks = Arrays
 					.asList(this.attacks.keySet().toArray(new Player[0]));
 			attackLoop: for(IAttack attack : this.attacks.values()) {
 				if( !this.participants.contains(attack.defender)) {
-					Pokebot.sendBatchableMessage(this.channel, attack.attacker.mention()
+					Pokebot.sendMessage(this.channel, attack.attacker.mention()
 							+ " went to attack, but there was no target!");
 					continue;
 				}
 				//We know it's sorted by speed, so only the fastest go first
 				if(Moves.attack(this.channel, attack)) {
 					if(attack.defender.lastMove == Moves.DESTINY_BOND) {
-						Pokebot.sendBatchableMessage(this.channel, attack.attacker.mention()
+						Pokebot.sendMessage(this.channel, attack.attacker.mention()
 								+ " was taken down with " + attack.defender.mention());
 						attack.attacker.HP = 0;
 					}
 					if(playerFainted(attack.defender)) {
-						Pokebot.endBatchMessages();
 						return;
 					}
 					if(attack.defender.ability == Abilities.AFTERMATH) {
@@ -148,10 +147,8 @@ public class Battle implements Comparator<Player>{
 				}
 				//Both a recoil check and a failsafe
 				if(attack.attacker.HP <= 0) {
-					Pokebot.sendBatchableMessage(this.channel,
-							attack.attacker.mention() + " fainted!");
+					Pokebot.sendMessage(this.channel, attack.attacker.mention() + " fainted!");
 					if(playerFainted(attack.attacker)) {
-						Pokebot.endBatchMessages();
 						return;
 					}
 				}
@@ -163,14 +160,14 @@ public class Battle implements Comparator<Player>{
 					case BURN: {
 						//TODO Check for ability heatproof
 						player.HP = Math.max(0, player.HP - (player.getMaxHP() / 8));
-						Pokebot.sendBatchableMessage(this.channel,
+						Pokebot.sendMessage(this.channel,
 								player.mention() + " took damage for it's burn!");
 						break;
 					}
 					case POISON: {
 						//TODO check for poison heal ability
 						player.HP = Math.max(0, player.HP - (player.getMaxHP() / 8));
-						Pokebot.sendBatchableMessage(this.channel,
+						Pokebot.sendMessage(this.channel,
 								player.mention() + " took damage from poison!");
 						break;
 					}
@@ -178,7 +175,7 @@ public class Battle implements Comparator<Player>{
 						//TODO check for poison heal ability
 						player.HP = Math.max(0,
 								player.HP - (player.getMaxHP() * ++player.counter / 16));
-						Pokebot.sendBatchableMessage(this.channel,
+						Pokebot.sendMessage(this.channel,
 								player.mention() + " took damage from poison!");
 						break;
 					}
@@ -195,7 +192,7 @@ public class Battle implements Comparator<Player>{
 			this.threatenTimeout.removeAll(hadAttacks); //Those that attacked this turn get forgiven if they were absent previously
 			for(Player player : this.threatenTimeout) {
 				this.onSafeLeaveBattle(player);
-				Pokebot.sendBatchableMessage(this.channel,
+				Pokebot.sendMessage(this.channel,
 						player.mention() + " got eliminated for inactivity!");
 			}
 			this.threatenTimeout.clear();
@@ -204,18 +201,16 @@ public class Battle implements Comparator<Player>{
 			this.threatenTimeout.addAll(this.participants);
 			this.threatenTimeout.removeAll(hadAttacks);
 			for(Player player : this.threatenTimeout) {
-				Pokebot.sendBatchableMessage(this.channel, "If " + player.user.mention()
+				Pokebot.sendMessage(this.channel, "If " + player.mention()
 						+ " doesn't attack the next turn, they're out!");
 				player.lastTarget = null;
 				player.lastMove = Moves.NULL;
 				player.lastAttacker = null;
 			}
 			this.attacks.clear();
-			Pokebot.sendBatchableMessage(this.channel,
+			Pokebot.sendMessage(this.channel,
 					"Begin next turn, you have " + this.turnTime + " seconds to make your attack");
-			Pokebot.endBatchMessages();
-			this.timer = new BattleTurnTimeout(this);
-			Pokebot.timer.schedule(this.timer, Pokebot.secondsToMiliseconds(this.turnTime));
+			Pokebot.timer.schedule(this.timer, this.turnTime, TimeUnit.SECONDS);
 			for(Player player : this.participants) {
 				this.onPostTurn(player);
 			}
@@ -223,7 +218,7 @@ public class Battle implements Comparator<Player>{
 	}
 	
 	public void preventExplosion(Player player, Player attacker){
-		Pokebot.sendBatchableMessage(this.channel, "But "+player.mention()+"'s DAMP prevented"
+		Pokebot.sendMessage(this.channel, "But "+player.mention()+"'s DAMP prevented"
 				+ attacker.mention()+"'s explosion!");
 	}
 	
@@ -247,12 +242,12 @@ public class Battle implements Comparator<Player>{
 		if(this.participants.size() == 1){
 			Player player = this.participants.remove(0);
 			this.onLeaveBattle(player);
-			Pokebot.sendBatchableMessage(this.channel, player.user.mention()+" won the battle by default!");
+			Pokebot.sendMessage(this.channel, player.mention()+" won the battle by default!");
 			BattleManager.battles.remove(this);
 			return true;
 		}
 		if(this.participants.size() <= 0){
-			Pokebot.sendBatchableMessage(this.channel, "Nobody won...");
+			Pokebot.sendMessage(this.channel, "Nobody won...");
 			BattleManager.battles.remove(this);
 			return true;
 		}

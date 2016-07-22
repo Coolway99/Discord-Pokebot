@@ -13,6 +13,7 @@ import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
@@ -244,7 +245,7 @@ public class EventHandler{
 			case "ga":
 			case "getability":{
 				Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-				Pokebot.sendBatchableMessage(channel, player.mention()+"'s ability is "+player.ability);
+				Pokebot.sendMessage(channel, player.mention()+"'s ability is "+player.ability);
 				return;
 			}
 			case "sa":
@@ -600,7 +601,7 @@ public class EventHandler{
 						System.out.println("Shutting down by owner request");
 						Pokebot.client.changeStatus(Status.game("Currently Offline"));
 						Pokebot.client.changePresence(true);
-						Pokebot.timer.cancel();
+						Pokebot.timer.shutdownNow();
 						BattleManager.nukeBattles();
 						new Pokebot.MessageTimer().run();
 						PlayerHandler.saveAll();
@@ -642,7 +643,7 @@ public class EventHandler{
 				if(!author.getID().equals(Pokebot.config.OWNERID)) break;
 				List<IRole> roles = channel.getGuild().getRoles();
 				for(IRole role : roles){
-					Pokebot.sendBatchableMessage(channel, role.getName());
+					Pokebot.sendMessage(channel, role.getName());
 				}
 				return;
 			}
