@@ -67,7 +67,8 @@ public class StatHandler{
 	public static int getTotalPoints(Player player){
 		return getStatPoints(player)
 				+ player.level
-				+ getMovePoints(player);
+				+ getMovePoints(player)
+				+ player.ability.getCost();
 		//TODO include other point-taking things like moves
 	}
 	

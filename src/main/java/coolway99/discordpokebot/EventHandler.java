@@ -1,21 +1,23 @@
 package coolway99.discordpokebot;
 
-import java.util.Optional;
+import java.util.List;
 
 import coolway99.discordpokebot.battle.BattleManager;
-import coolway99.discordpokebot.states.Effects;
+import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Moves;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
-import sx.blah.discord.api.EventSubscriber;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Status;
+import sx.blah.discord.util.MessageBuilder;
 
 @SuppressWarnings("static-method")
 public class EventHandler{
@@ -77,11 +79,39 @@ public class EventHandler{
 		String[] args = message.toString().split(" ");
 		try{
 		switch(args[0].toLowerCase().replace(Pokebot.config.COMMAND_PREFIX, "")){
+			case "gettype":
+			case "gt":
 			case "type":{
 				Player player = PlayerHandler.getPlayer(mentionOrAuthor);
 				Pokebot.sendMessage(channel, mentionOrAuthor.mention()+" is type "+player.primary.toString()
 						+(player.hasSecondaryType() ? " with secondary type "+player.secondary.toString()
 						 : ""));
+				return;
+			}
+			case "st":
+			case "settype":{
+				Player player = PlayerHandler.getPlayer(author);
+				if(player.inBattle()){
+					inBattleMessage(message);
+					return;
+				}
+				if(args.length < 2){
+					reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+" <type> (type)");
+					return;
+				}
+				try{
+					Types type = Types.valueOf(args[1].toUpperCase());
+					if(type == Types.NULL) throw new IllegalArgumentException("Null type");
+					Types type2 = Types.NULL;
+					if(args.length >= 3){
+						type2 = Types.valueOf(args[2].toUpperCase());
+						if(type2 == Types.NULL) throw new IllegalArgumentException("Null type");
+					}
+					player.primary = type;
+					player.secondary = type2;
+				}catch(IllegalArgumentException e){
+					reply(message, "That's not a valid type!");
+				}
 				return;
 			}
 			case "getusedpoints":
@@ -211,6 +241,39 @@ public class EventHandler{
 				reply(message, "I sent you all the natures I know");
 				return;
 			}
+			case "ga":
+			case "getability":{
+				Player player = PlayerHandler.getPlayer(mentionOrAuthor);
+				Pokebot.sendBatchableMessage(channel, player.mention()+"'s ability is "+player.ability);
+				return;
+			}
+			case "sa":
+			case "setability":{
+				Player player = PlayerHandler.getPlayer(author);
+				try{
+					Abilities ability = Abilities.valueOf(args[1].toUpperCase());
+					player.ability = ability;
+					reply(message, "Set ability to "+ability);
+				}catch(IndexOutOfBoundsException e){
+					reply(message, "Usage: sa <ability>");
+				}catch(IllegalArgumentException e){
+					reply(message, "That's not an ability, list them with laa");
+				}
+				return;
+			}
+			case "listallabilities":
+			case "listallability":
+			case "laa":{
+				StringBuilder builder = new StringBuilder("These are all the abilities I know:");
+				for(Abilities ability : Abilities.values()){
+					builder.append('\n');
+					builder.append(ability);
+					builder.append(" Cost:(").append(ability.getCost()).append(')');
+				}
+				Pokebot.sendPrivateMessage(author, builder.toString());
+				reply(message, "I sent you all the abilities I know");
+				return;
+			}
 			case "sm":
 			case "setmove":{
 				Player player = PlayerHandler.getPlayer(author);
@@ -285,7 +348,7 @@ public class EventHandler{
 					}
 					Moves move = Moves.valueOf(args[1].toUpperCase());
 					StringBuilder b = new StringBuilder("Stats of ").append(move);
-					b.append("\nType: ").append(move.getType());
+					b.append("\nType: ").append(move.getType(Abilities.MC_NORMAL_PANTS));
 					b.append("\nPower: ").append(move.getPower());
 					b.append("\nPP: ").append(move.getPP());
 					b.append("\nAccuracy: ").append(Math.round(move.getAccuracy()*10000)/100);
@@ -294,32 +357,6 @@ public class EventHandler{
 					Pokebot.sendMessage(channel, b.toString());
 				}catch(IllegalArgumentException e){
 					reply(message, "That's not a valid move!");
-				}
-				return;
-			}
-			case "st":
-			case "settype":{
-				Player player = PlayerHandler.getPlayer(author);
-				if(player.inBattle()){
-					inBattleMessage(message);
-					return;
-				}
-				if(args.length < 2){
-					reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+" <type> (type)");
-					return;
-				}
-				try{
-					Types type = Types.valueOf(args[1].toUpperCase());
-					if(type == Types.NULL) throw new IllegalArgumentException("Null type");
-					Types type2 = Types.NULL;
-					if(args.length >= 3){
-						type2 = Types.valueOf(args[2].toUpperCase());
-						if(type2 == Types.NULL) throw new IllegalArgumentException("Null type");
-					}
-					player.primary = type;
-					player.secondary = type2;
-				}catch(IllegalArgumentException e){
-					reply(message, "That's not a valid type!");
 				}
 				return;
 			}
@@ -437,11 +474,11 @@ public class EventHandler{
 					}
 					//At this point, we know there's a valid move in the slot and neither party has fainted
 					//Before anything else, lets see if the target is the bot
-					if(defender.user.getID().equals(Pokebot.client.getOurUser().getID())){
+					/*if(defender.user.getID().equals(Pokebot.client.getOurUser().getID())){
 						Pokebot.sendMessage(channel, 
 								author.mention()+" tried hurting me!");
 						return;
-					}
+					}*/
 					//If the player is in a battle, we want to pass on the message
 					if(attacker.inBattle()){
 						if(defender.inBattle()){
@@ -474,6 +511,7 @@ public class EventHandler{
 				}
 				return;
 			}
+			//TODO this should redirect to the heal function
 			case "revive":
 			case "heal":{
 				if(PlayerHandler.getPlayer(author).inBattle()){
@@ -490,7 +528,7 @@ public class EventHandler{
 				for(int x = 0; x < player.numOfAttacks; x++){
 					player.PP[x] = player.moves[x].getPP();
 				}
-				player.nvEffect = Effects.NonVolatile.NORMAL;
+				player.cureNV();
 				for(int x = 0; x < player.modifiers.length; x++){
 					player.modifiers[x] = 0;
 				}
@@ -560,7 +598,8 @@ public class EventHandler{
 					try{
 						reply(message, "shutting down");
 						System.out.println("Shutting down by owner request");
-						Pokebot.client.updatePresence(true, Optional.of("Currently Offline"));
+						Pokebot.client.changeStatus(Status.game("Currently Offline"));
+						Pokebot.client.changePresence(true);
 						Pokebot.timer.cancel();
 						BattleManager.nukeBattles();
 						new Pokebot.MessageTimer().run();
@@ -598,8 +637,28 @@ public class EventHandler{
 						reply(message," invalid song");
 						return;
 				}
+			}
+			case "listallroles":{
+				if(!author.getID().equals(Pokebot.config.OWNERID)) break;
+				List<IRole> roles = channel.getGuild().getRoles();
+				for(IRole role : roles){
+					Pokebot.sendBatchableMessage(channel, role.getName());
 				}
-				break;
+				return;
+			}
+			case "spoof":{
+				if(!author.getID().equals(Pokebot.config.OWNERID)) break;
+				StringBuilder builder = new StringBuilder(Pokebot.config.COMMAND_PREFIX);
+				for(int x = 1; x < args.length; x++){
+					builder.append(args[x]);
+					builder.append(' ');
+				}
+				reply(message, "Running "+builder.toString());
+				MessageBuilder newMessage = new MessageBuilder(Pokebot.client);
+				newMessage.appendContent(builder.toString());
+				newMessage.withChannel(channel);
+				this.onMessage(new MessageReceivedEvent(newMessage.send()));
+				return;
 			}
 			default:
 				break;

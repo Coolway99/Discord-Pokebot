@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Moves;
 import coolway99.discordpokebot.states.Natures;
@@ -51,19 +52,23 @@ public class Player{
 	 */
 	public Natures nature = Natures.values()[Pokebot.ran.nextInt(Natures.values().length)];
 	/**
+	 * The ability of the player
+	 */
+	public Abilities ability = Abilities.MC_NORMAL_PANTS;
+	/**
 	 * What nonvolatile effect is the player currently under?
 	 */
-	public Effects.NonVolatile nvEffect = Effects.NonVolatile.NORMAL;
+	private Effects.NonVolatile nvEffect = Effects.NonVolatile.NORMAL;
 	/**
 	 * What volatile effects does the player have?
 	 */
 	//public ArrayList<Effects.Volatile> vEffects = new ArrayList<>();
-	public final EnumSet<Effects.Volatile> vEffects;
+	private final EnumSet<Effects.Volatile> vEffects;
 	/**
 	 * What battle-effects does the player have?
 	 */
 	//public ArrayList<Effects.VolatileBattle> vBattleEffects = new ArrayList<>(); 
-	public final EnumSet<Effects.VBattle> battleEffects;
+	private final EnumSet<Effects.VBattle> battleEffects;
 	
 	public int numOfAttacks = 0;
 	//This array is manually done out as to make sure they are "null" type moves, to prevent errors
@@ -101,6 +106,64 @@ public class Player{
 		return this.battle != null;
 	}
 	
+	public void set(Effects.NonVolatile nvEffect){
+		this.nvEffect = nvEffect;
+	}
+	
+	public boolean has(Effects.NonVolatile nvEffect){
+		return this.nvEffect == nvEffect;
+	}
+	
+	public Effects.NonVolatile getNV(){
+		return this.nvEffect;
+	}
+	
+	public void remove(){
+		this.nvEffect = Effects.NonVolatile.NORMAL;
+	}
+	
+	public void cureNV(){
+		this.remove();
+	}
+	
+	public void set(Effects.Volatile vEffect){
+		this.vEffects.add(vEffect);
+	}
+	
+	public boolean has(Effects.Volatile vEffect){
+		return this.vEffects.contains(vEffect);
+	}
+	
+	public EnumSet<Effects.Volatile> getV(){
+		return this.vEffects;
+	}
+	
+	public void remove(Effects.Volatile vEffect){
+		this.vEffects.remove(vEffect);
+	}
+	
+	public void set(Effects.VBattle battleEffect){
+		this.battleEffects.add(battleEffect);
+	}
+	
+	public boolean has(Effects.VBattle battleEffect){
+		return this.battleEffects.contains(battleEffect);
+	}
+	
+	public EnumSet<Effects.VBattle> getVB(){
+		return this.battleEffects;
+	}
+	
+	public void remove(Effects.VBattle battleEffect){
+		this.battleEffects.remove(battleEffect);
+	}
+	
+	public void removeAllEffects(){
+		this.cureNV();
+		this.vEffects.clear();
+		this.battleEffects.clear();
+	}
+
 	public int getMaxHP(){
 		return StatHandler.calcStatValue(this.stats[Stats.HEALTH.getIndex()][SubStats.BASE.getIndex()],
 				this.stats[Stats.HEALTH.getIndex()][SubStats.IV.getIndex()],
@@ -219,6 +282,7 @@ public class Player{
 			this.level = in.nextInt();
 			in.nextLine();
 			this.nature = Natures.valueOf(in.nextLine());
+			this.ability = Abilities.valueOf(in.nextLine());
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
 		}catch(NoSuchElementException e){
@@ -259,6 +323,7 @@ public class Player{
 			}
 			out.println(this.level);
 			out.println(this.nature);
+			out.println(this.ability);
 			out.flush();
 			out.close();
 			System.out.println(Pokebot.getSaveFile(this.user).getAbsolutePath());

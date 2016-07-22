@@ -3,7 +3,6 @@ package coolway99.discordpokebot;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Timer;
@@ -17,9 +16,10 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 public class Pokebot{
 	//TODO make the rest of these configs
@@ -54,7 +54,7 @@ public class Pokebot{
 		timer.scheduleAtFixedRate(new TimerTask(){
 			@Override
 			public void run(){
-				Pokebot.client.updatePresence(false, Optional.of(Pokebot.getRandomGame()));
+				Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()));
 			}
 		}, secondsToMiliseconds(5), GAME_DELAY);
 	}
@@ -83,8 +83,8 @@ public class Pokebot{
 	public static void sendPrivateMessage(IUser user, String message){
 		try{
 			sendMessage(client.getOrCreatePMChannel(user), message);
-		}catch(HTTP429Exception e){
-			System.err.println("Unable to send PM, hit 429 rate limit");
+		}catch(RateLimitException e){
+			System.err.println("Unable to send PM, hit rate limit");
 		} catch(DiscordException e) {
 			e.printStackTrace();
 			System.err.println("\nUnable to send PM");
@@ -149,9 +149,9 @@ public class Pokebot{
 				StringBuilder builder = buffers.get(channel);
 				if(builder.length() > 0){
 					try {
-						channel.sendMessage(builder.toString());
+						channel.sendMessage(builder.toString()); //If it fails at this point, then the next message tick will try again
 						i.remove();
-					}catch(HTTP429Exception e){
+					}catch(RateLimitException e){
 						System.err.println("We are being rate limited in channel "
 								+channel.getGuild().getID()+'/'+channel.getID());
 					}catch(MissingPermissionsException e){

@@ -345,32 +345,37 @@ public enum Types{
 		}
 	}
 	
-	//THIS DOES NOT FACTOR IN STAB
-	public static double getTypeMultiplier(Moves move, Player defender){
+	public static boolean isImmune(Player attacker, Moves move, Player defender){
 		for(Types type : getImmune(defender.primary)){
-			if(move.getType() == type){
-				return 0;
+			if(move.getType(attacker) == type){
+				return true;
 			}
 		}
 		if(defender.hasSecondaryType()){
 			for(Types type : getImmune(defender.secondary)){
-				if(move.getType() == type){
-					return 0;
+				if(move.getType(attacker) == type){
+					return true;
 				}
 			}
 		}
+		return false;
+	}
+	
+	//THIS DOES NOT FACTOR IN STAB
+	public static double getTypeMultiplier(Player attacker, Moves move, Player defender){
+		if(isImmune(attacker, move, defender)) return 0;
 		
 		double multiplier = 1D; //We start with 1X damage
 		
 		for(Types type : getResistive(defender.primary)){
-			if(move.getType() == type){
+			if(move.getType(attacker) == type){
 				multiplier /= 2;
 				break;
 			}
 		}
 		if(defender.hasSecondaryType()){
 			for(Types type : getResistive(defender.secondary)){
-				if(move.getType() == type){
+				if(move.getType(attacker) == type){
 					multiplier /= 2;
 					break;
 				}
@@ -378,14 +383,14 @@ public enum Types{
 		}
 		
 		for(Types type : getEffective(defender.primary)){
-			if(move.getType() == type){
+			if(move.getType(attacker) == type){
 				multiplier *= 2;
 				break;
 			}
 		}
 		if(defender.hasSecondaryType()){
 			for(Types type : getEffective(defender.secondary)){
-				if(move.getType() == type){
+				if(move.getType(attacker) == type){
 					multiplier *= 2;
 					break;
 				}

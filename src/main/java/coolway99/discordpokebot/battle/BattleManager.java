@@ -7,7 +7,6 @@ import java.util.List;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Moves;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.handle.obj.IChannel;
@@ -86,9 +85,7 @@ public class BattleManager{
 	
 	public static void onExitBattle(Player player){
 		player.HP = player.getMaxHP();
-		player.nvEffect = Effects.NonVolatile.NORMAL;
-		player.vEffects.clear();
-		player.battleEffects.clear();
+		player.removeAllEffects();
 		player.lastAttacker = null;
 		player.lastMove = Moves.NULL;
 		player.lastMovedata = 0;
