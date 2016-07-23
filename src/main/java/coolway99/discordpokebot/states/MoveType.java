@@ -3,6 +3,5 @@ package coolway99.discordpokebot.states;
 public enum MoveType{
 	PHYSICAL,
 	SPECIAL,
-	STATUS;
-
+	STATUS
 }

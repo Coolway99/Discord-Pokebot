@@ -24,7 +24,7 @@ public enum GameList{
 	
 	private final String name;
 	
-	private GameList(String name){
+	GameList(String name){
 		this.name= name;
 	}
 	

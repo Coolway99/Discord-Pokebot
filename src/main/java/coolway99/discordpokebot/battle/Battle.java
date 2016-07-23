@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -62,10 +61,6 @@ public class Battle implements Comparator<Player>{
 		Pokebot.sendMessage(channel, builder.toString());
 		this.timer = new BattleTurnTimeout(this);
 		Pokebot.timer.schedule(this.timer, this.turnTime*2, TimeUnit.SECONDS);
-	}
-	
-	public IChannel getChannel(){
-		return this.channel;
 	}
 	
 	public List<Player> getParticipants(){
@@ -131,11 +126,11 @@ public class Battle implements Comparator<Player>{
 					if(playerFainted(attack.defender)) {
 						return;
 					}
-					if(attack.defender.ability == Abilities.AFTERMATH) {
-						for(Player player : this.participants) {
+					if(attack.defender.hasAbility(Abilities.AFTERMATH)){
+						for(Player player : this.participants){
 							if(player == attack.defender)
 								continue;
-							if(player.ability == Abilities.DAMP) {
+							if(player.hasAbility(Abilities.DAMP)){
 								this.preventExplosion(player, attack.defender);
 								//If the player has <= 0 HP, then the after-attacks check will catch it
 								continue attackLoop;
@@ -165,14 +160,21 @@ public class Battle implements Comparator<Player>{
 						break;
 					}
 					case POISON: {
-						//TODO check for poison heal ability
+						if(player.hasAbility(Abilities.POISON_HEAL)){
+							Moves.heal(this.channel, player, player.getMaxHP() / 8);
+							break;
+						}
 						player.HP = Math.max(0, player.HP - (player.getMaxHP() / 8));
 						Pokebot.sendMessage(this.channel,
 								player.mention() + " took damage from poison!");
 						break;
 					}
 					case TOXIC: {
-						//TODO check for poison heal ability
+						if(player.hasAbility(Abilities.POISON_HEAL)){
+							Moves.heal(this.channel, player, player.getMaxHP() / 8);
+							++player.counter;
+							break;
+						}
 						player.HP = Math.max(0,
 								player.HP - (player.getMaxHP() * ++player.counter / 16));
 						Pokebot.sendMessage(this.channel,
@@ -211,9 +213,7 @@ public class Battle implements Comparator<Player>{
 			Pokebot.sendMessage(this.channel,
 					"Begin next turn, you have " + this.turnTime + " seconds to make your attack");
 			Pokebot.timer.schedule(this.timer, this.turnTime, TimeUnit.SECONDS);
-			for(Player player : this.participants) {
-				this.onPostTurn(player);
-			}
+			this.participants.forEach(this::onPostTurn);
 		}
 	}
 	
@@ -228,9 +228,9 @@ public class Battle implements Comparator<Player>{
 	public boolean playerFainted(Player player){
 		onSafeLeaveBattle(player);
 		if(this.participants.size() == 1){
-			player = this.participants.get(0);
+			Player winner = this.participants.get(0);
 			this.participants.clear();
-			BattleManager.onBattleWon(this, player);
+			BattleManager.onBattleWon(this, winner);
 			this.timer.cancel();
 			return true;
 		}
@@ -282,7 +282,7 @@ public class Battle implements Comparator<Player>{
 		
 		switch(player.lastMove){
 			case FLY:{
-				switch(player.lastMovedata){
+				switch(player.lastMoveData){
 					case MoveConstants.FLYING:{
 						//This attack has charged up
 						this.onAutoAttack(player, player.lastMove, player.lastTarget);

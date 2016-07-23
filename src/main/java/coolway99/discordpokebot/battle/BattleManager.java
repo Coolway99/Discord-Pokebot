@@ -1,10 +1,5 @@
 package coolway99.discordpokebot.battle;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.states.Moves;
@@ -12,8 +7,10 @@ import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.*;
+
 public class BattleManager{
-	
+
 	public static final int BATTLE_TIMEOUT = 10; //In Minutes
 	
 	public static final ArrayList<Battle> battles = new ArrayList<>();
@@ -23,7 +20,7 @@ public class BattleManager{
 	public static boolean hasBattlePending(IUser user){
 		return inPreBattle.contains(user);
 	}
-	
+
 	public static void createBattle(IChannel channel, IUser user, List<IUser> invites, int turnTime){
 		if(hasBattlePending(user)){
 			Pokebot.sendMessage(channel, "You already have a battle pending!");
@@ -34,16 +31,16 @@ public class BattleManager{
 		preBattles.put(user, pre);
 		inPreBattle.add(user);
 	}
-	
+
 	public static void onJoinBattle(IChannel channel, IUser user, IUser host){
-		PreBattle pre = preBattles.get(host);
-		if(pre == null){
-			Pokebot.sendMessage(channel, user.mention()+" there is no battle pending for that person!");
-			return;
-		}
-		if(!pre.channel.getID().equals(channel.getID())){
-			Pokebot.sendMessage(channel, " you must do this in the same channel the battle is being hosted in!");
-			return;
+        PreBattle pre = preBattles.get(host);
+        if(pre == null){
+            Pokebot.sendMessage(channel, user.mention()+" there is no battle pending for that person!");
+            return;
+        }
+        if(!pre.channel.getID().equals(channel.getID())){
+            Pokebot.sendMessage(channel, " you must do this in the same channel the battle is being hosted in!");
+            return;
 		}
 		List<Player> list = preBattles.get(host).participants;
 		Player player = PlayerHandler.getPlayer(user);
@@ -53,7 +50,7 @@ public class BattleManager{
 		}
 		Pokebot.sendMessage(channel, user.mention()+" joined the battle hosted by "+host.mention());
 	}
-	
+
 	public static void onStartBattle(IChannel channel, IUser host){
 		PreBattle pre = preBattles.get(host);
 		if(pre == null){
@@ -75,25 +72,25 @@ public class BattleManager{
 		preBattles.remove(host);
 		Pokebot.sendMessage(channel, "Begin!");
 	}
-	
-	//Idealy only ever called from the command
+
+	//Ideally only ever called from the command
 	public static void onLeaveBattle(Player player){
 		if(player.battle == null) return;
 		Pokebot.sendMessage(player.battle.channel, player.user.mention()+" left the battle!");
 		player.battle.onLeaveBattle(player);
 	}
-	
+
 	public static void onExitBattle(Player player){
 		player.HP = player.getMaxHP();
 		player.removeAllEffects();
 		player.lastAttacker = null;
 		player.lastMove = Moves.NULL;
-		player.lastMovedata = 0;
+		player.lastMoveData = 0;
 		for(int x = 0; x < player.numOfAttacks; x++){
 			player.PP[x] = player.moves[x].getPP();
 		}
 		player.battle = null;
-		inPreBattle.remove(player);
+		inPreBattle.remove(player.user);
 	}
 
 	public static void onBattleWon(Battle battle, Player player){
@@ -101,7 +98,7 @@ public class BattleManager{
 		battles.remove(battle);
 		onExitBattle(player);
 	}
-	
+
 	public static void battleInviteMessage(IChannel channel, IUser host, List<IUser> users){
 		if(users == null || users.isEmpty()) return;
 		StringBuilder builder = new StringBuilder("Calling ");

@@ -20,7 +20,6 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.MessageBuilder;
 
-@SuppressWarnings("static-method")
 public class EventHandler{
 	
 	public static final String HELP_TEXT = "Here are the commands I know:\n"
@@ -61,9 +60,10 @@ public class EventHandler{
 			+"joinBattle [jb] <@mention> : Joins the battle that person opened\n"
 			+"startBattle [sb] : Starts the battle you previously opened";
 	
-	//TODO: Not all commands have outputs
+	//TODO: Not all commands have outputs, this needs to be fixed
 	//TODO: Perhaps make this neater somehow
 	//TODO: Perhaps split some sections off into different classes
+	@SuppressWarnings("SpellCheckingInspection")
 	@EventSubscriber
 	public void onMessage(MessageReceivedEvent event){
 		IMessage message = event.getMessage();
@@ -245,7 +245,7 @@ public class EventHandler{
 			case "ga":
 			case "getability":{
 				Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-				Pokebot.sendMessage(channel, player.mention()+"'s ability is "+player.ability);
+				Pokebot.sendMessage(channel, player.mention()+"'s ability is "+player.getAbility());
 				return;
 			}
 			case "sa":
@@ -253,7 +253,7 @@ public class EventHandler{
 				Player player = PlayerHandler.getPlayer(author);
 				try{
 					Abilities ability = Abilities.valueOf(args[1].toUpperCase());
-					player.ability = ability;
+					player.setAbility(ability);
 					reply(message, "Set ability to "+ability);
 				}catch(IndexOutOfBoundsException e){
 					reply(message, "Usage: sa <ability>");
@@ -385,7 +385,7 @@ public class EventHandler{
 				StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
 				Moves[] moves = Moves.values();
 				for(int x = 1; x < moves.length; x++){ //Starting at one to prevent the NULL move
-					builder.append(moves[x].toString()+"\n");
+					builder.append(moves[x].toString()).append("\n");
 				}
 				Pokebot.sendPrivateMessage(author, builder.toString());
 				reply(message, "I sent you all the moves I know");

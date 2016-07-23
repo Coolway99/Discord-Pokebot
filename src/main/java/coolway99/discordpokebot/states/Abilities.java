@@ -11,15 +11,16 @@ public enum Abilities{
 	//Anticipation isn't even worth adding
 	//Arena Trap prevents the foe from fleeing
 	AROMA_VEIL(100), //Prevents Taunt, Torment, Encore, Disable, Cursed Body, Heal Block, and Infatuation
-	
+	BULLETPROOF(80),
 	DAMP(80), //Prevents Self-Destruct, Explosion, and the ability Aftermath from working
 	
 	NORMALIZE(100),
+	POISON_HEAL(100),
 	;
 	
 	private final int cost;
 	
-	private Abilities(int cost){
+	Abilities(int cost){
 		this.cost = cost;
 	}
 	

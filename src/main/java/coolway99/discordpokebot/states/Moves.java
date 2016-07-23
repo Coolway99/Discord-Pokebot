@@ -1,14 +1,16 @@
 package coolway99.discordpokebot.states;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.battle.IAttack;
+import coolway99.discordpokebot.states.Effects.NonVolatile;
+import coolway99.discordpokebot.states.Effects.VBattle;
 import sx.blah.discord.handle.obj.IChannel;
+
+import java.util.Arrays;
+import java.util.List;
 
 //Fire punch, Ice punch, Thunder punch, Signal Beam, and Relic song are all the same, except with different effects
 //Any accuracy over 100 or over 1D will always hit, and will automatically have evasion and accuracy excluded
@@ -20,7 +22,7 @@ public enum Moves{
 	ABSORB(Types.GRASS, MoveType.SPECIAL, 25, 20, 100, true, false, 40), //Double it's cost because it heals
 	ACID(Types.POISON, MoveType.SPECIAL, 30, 40, 100, false, true, 45), //Has a chance of lowering special defense
 	ACID_ARMOR(Types.POISON, MoveType.STATUS, 20, -1, -1, false, true, false, 50), //Increases the user's defense by two stages
-	ACID_SPRAY(Types.POISON, MoveType.SPECIAL, 20, 40, 100, false, true, 100), //Lowers special defense by two
+	ACID_SPRAY(Types.POISON, MoveType.SPECIAL, 20, 40, 100, true, true, 100), //Lowers special defense by two
 	ACROBATICS(Types.FLYING, MoveType.PHYSICAL, 15, 55, 100, true, false, 120), //If the user has no item, the power is doubled
 	ACUPRESSURE(Types.NORMAL, MoveType.STATUS, 30, -1, -1, true, 100),
 	AERIAL_ACE(Types.FLYING, MoveType.PHYSICAL, 20, 60, 1000, 80),
@@ -47,6 +49,7 @@ public enum Moves{
 	FLY(Types.FLYING, MoveType.PHYSICAL, 15, 90, 95, true, false, 120), //Multiturn, boosted cost because of semiinvul
 	HEAL_BELL(Types.NORMAL, MoveType.STATUS, 5, -1, -1, true, false, 50),
 	ICE_PUNCH(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, false, true, 80),
+	GASTRO_ACID(Types.POISON, MoveType.STATUS, 10, -1, 100, true, false, 150), //Suppresses the target's ability 
 	GUILLOTINE(Types.NORMAL, MoveType.PHYSICAL, 5, -1, 30, true, false, 50),
 	//Affects fly and other moves like that, dealing double damage. +10 cost because of that
 	GUST(Types.FLYING, MoveType.SPECIAL, 35, 40, 100, 50), //Same as scratch, affects fly, bounce, etc
@@ -84,8 +87,8 @@ public enum Moves{
 	private final boolean hasAfterEffect; //Will code be ran AFTER attacking?
 	private final int cost; //How many points will this move use?
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, double accuracy,
-			boolean hasTarget, boolean hasBefore, boolean hasAfter, int cost){
+	Moves(Types type, MoveType moveType, int PP, int power, double accuracy,
+	      boolean hasTarget, boolean hasBefore, boolean hasAfter, int cost){
 		this.type = type;
 		this.power = power;
 		this.moveType = moveType;
@@ -97,39 +100,39 @@ public enum Moves{
 		this.cost = cost;
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy){
 		this(type, moveType, PP, power, accuracy, true);
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy, boolean hasTarget){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, boolean hasTarget){
 		this(type, moveType, PP, power, accuracy, hasTarget, false, false);
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-			boolean hasBefore, boolean hasAfter){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
+	      boolean hasBefore, boolean hasAfter){
 		this(type, moveType, PP, power, accuracy, true, hasBefore, hasAfter);
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-			boolean hasBefore, boolean hasAfter, int cost){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
+	      boolean hasBefore, boolean hasAfter, int cost){
 		this(type, moveType, PP, power, accuracy, true, hasBefore, hasAfter, cost);
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy, boolean hasTarget, int cost){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, boolean hasTarget, int cost){
 		this(type, moveType, PP, power, accuracy, hasTarget, false, false, cost);
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost){
 		this(type, moveType, PP, power, accuracy, true, false, false, cost);
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-			boolean hasTarget, boolean hasBefore, boolean hasAfter){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
+	      boolean hasTarget, boolean hasBefore, boolean hasAfter){
 		this(type, moveType, PP, power, accuracy, hasTarget, hasBefore, hasAfter, power);
 	}
 	
-	private Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-			boolean hasTarget, boolean hasBefore, boolean hasAfter, int cost){
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
+	      boolean hasTarget, boolean hasBefore, boolean hasAfter, int cost){
 		this(type, moveType, PP, power, accuracy/100D, hasTarget, hasBefore, hasAfter, cost);
 	}
 	
@@ -151,7 +154,7 @@ public enum Moves{
 	}
 	
 	public Types getType(Player attacker){
-		return this.getType(attacker.ability);
+		return this.getType(attacker.getModifiedAbility());
 	}
 	
 	public Types getType(Abilities ability){
@@ -209,8 +212,16 @@ public enum Moves{
 				return BeforeResult.STOP;
 			}
 			case ACID_ARMOR:{
+				attackMessage(channel, attacker, this);
 				StatHandler.raiseStat(channel, attacker, Stats.DEFENSE, true);
 				return BeforeResult.STOP;
+			}
+			case ACID_SPRAY:{
+				if(defender.hasAbility(Abilities.BULLETPROOF)){
+					Pokebot.sendMessage(channel, defender.mention()+" is immune to the attack!");
+					return BeforeResult.STOP;
+				}
+				return BeforeResult.CONTINUE;
 			}
 			case ACROBATICS:{
 				//TODO if a user has an item then this loses power
@@ -221,7 +232,8 @@ public enum Moves{
 					failMessage(channel, attacker);
 					return BeforeResult.STOP;
 				}
-				ArrayList<Stats> stats = new ArrayList<>(Arrays.asList(Stats.values()));
+				attackMessage(channel, attacker, this, defender);
+				List<Stats> stats = Arrays.asList(Stats.values());
 				while(!stats.isEmpty()){
 					Stats stat = stats.remove(Pokebot.ran.nextInt(stats.size()));
 					if(defender.modifiers[stat.getIndex()] < 6){
@@ -233,10 +245,12 @@ public enum Moves{
 				return BeforeResult.STOP;
 			}
 			case AGILITY:{
+				attackMessage(channel, attacker, this);
 				StatHandler.raiseStat(channel, attacker, Stats.SPEED, true);
 				return BeforeResult.STOP;
 			}
 			case AMNESIA:{
+				attackMessage(channel, attacker, this);
 				StatHandler.raiseStat(channel, attacker, Stats.SPECIAL_DEFENSE, true);
 				return BeforeResult.STOP;
 			}
@@ -287,6 +301,16 @@ public enum Moves{
 				Pokebot.sendMessage(channel, attacker.mention()+" will take it's foe down with it!");
 				return BeforeResult.STOP;
 			}
+			case GASTRO_ACID:{
+				if(willHit(this, attacker, defender, true)){
+					attackMessage(channel, attacker, this, defender);
+					defender.set(VBattle.ABILITY_BLOCK);
+					Pokebot.sendMessage(channel, defender.mention()+" 's ability was suppressed!");
+				} else {
+					missMessage(channel, attacker);
+				}
+				return BeforeResult.STOP;
+			}
 			case GUILLOTINE:{
 				if(willHit(this, attacker, defender, false)){
 					int damage = getDamage(attacker, this, defender, defender.HP);
@@ -303,6 +327,7 @@ public enum Moves{
 					Pokebot.sendBatchableMessage(channel, "But it doesn't work here!");
 					return false;
 				}*/
+				attackMessage(channel, attacker, this);
 				StatHandler.raiseStat(channel, attacker, Stats.ATTACK, true);
 				return BeforeResult.STOP;
 			}
@@ -326,16 +351,17 @@ public enum Moves{
 				if(attacker.inBattle()){
 					//We can assume that both the attacker and defender are in battle, and
 					//that it's the same battle
-					switch(attacker.lastMovedata){
+					switch(attacker.lastMoveData){
 						case MoveConstants.NOTHING:{
-							Pokebot.sendMessage(channel, attacker.user.mention()+" flew up high!");
-							attacker.lastMovedata = MoveConstants.FLYING;
+							if(!paralysisCheck(attacker)) return BeforeResult.STOP;
+							Pokebot.sendMessage(channel, attacker.mention()+" flew up high!");
+							attacker.lastMoveData = MoveConstants.FLYING;
 							attacker.set(Effects.VBattle.SEMI_INVULNERABLE);
 							return BeforeResult.STOP;
 						}
 						case MoveConstants.FLYING:{
 							attacker.remove(Effects.VBattle.SEMI_INVULNERABLE);
-							attacker.lastMovedata = MoveConstants.NOTHING;
+							attacker.lastMoveData = MoveConstants.NOTHING;
 							return BeforeResult.CONTINUE;
 						}
 						default:
@@ -364,9 +390,7 @@ public enum Moves{
 				break;
 			}
 			case ACID_SPRAY:{
-				//TODO if defense has bulletproof ability this attack does nothing
-				//if(defender.inBattle())
-					StatHandler.lowerStat(channel, defender, Stats.SPECIAL_DEFENSE, true);
+				StatHandler.lowerStat(channel, defender, Stats.SPECIAL_DEFENSE, true);
 				break;
 			}
 			case AIR_SLASH:{
@@ -512,6 +536,14 @@ public enum Moves{
 				+" for "+damage+" damage!");
 	}
 	
+	private static void attackMessage(IChannel channel, Player attacker, Moves move, Player defender){
+		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+" on "+defender.mention()+'!');
+	}
+	
+	private static void attackMessage(IChannel channel, Player attacker, Moves move){
+		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+'!');
+	}
+	
 	private static void recoilMessage(IChannel channel, Player attacker){
 		Pokebot.sendMessage(channel, attacker.mention()+" took damage from recoil!");
 	}
@@ -528,7 +560,7 @@ public enum Moves{
 		Pokebot.sendMessage(channel, "But "+attacker.mention()+"'s move failed!");
 	}
 	//Call AFTER you heal
-	private static void heal(IChannel channel, Player attacker, int heal){
+	public static void heal(IChannel channel, Player attacker, int heal){
 		if(heal < 0){
 			attack(channel, attacker, -heal);
 			return;
@@ -594,6 +626,10 @@ public enum Moves{
 		effectMessage(channel, defender, isImmune, "paralysis", "paralyzed");
 	}
 	
+	private static void paralysisMessage(IChannel channel, Player attacker){
+		Pokebot.sendMessage(channel, attacker.mention()+" is paralyzed! They can't move!");
+	}
+	
 	private static void poison(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
 			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
@@ -648,6 +684,16 @@ public enum Moves{
 		}
 	}
 	
+	private static boolean paralysisCheck(Player attacker){
+		if(!attacker.has(NonVolatile.PARALYSIS)) return false;
+		if(diceRoll(25)){
+			//We assume paralysis only takes place in a battle
+			paralysisMessage(attacker.battle.channel, attacker);
+			return false;
+		}
+		return true;
+	}
+
 	@SuppressWarnings("unused")
 	private static boolean runBattleLogic(Player attacker, Player defender){
 		return attacker.inBattle() && defender.inBattle() && attacker.battle == defender.battle;
@@ -680,14 +726,14 @@ public enum Moves{
 	
 	public static double getStab(Player attacker, Moves move){
 		if(isType(attacker, move.getType(attacker))){
-			if(attacker.ability == Abilities.ADAPTABILITY) return 2;
+			if(attacker.hasAbility(Abilities.ADAPTABILITY)) return 2;
 			return 1.5;
 		}
 		return 1;
 	}
 	
 	public static double getPowerChange(Player attacker, Moves move, Player defender, double power){
-		switch(attacker.ability){
+		switch(attacker.getModifiedAbility()){
 			case AERILATE: {
 				power*=1.3;
 				break;
@@ -704,7 +750,7 @@ public enum Moves{
 			case GUST:{
 				switch(defender.lastMove){
 					case FLY:{
-						if(defender.lastMovedata == MoveConstants.FLYING) return 2;
+						if(defender.lastMoveData == MoveConstants.FLYING) return 2;
 						break;
 					}
 					default:
@@ -721,12 +767,7 @@ public enum Moves{
 	//Dice rolls for a hit, if not factoring in changes to accuracy and evasion, you can safely
 	//pass in null for Attacker and Defender
 	public static boolean willHit(Moves move, Player attacker, Player defender, boolean factorChanges){
-		if(attacker.has(Effects.NonVolatile.PARALYSIS) && diceRoll(25)){
-			//This should only run in-battle
-			Pokebot.sendMessage(attacker.battle.channel,
-					attacker.user.mention()+" is paralyzed! They can't move!");
-			return false;
-		}
+		if(paralysisCheck(attacker)) return false;
 		if(defender.has(Effects.VBattle.SEMI_INVULNERABLE)){
 			switch(move){
 				case GUST:{
@@ -769,37 +810,37 @@ public enum Moves{
 		}
 		return times;
 	}
-}
-enum BeforeResult{
-	CONTINUE,
-	HAS_ADJUSTED_DAMAGE(false, true),
-	ALWAYS_HIT(true),
-	ALWAYS_HIT_ADJUSTED_DAMAGE(true, true),
-	//SKIP_DAMAGE,
-	RUN_AFTER,
-	STOP;
-	
-	private final boolean hitAlways;
-	private final boolean hasAdjustedDamage;
-	
-	private BeforeResult(){
-		this(false);
-	}
-	
-	private BeforeResult(boolean hitAlways){
-		this(hitAlways, false);
-	}
-	
-	private BeforeResult(boolean hitAlways, boolean hasAdjustedDamage){
-		this.hitAlways = hitAlways;
-		this.hasAdjustedDamage = hasAdjustedDamage;
-	}
-	
-	public boolean willHitAlways(){
-		return this.hitAlways;
-	}
-	
-	public boolean hasAdjustedDamage(){
-		return this.hasAdjustedDamage;
+	private enum BeforeResult{
+		CONTINUE,
+		HAS_ADJUSTED_DAMAGE(false, true),
+		ALWAYS_HIT(true),
+		ALWAYS_HIT_ADJUSTED_DAMAGE(true, true),
+		//SKIP_DAMAGE,
+		RUN_AFTER,
+		STOP;
+
+		private final boolean hitAlways;
+		private final boolean hasAdjustedDamage;
+
+		BeforeResult(){
+			this(false);
+		}
+
+		BeforeResult(boolean hitAlways){
+			this(hitAlways, false);
+		}
+
+		BeforeResult(boolean hitAlways, boolean hasAdjustedDamage){
+			this.hitAlways = hitAlways;
+			this.hasAdjustedDamage = hasAdjustedDamage;
+		}
+
+		public boolean willHitAlways(){
+			return this.hitAlways;
+		}
+
+		public boolean hasAdjustedDamage(){
+			return this.hasAdjustedDamage;
+		}
 	}
 }

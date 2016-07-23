@@ -37,5 +37,7 @@
 	<url>https://github.com/Coolway99/Discord-Pokebot</url>
 	<properties>
 		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 </project>

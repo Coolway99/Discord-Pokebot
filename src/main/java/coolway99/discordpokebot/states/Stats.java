@@ -13,12 +13,13 @@ public enum Stats{
 
 	private final int index;
 
-	private Stats(int x){
+	Stats(int x){
 		this.index = x;
 	}
 
 	public static Stats getStatFromIndex(int i){
 		switch(i){
+			default:
 			case 0:
 				return HEALTH;
 			case 1:
@@ -35,8 +36,6 @@ public enum Stats{
 				return ACCURACY;
 			case 7:
 				return EVASION;
-			default:
-				return null;
 		}
 	}
 

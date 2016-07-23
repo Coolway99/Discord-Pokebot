@@ -68,7 +68,7 @@ public class StatHandler{
 		return getStatPoints(player)
 				+ player.level
 				+ getMovePoints(player)
-				+ player.ability.getCost();
+				+ player.getAbility().getCost();
 		//TODO include other point-taking things like moves
 	}
 	
@@ -106,7 +106,7 @@ public class StatHandler{
 		Stats s = Stats.getStatFromString(stat);
 		if(s == null){
 			Pokebot.sendMessage(channel, "Usage: setstat <statname> <amount> (optional EV or IV modifier)"
-					+ "\nInvalid stat, avalible stats are health, attack, special_attack,"
+					+ "\nInvalid stat, available stats are health, attack, special_attack,"
 					+ "defense, special_defense, and speed, along with EV and IV variants for each");
 			return;
 		}

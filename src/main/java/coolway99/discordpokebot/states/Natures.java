@@ -36,7 +36,7 @@ public enum Natures{ //In this case, "Health" is null, since nature never applie
 	public final Stats increase;
 	public final Stats decrease;
 	
-	private Natures(Stats increase, Stats decrease){
+	Natures(Stats increase, Stats decrease){
 		this.increase = increase;
 		this.decrease = decrease;
 	}
@@ -57,12 +57,11 @@ public enum Natures{ //In this case, "Health" is null, since nature never applie
 	
 	public String getExpandedText(){
 		if(!this.hasEffect()) return this.toString();
-		return new StringBuilder(this.toString())
-				.append(" (+")
-				.append(this.increase)
-				.append(") (-")
-				.append(this.decrease)
-				.append(')')
-				.toString();
+		return this.toString()+
+				" (+"+
+				this.increase+
+				") (-"+
+				this.decrease+
+				')';
 	}
 }

@@ -15,6 +15,7 @@ import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
+import coolway99.discordpokebot.states.Effects.VBattle;
 import sx.blah.discord.handle.obj.IUser;
 
 //TODO
@@ -54,7 +55,7 @@ public class Player{
 	/**
 	 * The ability of the player
 	 */
-	public Abilities ability = Abilities.MC_NORMAL_PANTS;
+	private Abilities ability = Abilities.MC_NORMAL_PANTS;
 	/**
 	 * What nonvolatile effect is the player currently under?
 	 */
@@ -77,7 +78,7 @@ public class Player{
 	
 	public Battle battle = null;
 	public Moves lastMove = Moves.NULL; //Isn't set outside of a battle
-	public int lastMovedata = 0; //Can be used by moves for whatever they want, only used in battles
+	public int lastMoveData = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
 	public int counter = 0; //Used for Toxic, Sleep and Freeze
@@ -162,6 +163,23 @@ public class Player{
 		this.cureNV();
 		this.vEffects.clear();
 		this.battleEffects.clear();
+	}
+	
+	public Abilities getAbility(){
+		return this.ability;
+	}
+	
+	public Abilities getModifiedAbility(){
+		if(this.has(VBattle.ABILITY_BLOCK)) return Abilities.MC_NORMAL_PANTS;
+		return this.ability;
+	}
+
+	public boolean hasAbility(Abilities ability){
+		return ability == this.getModifiedAbility();
+	}
+	
+	public void setAbility(Abilities ability){
+		this.ability = ability;
 	}
 
 	public int getMaxHP(){
@@ -291,8 +309,8 @@ public class Player{
 	}
 	
 	public boolean hasMove(Moves move){
-		for(int x = 0; x < this.moves.length; x++){
-			if(this.moves[x].equals(move)) return true;
+		for(Moves hasMove : this.moves){
+			if(hasMove == move) return true;
 		}
 		return false;
 	}
@@ -310,16 +328,16 @@ public class Player{
 		try(PrintStream out = new PrintStream(file)){
 			out.println(this.primary.toString());
 			out.println(this.secondary.toString());
-			
-			for(int y = 0; y < this.stats.length; y++){
-				for(int x = 0; x < this.stats[0].length; x++){
-					out.println(this.stats[y][x]);
+			//If this doesn't guarantee an order, then this will cause issues
+			for(int[] stats : this.stats){
+				for(int stat : stats){
+					out.println(stat);
 				}
 			}
 			
 			out.println(this.numOfAttacks);
-			for(int x = 0; x < this.moves.length; x++){
-				out.println(this.moves[x].toString());
+			for(Moves move : this.moves){
+				out.println(move.toString());
 			}
 			out.println(this.level);
 			out.println(this.nature);

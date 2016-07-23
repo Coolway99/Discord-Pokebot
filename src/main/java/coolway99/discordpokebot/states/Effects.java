@@ -3,7 +3,7 @@ package coolway99.discordpokebot.states;
 //TODO Implement all of this inside Battles
 public class Effects{
 	//Can only have one of these at a time
-	public static enum NonVolatile{
+	public enum NonVolatile{
 		NORMAL,
 		BURN,
 		FROZEN, /*Prevents all movement, Fire-type moves used on the defender will thaw it, and
@@ -15,7 +15,7 @@ public class Effects{
 	}
 	
 	//A pokemon can be affected by any combination of these at a time
-	public static enum Volatile{
+	public enum Volatile{
 		CONFUSION,
 		CURSE, //Only if used by a ghost type. Will cause the user to lose 1/4th of MAXHP per turn
 		EMBARGO, //Prevents held items from being used
@@ -39,10 +39,12 @@ public class Effects{
 	}
 	
 	//Effects that are for the battle and affect it
-	public static enum VBattle{
+	public enum VBattle{
+		ABILITY_BLOCK, //This pokemon's ability is blocked, this isn't an effect in the real game
 		AQUA_RING, //Restores 1/16th of it's HP every turn
 		ENDURE, //The pokemon will survive with at least 1HP
-		CENTER_OF_ATTENTION, //In multi-battles, this pokemon is the only one anyone can hit
+		//TODO Instead of put this here, it's going to be battle-wide
+		//CENTER_OF_ATTENTION, //In multi-battles, this pokemon is the only one anyone can hit
 		DEFENSE_CURL, //This causes the power of Rollout and IceBall to be doubled
 		CHARGING, //Unless a power herb is used, this is Turn 1 of Sky Attack and Razor Wind (Glowing and Whipping Up A Whirlwind combined)
 		ROOTING, //Ingrain restores 1/16th HP every turn, but is forcefully grounded

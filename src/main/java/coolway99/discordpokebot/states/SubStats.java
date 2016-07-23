@@ -7,7 +7,7 @@ public enum SubStats{
 
 	private final int index;
 
-	private SubStats(int x){
+	SubStats(int x){
 		this.index = x;
 	}
 

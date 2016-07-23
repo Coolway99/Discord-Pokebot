@@ -50,7 +50,7 @@ public class Pokebot{
 		System.out.println("Logging in");
 		//client = getClient(TOKEN);
 		client.getDispatcher().registerListener(new BotReadyHandler());
-		timer.scheduleAtFixedRate(() -> PlayerHandler.saveAll()
+		timer.scheduleAtFixedRate(PlayerHandler::saveAll
 				, SAVE_DELAY, SAVE_DELAY, TimeUnit.MINUTES);
 		timer.scheduleAtFixedRate(new MessageTimer(), MESSAGE_DELAY, MESSAGE_DELAY, TimeUnit.MILLISECONDS);
 		timer.scheduleAtFixedRate(() -> Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()))

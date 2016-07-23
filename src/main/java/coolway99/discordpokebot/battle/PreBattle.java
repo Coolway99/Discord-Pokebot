@@ -27,6 +27,7 @@ public class PreBattle{
 		Pokebot.timer.schedule(this.waitTimer, BattleManager.BATTLE_TIMEOUT-1, TimeUnit.MINUTES);
 	}
 	
+	@SuppressWarnings("BooleanParameter")
 	public void onTimer(boolean alreadyNotified){
 		if(alreadyNotified){
 			BattleManager.preBattles.remove(this.host);
