@@ -17,6 +17,7 @@ import sx.blah.discord.handle.obj.IChannel;
 //EV's raise the "Stat Points" values (it really only happens completely like that at level 100, but idgaf)
 //You can lower your level to grind out that extra little bit of points
 
+@SuppressWarnings("SpellCheckingInspection")
 public class StatHandler{
 	
 	//Total points are 1000, the extra 100 comes from levels. You can reduce your level to gain extra points...
@@ -61,7 +62,7 @@ public class StatHandler{
 			default:
 				break;
 		}
-		return (int) ret;
+		return (int) ret; //Implicit Math.floor
 	}
 	
 	public static int getTotalPoints(Player player){
@@ -144,20 +145,49 @@ public class StatHandler{
 		if(mod < 0) res = 1D/res;
 		return res;
 	}
-	
-	public static void raiseStat(IChannel channel, Player player, Stats stat, boolean sharply){
-		player.modifiers[stat.getIndex()] = (byte) Math.min(
-				player.modifiers[stat.getIndex()]+(sharply ? 2 : 1),
-				6);
-		Pokebot.sendMessage(channel, player.user.mention()+"'s "+stat.toString()
-		+" increased"+(sharply ? " sharply" : "")+'!');
-	}
-	
-	public static void lowerStat(IChannel channel, Player player, Stats stat, boolean harshly){
-		player.modifiers[stat.getIndex()] = (byte) Math.max(
-				player.modifiers[stat.getIndex()]-(harshly ? 2 : 1),
-				-6);
-		Pokebot.sendMessage(channel, player.user.mention()+"'s "+stat.toString()
-		+" decreased"+(harshly ? " harshly" : "")+'!');
+
+	public static void changeStat(IChannel channel, Player player, Stats stat, int amount){
+		if(amount == 0){
+			Pokebot.sendMessage(channel, player.mention()+"'s "+stat+" remained unchanged!");
+			return;
+		}
+		//Todo if player has a certain ability then amount *= -1;
+		int newAmount = player.modifiers[stat.getIndex()];
+		if((newAmount < -6 && amount < 0) || (newAmount > 6 && amount > 0)){
+			Pokebot.sendMessage(channel, "But "+player.mention()+"'s "+stat+" can't go any "
+					+(amount < 0 ? "lower" : "higher")+"!");
+			return;
+		}
+		newAmount += amount;
+		if(amount < 0){
+			newAmount = Math.max(-6, newAmount);
+		} else {
+			newAmount = Math.min(6, newAmount);
+		}
+		player.modifiers[stat.getIndex()] = (byte) newAmount;
+		StringBuilder b = new StringBuilder(player.mention()).append("'s ").append(stat).append(" was ");
+		switch(amount){
+			case 1:
+			b.append("raised!");
+			break;
+			case -1:
+			b.append("lowered!");
+			break;
+			case 2:
+			b.append("raised sharply!");
+			break;
+			case -2:
+			b.append("lowered harshly");
+			break;
+			default:{
+				if(amount < 0){
+					b.append("lowered severely!");
+				} else {
+					b.append("raised greatly!");
+				}
+				break;
+			}
+		}
+		Pokebot.sendMessage(channel, b.toString());
 	}
 }

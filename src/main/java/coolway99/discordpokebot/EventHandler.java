@@ -1,8 +1,11 @@
 package coolway99.discordpokebot;
 
+import java.util.Arrays;
 import java.util.List;
 
+import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
+import coolway99.discordpokebot.battle.BattleMap;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Moves;
 import coolway99.discordpokebot.states.Natures;
@@ -22,8 +25,8 @@ import sx.blah.discord.util.MessageBuilder;
 
 public class EventHandler{
 	
-	public static final String HELP_TEXT = "Here are the commands I know:\n"
-			+"Arguments in <> are manditory, arguments in () are optional\n"
+	private static final String HELP_TEXT = "Here are the commands I know:\n"
+			+"Arguments in <> are mandatory, arguments in () are optional\n"
 			+"alternative spellings are shown in []\n"
 			+"All commands start with \""
 			+Pokebot.config.COMMAND_PREFIX
@@ -69,8 +72,8 @@ public class EventHandler{
 		IMessage message = event.getMessage();
 		IChannel channel = message.getChannel();
 		IUser author = message.getAuthor(); //The author of the message
-		IUser mentionOrAuthor = (message.getMentions().isEmpty() ?
-				author : message.getMentions().get(0)); //The first person the author mentioned, or the author if there was nobody
+		IUser mentionOrAuthor = message.getMentions().isEmpty() ?
+				author : message.getMentions().get(0); //The first person the author mentioned, or the author if there was nobody
 		if(message.mentionsEveryone()) return; //We don't want to respond to @everyone
 		/*if(message.toString().toLowerCase().contains("pokemon go")){
 			Pokebot.sendMessage(channel, "Our servers are experiencing issues. Please come back later");
@@ -353,7 +356,7 @@ public class EventHandler{
 					b.append("\nPower: ").append(move.getPower());
 					b.append("\nPP: ").append(move.getPP());
 					b.append("\nAccuracy: ").append(Math.round(move.getAccuracy()*10000)/100);
-					b.append('\n').append((move.isSpecial() ? "Special" : "Physical"));
+					b.append('\n').append(move.isSpecial() ? "Special" : "Physical");
 					b.append("\nPoint Cost: ").append(move.getCost());
 					Pokebot.sendMessage(channel, b.toString());
 				}catch(IllegalArgumentException e){
@@ -463,14 +466,14 @@ public class EventHandler{
 					Moves move = attacker.moves[slot];
 					Player defender;
 					//If this is a status move, then usually we are targeting ourselves
-					if(!move.hasTarget()){
+					if(!!move.has(Moves.Flags.UNTARGETABLE)){
 						defender = PlayerHandler.getPlayer(author);
 					} else {
 						defender = PlayerHandler.getPlayer(message.getMentions().get(0));
 					}
 					if(attacker.HP < 1 || defender.HP < 1){
-						reply(message, (attacker.HP < 1 ? "You have fainted and are unable to move!"
-								: defender.user.mention()+" has already fainted!"));
+						reply(message, attacker.HP < 1 ? "You have fainted and are unable to move!"
+								: defender.user.mention()+" has already fainted!");
 						return;
 					}
 					//At this point, we know there's a valid move in the slot and neither party has fainted
@@ -584,7 +587,7 @@ public class EventHandler{
 				return;
 			}
 			case "help":{
-				Pokebot.sendMessage(Pokebot.client.getOrCreatePMChannel(author), HELP_TEXT);
+				Pokebot.sendMessage(Pokebot.client.getOrCreatePMChannel(author), EventHandler.HELP_TEXT);
 				reply(message, "I sent you a PM with my help menu");
 				return;
 			}
@@ -612,9 +615,8 @@ public class EventHandler{
 					}
 					System.out.println("Terminated");
 					System.exit(0);
-				} else {
-					reply(message, "you aren't the owner, shoo!");
 				}
+				reply(message, "you aren't the owner, shoo!");
 				return;
 			}
 			case "music":{
@@ -647,6 +649,13 @@ public class EventHandler{
 				}
 				return;
 			}
+			case "testbattle":{
+				if(!author.getID().equals(Pokebot.config.OWNERID)) break;
+				Battle battle = new Battle(message.getChannel(), 200000, Arrays.asList(PlayerHandler.getPlayer
+						(author), PlayerHandler.getPlayer(Pokebot.client.getOurUser())));
+				BattleManager.battles.add(battle);
+				return;
+			}
 			case "spoof":{
 				if(!author.getID().equals(Pokebot.config.OWNERID)) break;
 				StringBuilder builder = new StringBuilder(Pokebot.config.COMMAND_PREFIX);
@@ -654,7 +663,7 @@ public class EventHandler{
 					builder.append(args[x]);
 					builder.append(' ');
 				}
-				reply(message, "Running "+builder.toString());
+				reply(message, "Running "+builder);
 				MessageBuilder newMessage = new MessageBuilder(Pokebot.client);
 				newMessage.appendContent(builder.toString());
 				newMessage.withChannel(channel);

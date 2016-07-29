@@ -1,11 +1,6 @@
 package coolway99.discordpokebot.battle;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import coolway99.discordpokebot.MoveConstants;
@@ -16,7 +11,7 @@ import coolway99.discordpokebot.states.Effects.Volatile;
 import coolway99.discordpokebot.states.Moves;
 import sx.blah.discord.handle.obj.IChannel;
 
-public class Battle implements Comparator<Player>{
+public class Battle{
 
 	public final IChannel channel;
 	private final List<Player> participants;
@@ -27,20 +22,22 @@ public class Battle implements Comparator<Player>{
 	/**
 	 * The map of players to attack. It's a tree map, so when it's iterated through the top speed goes first
 	 */
-	private final TreeMap<Player, IAttack> attacks;
+	//private final TreeMap<Player, IAttack> attacks;
+	private final BattleMap attacks;
 	/**
 	 * Set the timeout for a turn on the battle
 	 */
 	private final int turnTime;
 	private BattleTurnTimeout timer;
-	
+	private HashMap<BattleEffects, Integer> battleEffects;
+
 	public Battle(IChannel channel, int turnTime, List<Player> participants){
 		this.channel = channel;
 		this.participants = participants;
 		this.turnTime = turnTime;
-		this.attacks = new TreeMap<>(this);
+		this.attacks = new BattleMap();
 		this.threatenTimeout = new ArrayList<>(2);
-		
+		this.battleEffects = new HashMap<>();
 		for(Player player : participants){
 			player.battle = this;
 		}
@@ -48,7 +45,7 @@ public class Battle implements Comparator<Player>{
 		Iterator<Player> i = participants.iterator();
 		while(i.hasNext()){
 			Player player = i.next();
-			builder.append(player.user.mention());
+			builder.append(player.mention());
 			if(i.hasNext()){
 				builder.append(", "); //TODO make this neater
 			} else {
@@ -58,175 +55,214 @@ public class Battle implements Comparator<Player>{
 		builder.append("\nYou have ");
 		builder.append(this.turnTime*2);
 		builder.append(" seconds to make your first move!");
-		Pokebot.sendMessage(channel, builder.toString());
+		this.sendMessage(builder.toString());
 		this.timer = new BattleTurnTimeout(this);
 		Pokebot.timer.schedule(this.timer, this.turnTime*2, TimeUnit.SECONDS);
 	}
-	
+
+	private void sendMessage(String message){
+		Pokebot.sendMessage(this.channel, message);
+	}
+
 	public List<Player> getParticipants(){
 		return this.participants;
 	}
-	
+
 	public void onAttack(IChannel channel, Player attacker, Moves move, Player defender){
 		synchronized(this.attacks){
-			if(this.attacks.containsKey(attacker)) {
-				Pokebot.sendMessage(channel,
-						attacker.user.mention() + " you've already sent your attack!");
+			if(this.attacks.containsKey(attacker)){
+				this.sendMessage(attacker.mention()+" you've already sent your attack!");
 				return;
 			}
 			this.attacks.put(attacker, new IAttack(attacker, move, defender));
-			if( !channel.getID().equals(this.channel.getID())) {
-				Pokebot.sendMessage(this.channel,
-						attacker.user.mention() + " sent in their attack from another channel!");
+			if(!channel.getID().equals(this.channel.getID())){
+				this.sendMessage(attacker.mention()+" sent in their attack from another channel!");
 			} else {
-				Pokebot.sendMessage(this.channel,
-						attacker.user.mention() + " submitted their attack");
+				this.sendMessage(attacker.mention()+" submitted their attack");
 			}
 			attacker.lastMove = move;
-			attacker.lastTarget = (move.hasTarget() ? defender : null);
-			if(move.hasTarget())
+			attacker.lastTarget = move.has(Moves.Flags.UNTARGETABLE) ? null : defender;
+			if(!move.has(Moves.Flags.UNTARGETABLE))
 				defender.lastAttacker = attacker; //TODO free-for-all battles might make this weird...
-			if(this.attacks.size() == this.participants.size()) {
+			if(this.attacks.size() == this.participants.size()){
 				this.timer.cancel();
 				this.onTurn();
 			}
 		}
 	}
-	
+
 	//Called for moves that auto-set themselves
 	public void onAutoAttack(Player attacker, Moves move, Player defender){
 		synchronized(this.attacks){
 			this.attacks.put(attacker, new IAttack(attacker, move, defender));
-			Pokebot.sendMessage(this.channel, attacker.user.mention() + " has a multiturn attack!");
+			this.sendMessage(attacker.mention()+" has a multiturn attack!");
 		}
 	}
-	
+
 	//This is called every time the BattleTurnTimer times out, or if onAttack is completely filled
 	public void onTurn(){
 		this.timer.cancel();
 		synchronized(this.attacks){
-			Pokebot.sendMessage(this.channel, "Processing attacks");
+			this.sendMessage("Processing attacks");
 			//We make a "note" of those who hadAttacks, to prevent flinch from glitching things up
 			//TODO Perhaps make it a single list for the IAttacks, and have flinching remove it on-attack-time
-			final List<Player> hadAttacks = Arrays
-					.asList(this.attacks.keySet().toArray(new Player[0]));
-			attackLoop: for(IAttack attack : this.attacks.values()) {
-				if( !this.participants.contains(attack.defender)) {
-					Pokebot.sendMessage(this.channel, attack.attacker.mention()
-							+ " went to attack, but there was no target!");
-					continue;
-				}
+			attackLoop:
+			for(Player player : this.attacks.keySet()){
+				IAttack attack = this.attacks.get(player);
+				if(attack.isCanceled()) continue;
+				attack.cancel();
+				this.threatenTimeout.remove(attack.attacker);
 				//We know it's sorted by speed, so only the fastest go first
-				if(Moves.attack(this.channel, attack)) {
-					if(attack.defender.lastMove == Moves.DESTINY_BOND) {
-						Pokebot.sendMessage(this.channel, attack.attacker.mention()
-								+ " was taken down with " + attack.defender.mention());
-						attack.attacker.HP = 0;
-					}
-					if(playerFainted(attack.defender)) {
-						return;
-					}
-					if(attack.defender.hasAbility(Abilities.AFTERMATH)){
-						for(Player player : this.participants){
-							if(player == attack.defender)
-								continue;
-							if(player.hasAbility(Abilities.DAMP)){
-								this.preventExplosion(player, attack.defender);
-								//If the player has <= 0 HP, then the after-attacks check will catch it
-								continue attackLoop;
-							}
-						}
-						//Else we actually do damage
-						attack.attacker.HP -= attack.attacker.getMaxHP() / 4;
-					}
-				}
+				this.attackLogic(attack);
 				//Both a recoil check and a failsafe
-				if(attack.attacker.HP <= 0) {
-					Pokebot.sendMessage(this.channel, attack.attacker.mention() + " fainted!");
-					if(playerFainted(attack.attacker)) {
+				if(attack.attacker.HP <= 0){
+					this.sendMessage(attack.attacker.mention()+" fainted!");
+					if(this.playerFainted(attack.attacker)){
 						return;
 					}
 				}
 			}
 			//TODO after-turn things
-			//Doing various checks for damage
-			for(Player player : this.participants) {
+			//Here we do battle-wide effects
+			this.battleEffects.replaceAll((effect, integer) -> integer.intValue()-1);
+			this.battleEffects.keySet().removeIf(effect -> {
+				if(this.battleEffects.get(effect) <= 0){
+					this.sendMessage(effect+" faded away from the field!");
+					return true;
+				}
+				return false;
+			});
+			//Doing various checks for damage and other things
+			for(Player player : this.participants){
 				switch(player.getNV()){
-					case BURN: {
+					case BURN:{
 						//TODO Check for ability heatproof
-						player.HP = Math.max(0, player.HP - (player.getMaxHP() / 8));
-						Pokebot.sendMessage(this.channel,
-								player.mention() + " took damage for it's burn!");
+						player.HP = Math.max(0, player.HP-(player.getMaxHP()/8));
+						this.sendMessage(player.mention()+" took damage for it's burn!");
 						break;
 					}
-					case POISON: {
+					case POISON:{
 						if(player.hasAbility(Abilities.POISON_HEAL)){
-							Moves.heal(this.channel, player, player.getMaxHP() / 8);
+							Moves.heal(this.channel, player, player.getMaxHP()/8);
 							break;
 						}
-						player.HP = Math.max(0, player.HP - (player.getMaxHP() / 8));
-						Pokebot.sendMessage(this.channel,
-								player.mention() + " took damage from poison!");
+						player.HP = Math.max(0, player.HP-(player.getMaxHP()/8));
+						this.sendMessage(player.mention()+" took damage from poison!");
 						break;
 					}
-					case TOXIC: {
+					case TOXIC:{
 						if(player.hasAbility(Abilities.POISON_HEAL)){
-							Moves.heal(this.channel, player, player.getMaxHP() / 8);
+							Moves.heal(this.channel, player, player.getMaxHP()/8);
 							++player.counter;
 							break;
 						}
 						player.HP = Math.max(0,
-								player.HP - (player.getMaxHP() * ++player.counter / 16));
-						Pokebot.sendMessage(this.channel,
-								player.mention() + " took damage from poison!");
+								player.HP-(player.getMaxHP()*++player.counter/16));
+						this.sendMessage(player.mention()+" took damage from poison!");
 						break;
 					}
 					default:
 						break;
 				}
-				if(player.HP <= 0) {
+				if(player.HP <= 0){
 					Moves.faintMessage(this.channel, player);
-					if(playerFainted(player))
-						return;
+					if(this.playerFainted(player)){return;}
+				}
+				if(player.has(Volatile.FLINCH)){
+					this.sendMessage(player.mention()+" stopped cringing!");
+					player.remove(Volatile.FLINCH);
 				}
 			}
 			//We check for those who didn't do anything:
-			this.threatenTimeout.removeAll(hadAttacks); //Those that attacked this turn get forgiven if they were absent previously
-			for(Player player : this.threatenTimeout) {
+			for(Player player : this.threatenTimeout){
 				this.onSafeLeaveBattle(player);
-				Pokebot.sendMessage(this.channel,
-						player.mention() + " got eliminated for inactivity!");
+				this.sendMessage(player.mention()+" got eliminated for inactivity!");
 			}
-			this.threatenTimeout.clear();
-			if(checkDefaultWin())
+			if(this.checkDefaultWin())
 				return;
+			this.threatenTimeout.clear();
 			this.threatenTimeout.addAll(this.participants);
-			this.threatenTimeout.removeAll(hadAttacks);
-			for(Player player : this.threatenTimeout) {
-				Pokebot.sendMessage(this.channel, "If " + player.mention()
-						+ " doesn't attack the next turn, they're out!");
+			this.threatenTimeout.removeAll(this.attacks.keySet());
+			for(Player player : this.threatenTimeout){
+				this.sendMessage("If "+player.mention()
+						+" doesn't attack the next turn, they're out!");
 				player.lastTarget = null;
 				player.lastMove = Moves.NULL;
 				player.lastAttacker = null;
 			}
 			this.attacks.clear();
-			Pokebot.sendMessage(this.channel,
-					"Begin next turn, you have " + this.turnTime + " seconds to make your attack");
+			this.sendMessage("Begin next turn, you have "+this.turnTime+" seconds to make your attack");
 			Pokebot.timer.schedule(this.timer, this.turnTime, TimeUnit.SECONDS);
 			this.participants.forEach(this::onPostTurn);
 		}
 	}
-	
-	public void preventExplosion(Player player, Player attacker){
-		Pokebot.sendMessage(this.channel, "But "+player.mention()+"'s DAMP prevented"
-				+ attacker.mention()+"'s explosion!");
+
+	private void attackLogic(final IAttack attack){
+		//Check for flinch status
+		if(attack.attacker.has(Volatile.FLINCH)){
+			this.sendMessage("But "+attack.attacker.mention()+" is flinching!");
+			attack.attacker.remove(Volatile.FLINCH);
+			return;
+		}
+		if(!this.participants.contains(attack.defender)){
+			this.sendMessage(attack.attacker.mention()
+					+" went to attack, but there was no target!");
+			return;
+		}
+		if(Moves.attack(this.channel, attack)){
+			if(attack.defender.lastMove == Moves.DESTINY_BOND){
+				this.sendMessage(attack.attacker.mention()
+						+" was taken down with "+attack.defender.mention());
+				attack.attacker.HP = 0;
+			}
+			if(attack.attacker.lastMove == Moves.AFTER_YOU){
+				IAttack defenderAttack = this.attacks.get(attack.defender);
+				if(defenderAttack != null && !defenderAttack.isCanceled()){
+					this.sendMessage(attack.attacker.mention()+" made "+attack.defender.mention()+" go next!");
+					//this.attackLogic(defenderAttack.get());
+					//defenderAttack.get().cancel();
+				} else {
+					this.sendMessage("But there wasn't anything to do!"); //TODO better message
+				}
+			}
+			if(this.playerFainted(attack.defender)){
+				return;
+			}
+			if(attack.defender.hasAbility(Abilities.AFTERMATH)){
+				for(Player player : this.participants){
+					if(player == attack.defender)
+						continue;
+					if(player.hasAbility(Abilities.DAMP)){
+						this.preventExplosion(player, attack.defender);
+						//If the player has <= 0 HP, then the after-attacks check will catch it
+						return;
+					}
+				}
+				//Else we actually do damage
+				attack.attacker.HP -= attack.attacker.getMaxHP()/4;
+			}
+		}
 	}
-	
+
+	public void set(BattleEffects effect, int duration){
+		this.battleEffects.put(effect, duration);
+	}
+
+	public boolean has(BattleEffects effect){
+		return this.battleEffects.keySet().contains(effect);
+	}
+
+	//This is in this class, because only battles prevent explosions
+	public void preventExplosion(Player player, Player attacker){
+		this.sendMessage("But "+player.mention()+"'s DAMP prevented"
+				+attacker.mention()+"'s explosion!");
+	}
+
 	/**
 	 * Returns true if the battle has ended
 	 */
 	public boolean playerFainted(Player player){
-		onSafeLeaveBattle(player);
+		this.onSafeLeaveBattle(player);
 		if(this.participants.size() == 1){
 			Player winner = this.participants.get(0);
 			this.participants.clear();
@@ -236,50 +272,46 @@ public class Battle implements Comparator<Player>{
 		}
 		return false;
 	}
-	
+
 	//Should we stop execution?
 	public boolean checkDefaultWin(){
 		if(this.participants.size() == 1){
 			Player player = this.participants.remove(0);
 			this.onLeaveBattle(player);
-			Pokebot.sendMessage(this.channel, player.mention()+" won the battle by default!");
+			this.sendMessage(player.mention()+" won the battle by default!");
 			BattleManager.battles.remove(this);
 			return true;
 		}
 		if(this.participants.size() <= 0){
-			Pokebot.sendMessage(this.channel, "Nobody won...");
+			this.sendMessage("Nobody won...");
 			BattleManager.battles.remove(this);
 			return true;
 		}
 		return false;
 	}
-	
+
 	public boolean onLeaveBattle(Player player){
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 		this.attacks.remove(player);
 		this.threatenTimeout.remove(player);
-		return checkDefaultWin();
+		return this.checkDefaultWin();
 	}
-	
+
 	private void onSafeLeaveBattle(Player player){
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 	}
-	
-	public void addParticipant(Player player){
-		this.participants.add(player);
-	}
-	
+
 	//This is ran after all the battle logic
+
 	/**
 	 * Used to run things like post-turn damage.
-	 * 
-	 * Attacks are already reset by this point, 
+	 * <p>
+	 * Attacks are already reset by this point,
 	 * so any multi-turn attacks can auto-queue themselves without consequence
 	 */
 	public void onPostTurn(Player player){
-		
 		switch(player.lastMove){
 			case FLY:{
 				switch(player.lastMoveData){
@@ -313,15 +345,12 @@ public class Battle implements Comparator<Player>{
 		}*/
 	}
 
-	//Flinching can only occur if the attacker attacked first.
-	public void flinch(Player player){
-		this.attacks.remove(player);
-		player.remove(Volatile.FLINCH);
-	}
-	
-	@Override
-	public int compare(Player o1, Player o2){
-		return o2.getSpeedStat() - o1.getSpeedStat();
+	public void afterYou(Player attacker, Player defender){
+
 	}
 
+	public enum BattleEffects{
+		GRAVITY,
+		TRICK_ROOM
+	}
 }

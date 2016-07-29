@@ -28,7 +28,7 @@ public class Pokebot{
 	public static final byte SAVE_DELAY = 1; //In minutes
 	public static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
 	public static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
-	
+
 	public static IDiscordClient client;
 	public static final ConfigHandler config = new ConfigHandler();
 	public static final Scanner in = new Scanner(System.in);
@@ -56,24 +56,19 @@ public class Pokebot{
 		timer.scheduleAtFixedRate(() -> Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()))
 		, GAME_DELAY, GAME_DELAY, TimeUnit.MINUTES);
 	}
-	
+
 	public static IDiscordClient getClient(String token) throws Exception{
 		return new ClientBuilder().withToken(token).login();
 	}
-	
+
 	public static File getSaveFile(IUser user){
 		return new File("/botdata/userpokemon/"+user.getID());
 	}
-	
+
 	public static void sendMessage(IChannel channel, String message){
 		locks.putIfAbsent(channel, new ReentrantLock());
 		locks.get(channel).lock();
 		try{
-			/*try{
-					channel.sendMessage(message);
-				}catch(DiscordException | HTTP429Exception | MissingPermissionsException e){
-					e.printStackTrace();
-				}*/
 			if(!buffers.containsKey(channel)){
 				buffers.put(channel, (new StringBuilder(message)));
 			} else {
@@ -83,54 +78,18 @@ public class Pokebot{
 			locks.get(channel).unlock();
 		}
 	}
-	
+
 	public static void sendPrivateMessage(IUser user, String message){
 		try{
 			sendMessage(client.getOrCreatePMChannel(user), message);
-		}catch(RateLimitException e){
+		} catch (RateLimitException e){
 			System.err.println("Unable to send PM, hit rate limit");
-		} catch(DiscordException e) {
+		} catch (DiscordException e){
 			e.printStackTrace();
 			System.err.println("\nUnable to send PM");
 		}
 	}
-	
-	/*@SuppressWarnings("unused")
-	public static void startBatchMessages(Battle battle){}
-	
-	//TODO perhaps make "Batchable" messages use a builder inside each battle.
-	//I don't think this is needed anyways, it's a single timer thread so
-	//if the Battle thread takes long enough that the messages are sent, then
-	//the message thread won't run until after the battle is done processing
-	public static void sendBatchableMessage(IChannel channel, String message){
-		sendMessage(channel, message);
-	}
-	
-	public static void endBatchMessages(){}
-	//I wanna try just sending raw messages for now
-	/*
-	public static void startBatchMessages(Battle battle){
-		batchMessagesForBattle = battle.channel;
-		builder = new StringBuilder();
-	}
-	
-	public static void sendBatchableMessage(IChannel channel, String message){
-		if(batchMessagesForBattle != null && channel.getID().equals(batchMessagesForBattle.getID())){
-			builder.append(message);
-			builder.append('\n');
-			return;
-		}
-		Pokebot.sendMessage(channel, message);
-	}
-	
-	
-	public static void endBatchMessages(){
-		IChannel channel = batchMessagesForBattle;
-		batchMessagesForBattle = null;
-		sendMessage(channel, builder.toString());
-		builder = null;
-	}*/
-	
+
 	public static String getRandomGame(){
 		GameList[] vals = GameList.values();
 		return vals[Pokebot.ran.nextInt(vals.length)].getName();

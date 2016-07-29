@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.battle.IAttack;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Moves;
@@ -18,11 +19,11 @@ import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.states.Effects.VBattle;
 import sx.blah.discord.handle.obj.IUser;
 
-//TODO
+//TODO stuff
 //The variables all contain the default states
 public class Player{
 	
-	public IUser user;
+	public final IUser user;
 	public Types primary = Types.NORMAL;
 	public Types secondary = Types.NULL;
 	public int HP = 0;
@@ -119,12 +120,12 @@ public class Player{
 		return this.nvEffect;
 	}
 	
-	public void remove(){
+	/*public void remove(){
 		this.nvEffect = Effects.NonVolatile.NORMAL;
-	}
+	}*/
 	
 	public void cureNV(){
-		this.remove();
+		this.nvEffect = Effects.NonVolatile.NORMAL;
 	}
 	
 	public void set(Effects.Volatile vEffect){

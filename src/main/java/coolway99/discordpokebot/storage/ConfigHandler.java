@@ -20,7 +20,7 @@ public class ConfigHandler{
 	
 	//CONSTANTS FOR INTERNAL USE
 	private static final String NAMEKEY = "BOTNAME";
-	private static final String NAMEDEFAULT = "Pokebot";//"Pokébot";
+	private static final String NAMEDEFAULT = "Pokebot";//"PokÃ©bot";
 	private static final String COMMANDKEY = "COMMAND_PREFIX";
 	private static final String COMMANDDEFAULT = "==";
 	private static final String OWNERIDKEY = "BOT_OWNER_ID";

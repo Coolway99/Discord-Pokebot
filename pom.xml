@@ -6,6 +6,8 @@
 	<artifactId>discordpokebot</artifactId>
 	<name>Discord Pokemon Battle Bot</name>
 	<description>A bot for discord adding better pokemon battles</description>
+	<version>0.8</version>
+	<url>https://github.com/Coolway99/Discord-Pokebot</url>
 	<repositories>
 		<repository>
 			<snapshots>
@@ -28,13 +30,11 @@
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4j</artifactId>
-			<version>2.5.1</version>
+			<version>2.5.2</version>
 			<classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies 
 				bundled into one jar) -->
 		</dependency>
 	</dependencies>
-	<version>0.5</version>
-	<url>https://github.com/Coolway99/Discord-Pokebot</url>
 	<properties>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
