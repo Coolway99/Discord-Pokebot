@@ -5,7 +5,6 @@ import java.util.List;
 
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
-import coolway99.discordpokebot.battle.BattleMap;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Moves;
 import coolway99.discordpokebot.states.Natures;
@@ -161,7 +160,7 @@ public class EventHandler{
 				}
 				try{
 					StatHandler.setStats(channel, player, args[1], Integer.parseInt(args[2]),
-							(args.length > 3 ? args[3] : null));
+							args.length > 3 ? args[3] : null);
 				}catch(NumberFormatException e){
 					reply(message, "Invalid number");
 				}
@@ -466,7 +465,7 @@ public class EventHandler{
 					Moves move = attacker.moves[slot];
 					Player defender;
 					//If this is a status move, then usually we are targeting ourselves
-					if(!!move.has(Moves.Flags.UNTARGETABLE)){
+					if(move.has(Moves.Flags.UNTARGETABLE)){
 						defender = PlayerHandler.getPlayer(author);
 					} else {
 						defender = PlayerHandler.getPlayer(message.getMentions().get(0));

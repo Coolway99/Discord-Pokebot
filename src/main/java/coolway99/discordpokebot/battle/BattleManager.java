@@ -99,7 +99,7 @@ public class BattleManager{
 		onExitBattle(player);
 	}
 
-	public static void battleInviteMessage(IChannel channel, IUser host, List<IUser> users){
+	private static void battleInviteMessage(IChannel channel, IUser host, List<IUser> users){
 		if(users == null || users.isEmpty()) return;
 		StringBuilder builder = new StringBuilder("Calling ");
 		if(users.size() > 1){
@@ -108,7 +108,7 @@ public class BattleManager{
 				IUser user = i.next();
 				if(!i.hasNext()) builder.append(" and ");
 				builder.append(user.mention());
-				builder.append((i.hasNext() ? ", " : ". "));
+				builder.append(i.hasNext() ? ", " : ". ");
 			}
 		} else {
 			builder.append(users.get(0).mention());

@@ -33,8 +33,8 @@ public enum Natures{ //In this case, "Health" is null, since nature never applie
 	QUIRKY(Stats.HEALTH, Stats.HEALTH)
 	;
 	
-	public final Stats increase;
-	public final Stats decrease;
+	private final Stats increase;
+	private final Stats decrease;
 	
 	Natures(Stats increase, Stats decrease){
 		this.increase = increase;
@@ -48,7 +48,7 @@ public enum Natures{ //In this case, "Health" is null, since nature never applie
 	}
 	
 	public double getStatMultiplier(int index){
-		return getStatMultiplier(Stats.getStatFromIndex(index));
+		return this.getStatMultiplier(Stats.getStatFromIndex(index));
 	}
 	
 	public boolean hasEffect(){

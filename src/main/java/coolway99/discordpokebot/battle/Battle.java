@@ -1,15 +1,18 @@
 package coolway99.discordpokebot.battle;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.states.Effects.Volatile;
+import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Moves;
 import sx.blah.discord.handle.obj.IChannel;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Battle{
 
@@ -28,8 +31,8 @@ public class Battle{
 	 * Set the timeout for a turn on the battle
 	 */
 	private final int turnTime;
-	private BattleTurnTimeout timer;
-	private HashMap<BattleEffects, Integer> battleEffects;
+	private final BattleTurnTimeout timer;
+	private final HashMap<BattleEffects, Integer> battleEffects;
 
 	public Battle(IChannel channel, int turnTime, List<Player> participants){
 		this.channel = channel;
@@ -92,7 +95,7 @@ public class Battle{
 	}
 
 	//Called for moves that auto-set themselves
-	public void onAutoAttack(Player attacker, Moves move, Player defender){
+	private void onAutoAttack(Player attacker, Moves move, Player defender){
 		synchronized(this.attacks){
 			this.attacks.put(attacker, new IAttack(attacker, move, defender));
 			this.sendMessage(attacker.mention()+" has a multiturn attack!");
@@ -106,7 +109,6 @@ public class Battle{
 			this.sendMessage("Processing attacks");
 			//We make a "note" of those who hadAttacks, to prevent flinch from glitching things up
 			//TODO Perhaps make it a single list for the IAttacks, and have flinching remove it on-attack-time
-			attackLoop:
 			for(Player player : this.attacks.keySet()){
 				IAttack attack = this.attacks.get(player);
 				if(attack.isCanceled()) continue;
@@ -124,7 +126,7 @@ public class Battle{
 			}
 			//TODO after-turn things
 			//Here we do battle-wide effects
-			this.battleEffects.replaceAll((effect, integer) -> integer.intValue()-1);
+			this.battleEffects.replaceAll((effect, integer) -> integer-1);
 			this.battleEffects.keySet().removeIf(effect -> {
 				if(this.battleEffects.get(effect) <= 0){
 					this.sendMessage(effect+" faded away from the field!");
@@ -168,9 +170,9 @@ public class Battle{
 					Moves.faintMessage(this.channel, player);
 					if(this.playerFainted(player)){return;}
 				}
-				if(player.has(Volatile.FLINCH)){
+				if(player.has(Effects.Volatile.FLINCH)){
 					this.sendMessage(player.mention()+" stopped cringing!");
-					player.remove(Volatile.FLINCH);
+					player.remove(Effects.Volatile.FLINCH);
 				}
 			}
 			//We check for those who didn't do anything:
@@ -199,9 +201,9 @@ public class Battle{
 
 	private void attackLogic(final IAttack attack){
 		//Check for flinch status
-		if(attack.attacker.has(Volatile.FLINCH)){
+		if(attack.attacker.has(Effects.Volatile.FLINCH)){
 			this.sendMessage("But "+attack.attacker.mention()+" is flinching!");
-			attack.attacker.remove(Volatile.FLINCH);
+			attack.attacker.remove(Effects.Volatile.FLINCH);
 			return;
 		}
 		if(!this.participants.contains(attack.defender)){
@@ -253,7 +255,7 @@ public class Battle{
 	}
 
 	//This is in this class, because only battles prevent explosions
-	public void preventExplosion(Player player, Player attacker){
+	private void preventExplosion(Player player, Player attacker){
 		this.sendMessage("But "+player.mention()+"'s DAMP prevented"
 				+attacker.mention()+"'s explosion!");
 	}
@@ -261,7 +263,7 @@ public class Battle{
 	/**
 	 * Returns true if the battle has ended
 	 */
-	public boolean playerFainted(Player player){
+	private boolean playerFainted(Player player){
 		this.onSafeLeaveBattle(player);
 		if(this.participants.size() == 1){
 			Player winner = this.participants.get(0);
@@ -274,7 +276,7 @@ public class Battle{
 	}
 
 	//Should we stop execution?
-	public boolean checkDefaultWin(){
+	private boolean checkDefaultWin(){
 		if(this.participants.size() == 1){
 			Player player = this.participants.remove(0);
 			this.onLeaveBattle(player);
@@ -290,12 +292,11 @@ public class Battle{
 		return false;
 	}
 
-	public boolean onLeaveBattle(Player player){
+	public void onLeaveBattle(Player player){
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 		this.attacks.remove(player);
 		this.threatenTimeout.remove(player);
-		return this.checkDefaultWin();
 	}
 
 	private void onSafeLeaveBattle(Player player){
@@ -311,7 +312,7 @@ public class Battle{
 	 * Attacks are already reset by this point,
 	 * so any multi-turn attacks can auto-queue themselves without consequence
 	 */
-	public void onPostTurn(Player player){
+	private void onPostTurn(Player player){
 		switch(player.lastMove){
 			case FLY:{
 				switch(player.lastMoveData){
@@ -343,10 +344,6 @@ public class Battle{
 				}
 			}
 		}*/
-	}
-
-	public void afterYou(Player attacker, Player defender){
-
 	}
 
 	public enum BattleEffects{

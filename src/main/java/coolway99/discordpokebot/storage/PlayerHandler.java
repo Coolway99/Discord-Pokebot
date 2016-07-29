@@ -16,7 +16,6 @@ public class PlayerHandler{
 		if(!playerMap.containsKey(user.getID())){
 			System.out.println("Creating new entry"); 
 			Player player = new Player(user);
-			System.out.println("Created new user");
 			playerMap.put(user.getID(), player);
 			}
 		System.out.println(user.getID());

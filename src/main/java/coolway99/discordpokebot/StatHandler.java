@@ -133,7 +133,7 @@ public class StatHandler{
 	
 	public static double getModifierChange(byte mod){
 		if(mod == 0 || mod > 6 || mod < -6) return 1D;
-		double res = (Math.abs(mod+2D)/2D);
+		double res = Math.abs(mod+2D)/2D;
 		if(mod < 0) res = 1D/res;
 		return res;
 	}
@@ -141,7 +141,7 @@ public class StatHandler{
 	//This is used for accuracy and evasion
 	public static double getHitModifierChange(byte mod){
 		if(mod == 0 || mod > 6 || mod < -6) return 1D;
-		double res = (Math.abs(mod+3D)/3D);
+		double res = Math.abs(mod+3D)/3D;
 		if(mod < 0) res = 1D/res;
 		return res;
 	}

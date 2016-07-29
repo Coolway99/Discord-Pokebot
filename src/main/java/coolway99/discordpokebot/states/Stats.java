@@ -19,6 +19,7 @@ public enum Stats{
 
 	public static Stats getStatFromIndex(int i){
 		switch(i){
+			//noinspection DefaultNotLastCaseInSwitch
 			default:
 			case 0:
 				return HEALTH;

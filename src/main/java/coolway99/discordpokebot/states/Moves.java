@@ -294,7 +294,6 @@ public enum Moves{
 			}
 			case AFTER_YOU:{
 				//We have to be in a battle for this to work
-				attacker.battle.afterYou(attacker, defender);
 				return BeforeResult.STOP;
 			}
 			case AROMATHERAPY:

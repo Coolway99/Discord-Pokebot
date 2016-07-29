@@ -8,6 +8,7 @@ import java.util.*;
  * @author Coolway
  * @since 2016-07-26
  */
+@SuppressWarnings("InstanceofInterfaces")
 public class BattleMap implements SortedMap<Player, IAttack>, Comparator<IAttack>{
 
 	private final ArrayList<Player> players;
@@ -59,11 +60,13 @@ public class BattleMap implements SortedMap<Player, IAttack>, Comparator<IAttack
 		return this.players.isEmpty();
 	}
 
+	@SuppressWarnings("SuspiciousMethodCalls")
 	@Override
 	public boolean containsKey(Object key){
 		return this.players.contains(key);
 	}
 
+	@SuppressWarnings("SuspiciousMethodCalls")
 	@Override
 	public boolean containsValue(Object value){
 		return this.attacks.contains(value);
@@ -115,6 +118,7 @@ public class BattleMap implements SortedMap<Player, IAttack>, Comparator<IAttack
 		return null;
 	}
 
+	@SuppressWarnings("ChainOfInstanceofChecks")
 	@Override
 	public IAttack remove(Object key){
 		if(key instanceof Player){
@@ -122,14 +126,14 @@ public class BattleMap implements SortedMap<Player, IAttack>, Comparator<IAttack
 			if(i < 0) return null;
 			this.players.remove(i);
 			return this.attacks.remove(i);
-		} else if(key instanceof IAttack){
+		}
+		if(key instanceof IAttack){
 			int i = this.attacks.indexOf(key);
 			if(i < 0) return null;
 			this.players.remove(i);
 			return this.attacks.remove(i);
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	@Override

@@ -25,9 +25,9 @@ import sx.blah.discord.util.RateLimitException;
 public class Pokebot{
 	//TODO make the rest of these configs
 	//public static final long SAVE_DELAY = minutesToMiliseconds(1);
-	public static final byte SAVE_DELAY = 1; //In minutes
-	public static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
-	public static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
+	private static final byte SAVE_DELAY = 1; //In minutes
+	private static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
+	private static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
 
 	public static IDiscordClient client;
 	public static final ConfigHandler config = new ConfigHandler();
@@ -35,11 +35,11 @@ public class Pokebot{
 	public static final Random ran = new Random();
 	//public static final Timer timer = new Timer("Pokebot Timer Thread", true);
 	public static final ScheduledExecutorService timer =  Executors.newScheduledThreadPool(4);
-	public static final ConcurrentHashMap<IChannel, StringBuilder> buffers = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<IChannel, StringBuilder> buffers = new ConcurrentHashMap<>();
 	//The hope with channel-locking is that we don't send messages the at the same time we are adding new ones
-	//Channel objects, while not equal to eachother directly, are equal if they belong to the same channel
-	public static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
-	
+	//Channel objects, while not equal to each other directly, are equal if they belong to the same channel
+	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
+
 	public static void main(String... args) throws Exception{
 		if(args.length < 1){
 			System.out.println("The app needs a token to log in");
@@ -57,12 +57,12 @@ public class Pokebot{
 		, GAME_DELAY, GAME_DELAY, TimeUnit.MINUTES);
 	}
 
-	public static IDiscordClient getClient(String token) throws Exception{
+	private static IDiscordClient getClient(String token) throws Exception{
 		return new ClientBuilder().withToken(token).login();
 	}
 
 	public static File getSaveFile(IUser user){
-		return new File("/botdata/userpokemon/"+user.getID());
+		return new File(config.SAVEDIR+'/'+user.getID());
 	}
 
 	public static void sendMessage(IChannel channel, String message){
@@ -70,7 +70,7 @@ public class Pokebot{
 		locks.get(channel).lock();
 		try{
 			if(!buffers.containsKey(channel)){
-				buffers.put(channel, (new StringBuilder(message)));
+				buffers.put(channel, new StringBuilder(message));
 			} else {
 				buffers.get(channel).append('\n').append(message);
 			}

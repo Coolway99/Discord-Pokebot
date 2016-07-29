@@ -8,7 +8,6 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import coolway99.discordpokebot.battle.Battle;
-import coolway99.discordpokebot.battle.IAttack;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Moves;
@@ -16,7 +15,6 @@ import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
-import coolway99.discordpokebot.states.Effects.VBattle;
 import sx.blah.discord.handle.obj.IUser;
 
 //TODO stuff
@@ -43,12 +41,12 @@ public class Player{
 	 * IV
 	 * EV
 	 */
-	public int[][] stats = new int[6][3];
+	public final int[][] stats = new int[6][3];
 	
 	/**
 	 * An array holding the modifiers for each stat
 	 */
-	public byte[] modifiers = new byte[8];
+	public final byte[] modifiers = new byte[8];
 	/**
 	 * The nature of the player
 	 */
@@ -64,18 +62,16 @@ public class Player{
 	/**
 	 * What volatile effects does the player have?
 	 */
-	//public ArrayList<Effects.Volatile> vEffects = new ArrayList<>();
 	private final EnumSet<Effects.Volatile> vEffects;
 	/**
 	 * What battle-effects does the player have?
 	 */
-	//public ArrayList<Effects.VolatileBattle> vBattleEffects = new ArrayList<>(); 
 	private final EnumSet<Effects.VBattle> battleEffects;
 	
 	public int numOfAttacks = 0;
 	//This array is manually done out as to make sure they are "null" type moves, to prevent errors
-	public Moves[] moves = new Moves[]{Moves.NULL, Moves.NULL, Moves.NULL, Moves.NULL};
-	public int[] PP = new int[4];
+	public final Moves[] moves = new Moves[]{Moves.NULL, Moves.NULL, Moves.NULL, Moves.NULL};
+	public final int[] PP = new int[4];
 	
 	public Battle battle = null;
 	public Moves lastMove = Moves.NULL; //Isn't set outside of a battle
@@ -94,11 +90,6 @@ public class Player{
 		this.vEffects = EnumSet.noneOf(Effects.Volatile.class);
 		this.battleEffects = EnumSet.noneOf(Effects.VBattle.class);
 	}
-	
-	//the user object is public final anyways
-	/*public IUser getUser(){
-		return this.user;
-	}*/
 	
 	public boolean hasSecondaryType(){
 		return this.secondary != Types.NULL;
@@ -171,7 +162,7 @@ public class Player{
 	}
 	
 	public Abilities getModifiedAbility(){
-		if(this.has(VBattle.ABILITY_BLOCK)) return Abilities.MC_NORMAL_PANTS;
+		if(this.has(Effects.VBattle.ABILITY_BLOCK)) return Abilities.MC_NORMAL_PANTS;
 		return this.ability;
 	}
 
@@ -276,7 +267,7 @@ public class Player{
 		}
 	}
 	
-	public void loadData(){
+	private void loadData(){
 		//If the file is "incomplete", which should only result when the save format is updated
 		//with more info, then this will error out and close the file, with the default values
 		//being intact for the values not found

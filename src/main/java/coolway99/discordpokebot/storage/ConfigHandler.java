@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-public class ConfigHandler{	
+@SuppressWarnings("UnqualifiedStaticUsage")
+public class ConfigHandler{
 	
 	public static final String CONFPATH = "pokebot.conf"; //WITHOUT THE "." IT CRASHES
 	public final String BOTNAME;
