@@ -52,9 +52,9 @@ public enum Moves{
 	DOUBLE_SLAP(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 15, Flags.HAS_BEFORE), //Same as Comet Punch
 	FAIRY_WIND(Types.FAIRY, MoveType.SPECIAL, 30, 40, 100), //Same as scratch
 	FIRE_PUNCH(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
+	//TODO using the multiturn flags
 	FLY(Types.FLYING, MoveType.PHYSICAL, 15, 90, 95, 120, Flags.HAS_BEFORE, Flags.FLIGHT), //Multiturn, boosted cost
-	// because of
-	// semiinvul
+	// because of semiinvul
 	HEAL_BELL(Types.NORMAL, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
 	ICE_PUNCH(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	GASTRO_ACID(Types.POISON, MoveType.STATUS, 10, -1, 100, 150, Flags.HAS_BEFORE), //Suppresses the target's ability
@@ -72,6 +72,7 @@ public enum Moves{
 	// cost for poison chance
 	RELIC_SONG(Types.NORMAL, MoveType.SPECIAL, 10, 75, 100, 80, Flags.HAS_AFTER), //TODO sleep
 	SCRATCH(Types.NORMAL, MoveType.PHYSICAL, 35, 40, 100), //Same as scratch
+	SKY_ATTACK(Types.FLYING, MoveType.PHYSICAL, 5, 140, 90, Flags.MULTITURN, Flags.HAS_AFTER), //TODO multiturn
 	SIGNAL_BEAM(Types.BUG, MoveType.SPECIAL, 15, 75, 100, 80, Flags.HAS_AFTER), //TODO confusion
 	SLAM(Types.NORMAL, MoveType.PHYSICAL, 20, 80, 75),
 	STEAM_ROLLER(Types.BUG, MoveType.PHYSICAL, 20, 65, 100, 65, Flags.HAS_BEFORE, Flags.HAS_AFTER), //Same as Stomp,
@@ -82,7 +83,7 @@ public enum Moves{
 	VICE_GRIP(Types.NORMAL, MoveType.PHYSICAL, 30, 55, 100),
 	WATER_GUN(Types.WATER, MoveType.SPECIAL, 25, 40, 100), //Same as scratch
 	//WHIRLWIND does not apply
-	RAZOR_WIND(Types.NORMAL, MoveType.SPECIAL, 10, 80, 100), //TODO It's a multiturn-attack
+	RAZOR_WIND(Types.NORMAL, MoveType.SPECIAL, 10, 80, 100, Flags.MULTITURN), //TODO It's a multiturn-attack
 	SWORDS_DANCE(Types.NORMAL, MoveType.STATUS, 20, -1, -1, 50, Flags.UNTARGETABLE, Flags.HAS_BEFORE), //Status attack
 	WING_ATTACK(Types.FLYING, MoveType.SPECIAL, 35, 60, 100),
 	VINE_WHIP(Types.GRASS, MoveType.PHYSICAL, 25, 45, 100),;
@@ -93,34 +94,23 @@ public enum Moves{
 	private final int PP; //The default PP of the move
 	private final double accuracy; //From 0 to 1
 	private final Battle_Priority priority;
-	/*private final boolean hasTarget;
-	private final boolean hasBeforeEffect; //Will code be ran BEFORE attacking?
-	private final boolean hasAfterEffect; //Will code be ran AFTER attacking?*/
 	private final int cost; //How many points will this move use?
 	private final EnumSet<Flags> flags;
 
-	Moves(Types type, MoveType moveType, int PP, int power, double accuracy, int cost, Battle_Priority priority,
+	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
 			Flags... flags){
 		this.type = type;
 		this.power = power;
 		this.moveType = moveType;
 		this.PP = PP;
-		this.accuracy = accuracy; //TODO perhaps make it 0-100D
+		this.accuracy = accuracy/100D; //TODO perhaps make it 0-100D
 		this.priority = priority;
-		/*this.hasTarget = hasTarget;
-		this.hasBeforeEffect = hasBefore;
-		this.hasAfterEffect = hasAfter;*/
 		this.cost = cost;
 		if(flags.length <= 0){
 			this.flags = EnumSet.noneOf(Flags.class);
 		} else {
 			this.flags = EnumSet.copyOf(Arrays.asList(flags));
 		}
-	}
-
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
-	      Flags... flags){
-		this(type, moveType, PP, power, accuracy/100D, cost, priority, flags);
 	}
 
 	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Flags... flags){
@@ -130,45 +120,6 @@ public enum Moves{
 	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, Flags... flags){
 		this(type, moveType, PP, power, accuracy, power, flags);
 	}
-
-
-
-	/*Moves(Types type, MoveType moveType, int PP, int power, int accuracy){
-		this(type, moveType, PP, power, accuracy, true);
-	}
-	
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, boolean hasTarget){
-		this(type, moveType, PP, power, accuracy, hasTarget, false, false);
-	}
-	
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-	      boolean hasBefore, boolean hasAfter){
-		this(type, moveType, PP, power, accuracy, true, hasBefore, hasAfter);
-	}
-	
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-	      boolean hasBefore, boolean hasAfter, int cost){
-		this(type, moveType, PP, power, accuracy, true, hasBefore, hasAfter, cost);
-	}
-	
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, boolean hasTarget, int cost){
-		this(type, moveType, PP, power, accuracy, hasTarget, false, false, cost);
-	}
-	
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost){
-		this(type, moveType, PP, power, accuracy, true, false, false, cost);
-	}
-	
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-	      boolean hasTarget, boolean hasBefore, boolean hasAfter){
-		this(type, moveType, PP, power, accuracy, hasTarget, hasBefore, hasAfter, power);
-	}
-	
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy,
-	      boolean hasTarget, boolean hasBefore, boolean hasAfter, int cost){
-		this(type, moveType, PP, power, accuracy/100D, hasTarget, hasBefore, hasAfter, cost);
-	}*/
-
 
 	public boolean isSpecial(){
 		return this.moveType == MoveType.SPECIAL;
@@ -308,14 +259,14 @@ public enum Moves{
 				}
 				switch(this){
 					case AROMATHERAPY:
-						Pokebot.sendMessage(channel, "A soothing aroma wafted through the area, curing everyone of all" +
+					Pokebot.sendMessage(channel, "A soothing aroma wafted through the area, curing everyone of all" +
 								" status effects!");
-						break;
+					break;
 					case HEAL_BELL:
-						Pokebot.sendMessage(channel, "A bell chimed, curing everyone of all status effects!");
-						break;
+					Pokebot.sendMessage(channel, "A bell chimed, curing everyone of all status effects!");
+					break;
 					default:
-						break;
+					break;
 				}
 				return BeforeResult.STOP;
 			}
@@ -366,11 +317,6 @@ public enum Moves{
 				return BeforeResult.STOP;
 			}
 			case SWORDS_DANCE:{
-				//Automatic checking is now done on status moves
-				/*if(!defender.inBattle()){
-					Pokebot.sendBatchableMessage(channel, "But it doesn't work here!");
-					return false;
-				}*/
 				attackMessage(channel, attacker, this);
 				StatHandler.changeStat(channel, attacker, Stats.ATTACK, 2);
 				return BeforeResult.STOP;
@@ -390,29 +336,6 @@ public enum Moves{
 						+" missed and took crash damage instead!");
 				attacker.HP = Math.max(0, attacker.HP-(attacker.getMaxHP()/2));
 				return BeforeResult.STOP;
-			}
-			case FLY:{
-				if(attacker.inBattle()){
-					//We can assume that both the attacker and defender are in battle, and
-					//that it's the same battle
-					switch(attacker.lastMoveData){
-						case MoveConstants.NOTHING:{
-							if(!checkParalysis(attacker)) return BeforeResult.STOP;
-							Pokebot.sendMessage(channel, attacker.mention()+" flew up high!");
-							attacker.lastMoveData = MoveConstants.FLYING;
-							attacker.set(Effects.VBattle.SEMI_INVULNERABLE);
-							return BeforeResult.STOP;
-						}
-						case MoveConstants.FLYING:{
-							attacker.remove(Effects.VBattle.SEMI_INVULNERABLE);
-							attacker.lastMoveData = MoveConstants.NOTHING;
-							return BeforeResult.CONTINUE;
-						}
-						default:
-							return BeforeResult.STOP;
-					}
-				}
-				return BeforeResult.CONTINUE;
 			}
 			case SPLASH:{
 				Pokebot.sendMessage(channel, attacker.mention()+" used Splash!... but nothing happened.");
@@ -471,6 +394,7 @@ public enum Moves{
 				}
 				break;
 			}
+			case SKY_ATTACK:
 			case STEAM_ROLLER:
 			case STOMP:{
 				if(diceRoll(30)) flinch(channel, defender);
@@ -484,6 +408,51 @@ public enum Moves{
 			}
 			default:
 				break;
+		}
+	}
+
+	//This only runs in a battle context, has the same as runBefore. Multiturn attacks act like normal attacks
+	// outside of battle context
+	public BeforeResult runMultiturn(IChannel channel, Player attacker, Player defender){
+		switch(this){
+			case FLY:{
+				switch(attacker.lastMoveData){
+					case MoveConstants.NOTHING:{
+						if(!checkParalysis(attacker)) return BeforeResult.STOP;
+						Pokebot.sendMessage(channel, attacker.mention()+" flew up high!");
+						attacker.lastMoveData = MoveConstants.FLYING;
+						attacker.set(Effects.VBattle.SEMI_INVULNERABLE);
+						return BeforeResult.STOP;
+					}
+					case MoveConstants.FLYING:{
+						attacker.remove(Effects.VBattle.SEMI_INVULNERABLE);
+						attacker.lastMoveData = MoveConstants.NOTHING;
+						return BeforeResult.CONTINUE;
+					}
+					default:
+						return BeforeResult.STOP;
+				}
+			}
+			case SKY_ATTACK:{
+				switch(attacker.lastMoveData){
+					case MoveConstants.NOTHING:{
+						if(!checkParalysis(attacker)) return BeforeResult.STOP;
+						Pokebot.sendMessage(channel, attacker.mention()+" is glowing!");
+						attacker.lastMoveData = MoveConstants.GLOWING;
+						attacker.set(Effects.VBattle.CHARGING);
+						return BeforeResult.STOP;
+					}
+					case MoveConstants.GLOWING:{
+						attacker.lastMoveData = MoveConstants.NOTHING;
+						attacker.remove(Effects.VBattle.CHARGING);
+						return BeforeResult.CONTINUE;
+					}
+					default:
+						return BeforeResult.STOP;
+				}
+			}
+			default:
+				return BeforeResult.CONTINUE;
 		}
 	}
 
@@ -523,6 +492,11 @@ public enum Moves{
 		BeforeResult cont = BeforeResult.CONTINUE;
 		if(move.has(Flags.HAS_BEFORE)){
 			cont = move.runBefore(channel, attacker, defender);
+		}
+		//We can assume we are in a battle context from inBattle. Also, the move.has operation is faster than the
+		// player.inBattle operation
+		if(cont != BeforeResult.STOP && move.has(Flags.MULTITURN) && attacker.inBattle()){
+			cont = move.runMultiturn(channel, attacker, defender);
 		}
 		switch(cont){
 			//noinspection DefaultNotLastCaseInSwitch
@@ -754,7 +728,7 @@ public enum Moves{
 						*getOtherModifiers(move, defender)
 						*((Pokebot.ran.nextInt(100-85)+85)/100D) //Random chance
 				;
-
+		if(attacker.hasAbility(Abilities.ANALYTIC)) modifier *= 1.3; //30% increase
 		double a = ((2*attacker.level)+10D)/250D;
 		double b;
 		if(move.isSpecial()){
@@ -909,6 +883,7 @@ public enum Moves{
 		HAS_AFTER,
 		UNTARGETABLE,
 		BYPASSES_IMMUNITIES,
+		MULTITURN, //If a move takes more than one turn
 		FLIGHT, //If a move requires the use of flying
 	}
 

@@ -86,7 +86,7 @@ public class Battle{
 			attacker.lastMove = move;
 			attacker.lastTarget = move.has(Moves.Flags.UNTARGETABLE) ? null : defender;
 			if(!move.has(Moves.Flags.UNTARGETABLE))
-				defender.lastAttacker = attacker; //TODO free-for-all battles might make this weird...
+				defender.lastAttacker = attacker; //free-for-all may make it weird, but it's intentional
 			if(this.attacks.size() == this.participants.size()){
 				this.timer.cancel();
 				this.onTurn();
@@ -107,8 +107,6 @@ public class Battle{
 		this.timer.cancel();
 		synchronized(this.attacks){
 			this.sendMessage("Processing attacks");
-			//We make a "note" of those who hadAttacks, to prevent flinch from glitching things up
-			//TODO Perhaps make it a single list for the IAttacks, and have flinching remove it on-attack-time
 			for(Player player : this.attacks.keySet()){
 				IAttack attack = this.attacks.get(player);
 				if(attack.isCanceled()) continue;

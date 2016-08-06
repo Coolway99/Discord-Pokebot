@@ -5,5 +5,6 @@ public class MoveConstants{
 	public static final int NOTHING = 0;
 	//FLY
 	public static final int FLYING = 1;
-
+	//SKY ATTACK
+	public static final int GLOWING = 1;
 }

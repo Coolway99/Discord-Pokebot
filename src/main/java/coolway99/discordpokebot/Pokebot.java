@@ -1,15 +1,5 @@
 package coolway99.discordpokebot;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.storage.PlayerHandler;
@@ -21,6 +11,16 @@ import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
 	//TODO make the rest of these configs

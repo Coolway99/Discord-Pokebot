@@ -1,13 +1,13 @@
 package coolway99.discordpokebot.battle;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PreBattle{
 

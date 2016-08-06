@@ -1,11 +1,11 @@
 package coolway99.discordpokebot.storage;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.battle.BattleManager;
 import sx.blah.discord.handle.obj.IUser;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class PlayerHandler{
 	

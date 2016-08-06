@@ -6,7 +6,7 @@ public enum Abilities{
 	AERILATE(150), //Changes all moves to flying type, Also increases power of all moves by 30%
 	AFTERMATH(100), //Does damage to the attacker when this pokemon faints unless a pokemon with damp is on the field
 	AIR_LOCK(80), //TODO Prevents weather effects, and makes moves that change the weather fail
-	//ANALYTIC(130), //TODO If the pokemon already attacked this turn, then it does 30% more damage
+	ANALYTIC(130), //TODO If the pokemon already attacked this turn, then it does 30% more damage
 	//Anger Point raises attack upon taking a critical hit, which isn't going to be implemented
 	//Anticipation isn't even worth adding
 	//Arena Trap prevents the foe from fleeing

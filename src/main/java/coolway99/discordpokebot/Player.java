@@ -1,12 +1,5 @@
 package coolway99.discordpokebot;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.EnumSet;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
@@ -16,6 +9,13 @@ import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IUser;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.util.EnumSet;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 //TODO stuff
 //The variables all contain the default states
