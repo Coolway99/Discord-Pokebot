@@ -307,14 +307,7 @@ public enum Moves{
 				return BeforeResult.STOP;
 			}
 			case GUILLOTINE:{
-				if(willHit(this, attacker, defender, false)){
-					int damage = getDamage(attacker, this, defender, defender.HP);
-					attackMessage(channel, attacker, this, defender, damage);
-					defender.HP -= damage;
-				} else {
-					missMessage(channel, attacker);
-				}
-				return BeforeResult.STOP;
+				return BeforeResult.HAS_ADJUSTED_DAMAGE;
 			}
 			case SWORDS_DANCE:{
 				attackMessage(channel, attacker, this);
@@ -433,11 +426,17 @@ public enum Moves{
 						return BeforeResult.STOP;
 				}
 			}
+			case RAZOR_WIND:
 			case SKY_ATTACK:{
 				switch(attacker.lastMoveData){
 					case MoveConstants.NOTHING:{
 						if(!checkParalysis(attacker)) return BeforeResult.STOP;
-						Pokebot.sendMessage(channel, attacker.mention()+" is glowing!");
+						switch(this){
+							case SKY_ATTACK:
+								Pokebot.sendMessage(channel, attacker.mention()+" is glowing!");
+							case RAZOR_WIND:
+								Pokebot.sendMessage(channel, attacker.mention()+" whipped up a whirlwind!");
+						}
 						attacker.lastMoveData = MoveConstants.GLOWING;
 						attacker.set(Effects.VBattle.CHARGING);
 						return BeforeResult.STOP;
@@ -458,12 +457,12 @@ public enum Moves{
 
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
 	public static boolean attack(IChannel channel, IAttack attack){
-		return attack(channel, attack.attacker, attack.move, attack.defender);
+		return attack(channel, attack.attacker, attack.move, attack.defender, -1);
 	}
 
 	//Returns ifDefenderFainted
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
-	public static boolean attack(IChannel channel, Player attacker, Moves move, Player defender){
+	public static boolean attack(IChannel channel, Player attacker, Moves move, Player defender, int slot){
 		if(!attacker.inBattle() &&
 				(move.getMoveType() == MoveType.STATUS || move.getMoveType() == MoveType.BATTLE_STATUS)){
 			Pokebot.sendMessage(channel, "But it doesn't work here!");
@@ -493,10 +492,15 @@ public enum Moves{
 		if(move.has(Flags.HAS_BEFORE)){
 			cont = move.runBefore(channel, attacker, defender);
 		}
-		//We can assume we are in a battle context from inBattle. Also, the move.has operation is faster than the
-		// player.inBattle operation
-		if(cont != BeforeResult.STOP && move.has(Flags.MULTITURN) && attacker.inBattle()){
-			cont = move.runMultiturn(channel, attacker, defender);
+		if(cont != BeforeResult.STOP){
+			if(!(slot < 0 || slot > 4)){
+				attacker.PP[slot]--;
+			}
+			//We can assume we are in a battle context from inBattle. Also, the move.has operation is faster than the
+			// player.inBattle operation
+			if(move.has(Flags.MULTITURN) && attacker.inBattle()){
+				cont = move.runMultiturn(channel, attacker, defender);
+			}
 		}
 		switch(cont){
 			//noinspection DefaultNotLastCaseInSwitch
@@ -542,6 +546,9 @@ public enum Moves{
 			case STEAM_ROLLER:
 			case STOMP:{
 				return getDamage(attacker, this, defender, this.power*2);
+			}
+			case GUILLOTINE:{
+				return getDamage(attacker, this, defender, defender.HP);
 			}
 			default:
 				return 0;

@@ -23,57 +23,20 @@ import java.util.List;
 
 public class EventHandler{
 
-	private static final String HELP_TEXT = "Here are the commands I know:\n"
-			+"Arguments in <> are mandatory, arguments in () are optional\n"
-			+"alternative spellings are shown in []\n"
-			+"All commands start with \""
-			+Pokebot.config.COMMAND_PREFIX
-			+"\"\n"
-			+"All commands are case insensitive"
-			+" If a command has only an optional @mention \"(@mention)\""
-			+" then excluding it will show relevant info for yourself\n"
-			+'\n'
-			+"help : Shows this dialog\n"
-			+'\n'
-			+"getUsedPoints [gup] (@mention) : Displays the point of the user\n"
-			+"getStats [stats] [gs] (@mention) : Displays the stats of the user\n"
-			+"setStat [ss] <statname> <amount> (ev or iv) :"
-			+" Sets your stats, if the subtype is excluded, it's assume to be base stats\n"
-			+"printStats [ps] : Sends you a PM with your stats in detail."
-			+" Instead of showing you the total value, this breaks it down by every favor\n"
-			+'\n'
-			+"setMove [sm] <slot> <move_name> : Sets the slot to this move."
-			+" Slots are 1-4, and will be ignored if you don't yet have 4 moves\n"
-			+"getMove [gm] <slot> (@mention) : Displays the move in that user's slot\n"
-			+"listMoves [lm] (@mention) : Displays a list of the user's moves\n"
-			+"listAllMoves [lam] : Sends you a list of every move I know\n"
-			+'\n'
-			+"type (@mention) : Displays the type(s) of the user\n"
-			+"setType [st] <type> (type2) : Sets your type(s)\n"
-			+'\n'
-			+"getPP [gpp] [gp] (@mention) : Displays the remaining PP for the user's moves\n"
-			+"attack <slot> <@mention> : Attacks the user with the move in your given slot\n"
-			+"heal [revive] (@mention) : Heals the given user to full HP, PP, and removes all status effects\n"
-			+'\n'
-			+"battle <turnTime> <@mention> (@mention...) : Starts a battle with the given turn time."
-			+" The turnTime is how many seconds before the turn is forcefully ended."
-			+" You need at to invite least one person, you can invite more, and it's not limited to those you invite\n"
-			+"joinBattle [jb] <@mention> : Joins the battle that person opened\n"
-			+"startBattle [sb] : Starts the battle you previously opened";
-
 	//TODO: Not all commands have outputs, this needs to be fixed
 	//TODO: Perhaps make this neater somehow
 	//TODO: Perhaps split some sections off into different classes
-	@SuppressWarnings("SpellCheckingInspection")
+	@SuppressWarnings({"SpellCheckingInspection", "WeakerAccess"})
 	@EventSubscriber
 	public void onMessage(MessageReceivedEvent event){
 		IMessage message = event.getMessage();
-		IChannel channel = message.getChannel();
+		if(message.mentionsEveryone()) return; //We don't want to respond to @everyone
 		IUser author = message.getAuthor(); //The author of the message
+		if(author.isBot()) return; //We don't want to respond to bots
+		IChannel channel = message.getChannel();
 		IUser mentionOrAuthor = message.getMentions().isEmpty() ?
 				author : message.getMentions().get(0); //The first person the author mentioned, or the author if there
 		// was nobody
-		if(message.mentionsEveryone()) return; //We don't want to respond to @everyone
 		/*if(message.toString().toLowerCase().contains("pokemon go")){
 			Pokebot.sendMessage(channel, "Our servers are experiencing issues. Please come back later");
 			return;
@@ -84,7 +47,8 @@ public class EventHandler{
 			switch(args[0].toLowerCase().replaceFirst(Pokebot.config.COMMAND_PREFIX, "")){
 				case "gettype":
 				case "gt":
-				case "type":{
+				case "type":
+				case "types":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
 					Pokebot.sendMessage(channel, mentionOrAuthor.mention()+" is type "+player.primary.toString()
 							+(player.hasSecondaryType() ? " with secondary type "+player.secondary.toString()
@@ -99,7 +63,7 @@ public class EventHandler{
 						return;
 					}
 					if(args.length < 2){
-						reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+" <type> (type)");
+						reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+"settype <type> (type)");
 						return;
 					}
 					try{
@@ -112,6 +76,7 @@ public class EventHandler{
 						}
 						player.primary = type;
 						player.secondary = type2;
+						reply(message, "Type(s) set to "+type+" "+(type2 != Types.NULL ? type2 : ""));
 					} catch(IllegalArgumentException e){
 						reply(message, "That's not a valid type!");
 					}
@@ -198,10 +163,8 @@ public class EventHandler{
 							.append(StatHandler.getCombinedPoints(player, SubStats.EV))
 							.append('/').append(StatHandler.MAX_TOTAL_EV_POINTS)
 							.append("\nLevel: ").append(player.level).append('/').append(StatHandler.MAX_LEVEL)
-							.append("\nNature: ").append(player.nature.getExpandedText());
-				/*TODO
-				 * builder.append("\nAbility").append(player.ability);
-				 */
+							.append("\nNature: ").append(player.nature.getExpandedText())
+							.append("\nAbility: ").append(player.getAbility());
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent a PM to you with your stats");
 					return;
@@ -238,7 +201,7 @@ public class EventHandler{
 				case "listallnature":{
 					StringBuilder builder = new StringBuilder("These are the natures I know:");
 					for(Natures nature : Natures.values()){
-						builder.append('\n').append(nature);
+						builder.append('\n').append(nature.getExpandedText());
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent you all the natures I know");
@@ -306,6 +269,10 @@ public class EventHandler{
 						} else {
 							slot--;
 						}
+						if(StatHandler.wouldExceedTotalPoints(player, player.moves[slot], move)){
+							reply(message, "You don't have enough points left for that move!");
+							return;
+						}
 						player.moves[slot] = move;
 						player.PP[slot] = move.getPP();
 						reply(message, "Set move "+(slot+1)+" to "+move.getName());
@@ -313,32 +280,6 @@ public class EventHandler{
 						reply(message, "That is not a valid number!");
 					} catch(IllegalArgumentException e){
 						reply(message, "That is not a valid move!");
-					}
-					return;
-				}
-				case "gm":
-				case "getmove":{
-					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-					try{
-						if(args.length < 2){
-							reply(message, "Usage: <slot> (@user)");
-							return;
-						}
-						int slot = Integer.parseInt(args[1]);
-						if(slot < 1 || slot > 4){
-							reply(message, "Slots range from 1-4");
-							return;
-						}
-						if(slot > player.numOfAttacks){
-							reply(message, "They don't have a move in that slot!");
-							return;
-						}
-						Pokebot.sendMessage(channel, player.user.mention()
-								+" has "+player.moves[slot-1].getName()
-								+" in slot "+slot);
-						return;
-					} catch(NumberFormatException e){
-						reply(message, "That's not a number!");
 					}
 					return;
 				}
@@ -350,19 +291,23 @@ public class EventHandler{
 							return;
 						}
 						Moves move = Moves.valueOf(args[1].toUpperCase());
-						StringBuilder b = new StringBuilder("Stats of ").append(move);
-						b.append("\nType: ").append(move.getType(Abilities.MC_NORMAL_PANTS));
-						b.append("\nPower: ").append(move.getPower());
-						b.append("\nPP: ").append(move.getPP());
-						b.append("\nAccuracy: ").append(Math.round(move.getAccuracy()*10000)/100);
-						b.append('\n').append(move.isSpecial() ? "Special" : "Physical");
-						b.append("\nPoint Cost: ").append(move.getCost());
-						Pokebot.sendMessage(channel, b.toString());
+						String b = "Stats of "+move+
+								"\nType: "+move.getType(Abilities.MC_NORMAL_PANTS)+
+								"\nPower: "+move.getPower()+
+								"\nPP: "+move.getPP()+
+								"\nAccuracy: "+Math.round(move.getAccuracy()*10000)/100+
+								'\n'+(move.isSpecial() ? "Special" : "Physical")+
+								"\nPoint Cost: "+move.getCost();
+						Pokebot.sendMessage(channel, b);
 					} catch(IllegalArgumentException e){
 						reply(message, "That's not a valid move!");
 					}
 					return;
 				}
+				case "getpp":
+				case "gpp":
+				case "gp":
+					Pokebot.sendMessage(channel, "Depreciated, use listMoves instead");
 				case "lm":
 				case "listmoves":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
@@ -370,14 +315,11 @@ public class EventHandler{
 						Pokebot.sendMessage(channel, " has no moves!");
 						return;
 					}
-					StringBuilder builder = new StringBuilder("The moves for ");
-					builder.append(player.user.mention());
-					builder.append(" are:\n");
+					StringBuilder builder = new StringBuilder("The moves for ").append(player.mention()).append(" are:\n");
 					for(int x = 0; x < player.numOfAttacks; x++){
-						builder.append(x+1);
-						builder.append(": ");
-						builder.append(player.moves[x].toString());
-						builder.append('\n');
+						builder.append(x+1).append(": ").append(player.moves[x].toString());
+						builder.append(" [").append(player.PP[x]).append('/')
+								.append(player.moves[x].getPP()).append("]\n");
 					}
 					Pokebot.sendMessage(channel, builder.toString());
 					return;
@@ -387,24 +329,11 @@ public class EventHandler{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
 					Moves[] moves = Moves.values();
 					for(int x = 1; x < moves.length; x++){ //Starting at one to prevent the NULL move
-						builder.append(moves[x].toString()).append("\n");
+						builder.append(moves[x].toString()).append(" (").append(moves[x].getMoveType()).append(')')
+								.append("\n");
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent you all the moves I know");
-					return;
-				}
-				case "gp":
-				case "gpp":
-				case "getpp":{
-					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-					StringBuilder builder = new StringBuilder("The PP remaining for "+player.user.mention()+" is:\n");
-					for(int x = 0; x < player.numOfAttacks; x++){
-						builder.append(x+1);
-						builder.append(": ");
-						builder.append(player.PP[x]);
-						builder.append('\n');
-					}
-					Pokebot.sendMessage(channel, builder.toString());
 					return;
 				}
 				case "setlevel":
@@ -451,7 +380,7 @@ public class EventHandler{
 						slot--;
 						Player attacker = PlayerHandler.getPlayer(author);
 						if(attacker.numOfAttacks == 0){
-							reply(message, "You have no moves! Set some with "+Pokebot.config.COMMAND_PREFIX+"sm");
+							reply(message, "You have no moves! Set some with "+Pokebot.config.COMMAND_PREFIX+"setmove");
 							return;
 						}
 						if(attacker.numOfAttacks < slot){
@@ -477,11 +406,10 @@ public class EventHandler{
 						}
 						//At this point, we know there's a valid move in the slot and neither party has fainted
 						//Before anything else, lets see if the target is the bot
-					/*if(defender.user.getID().equals(Pokebot.client.getOurUser().getID())){
-						Pokebot.sendMessage(channel, 
-								author.mention()+" tried hurting me!");
-						return;
-					}*/
+						if(defender.user.getID().equals(Pokebot.client.getOurUser().getID()) && !attacker.inBattle()){
+							Pokebot.sendMessage(channel, author.mention()+" tried hurting me!");
+							return;
+						}
 						//If the player is in a battle, we want to pass on the message
 						if(attacker.inBattle()){
 							if(defender.inBattle()){
@@ -501,13 +429,11 @@ public class EventHandler{
 							return;
 						}
 						//This is the normal neither-in-battle mess around attack
-						Moves.attack(channel, attacker, move, defender);
+						Moves.attack(channel, attacker, move, defender, slot);
 						if(StatHandler.getStatPoints(defender) <= 10){
-							Pokebot.sendMessage(channel, defender.user.mention()+", it looks like you haven't set any " +
-									"stats!"
-									+"Set some with setstats");
+							Pokebot.sendMessage(channel, defender.mention()+", it looks like you haven't set any stats!"
+									+" Set some with setstats");
 						}
-						attacker.PP[slot]--;
 					} catch(NumberFormatException e){
 						reply(message, "That's not a number!");
 					} catch(IndexOutOfBoundsException e){
@@ -587,8 +513,8 @@ public class EventHandler{
 					return;
 				}
 				case "help":{
-					Pokebot.sendMessage(Pokebot.client.getOrCreatePMChannel(author), EventHandler.HELP_TEXT);
-					reply(message, "I sent you a PM with my help menu");
+					Pokebot.sendMessage(channel, "A detailed command list can be found at " +
+							"https://github.com/Coolway99/Discord-Pokebot/wiki/Command-List");
 					return;
 				}
 				case "pgs":
@@ -653,6 +579,18 @@ public class EventHandler{
 					newMessage.appendContent(builder.toString());
 					newMessage.withChannel(channel);
 					this.onMessage(new MessageReceivedEvent(newMessage.send()));
+					return;
+				}
+				case "info":{
+					reply(message, "I am a Pokémon bot for Discord, but not in the traditional sense. " +
+							"The concept is that YOU are the Pokémon, and I am built off of that idea.\n" +
+							"While I am released to the public, I am currently incomplete and may change overtime.\n" +
+							"I was built by Coolway99, and you can find my source code and more information at " +
+							"https://github.com/Coolway99/Discord-Pokebot");
+					return;
+				}
+				case "version":{
+					reply(message, "I am version "+Pokebot.VERSION);
 					return;
 				}
 				default:

@@ -326,7 +326,7 @@ public class Player{
 					out.println(stat);
 				}
 			}
-			
+
 			out.println(this.numOfAttacks);
 			for(Moves move : this.moves){
 				out.println(move.toString());
@@ -340,5 +340,13 @@ public class Player{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj){
+		if(obj instanceof Player){
+			return this.user.getID().equals(((Player) obj).user.getID());
+		}
+		return false;
 	}
 }

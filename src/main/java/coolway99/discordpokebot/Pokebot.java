@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
+	public static final String VERSION = "1.0.0";
 	//TODO make the rest of these configs
-	//public static final long SAVE_DELAY = minutesToMiliseconds(1);
 	private static final byte SAVE_DELAY = 1; //In minutes
 	private static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
 	private static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
@@ -48,7 +48,6 @@ public class Pokebot{
 			client = getClient(args[0]);
 		}
 		System.out.println("Logging in");
-		//client = getClient(TOKEN);
 		client.getDispatcher().registerListener(new BotReadyHandler());
 		timer.scheduleAtFixedRate(PlayerHandler::saveAll
 				, SAVE_DELAY, SAVE_DELAY, TimeUnit.MINUTES);
@@ -66,7 +65,7 @@ public class Pokebot{
 	}
 
 	public static void sendMessage(IChannel channel, String message){
-		locks.putIfAbsent(channel, new ReentrantLock());
+		locks.putIfAbsent(channel, new ReentrantLock()); //Thread Safe "create if doesn't exist"
 		locks.get(channel).lock();
 		try{
 			if(!buffers.containsKey(channel)){
@@ -98,34 +97,46 @@ public class Pokebot{
 	public static class MessageTimer implements Runnable{
 		@Override
 		public void run(){
-			//I'm lazy
-			synchronized(Pokebot.buffers){
-				syncRun();
-			}
-		}
-		
-		private static void syncRun(){
-			Iterator<IChannel> i = buffers.keySet().iterator();
-			while(i.hasNext()){
-				IChannel channel = i.next();
-				StringBuilder builder = buffers.get(channel);
-				if(builder.length() > 0){
-					locks.get(channel).lock();
+			synchronized(Pokebot.buffers){ //This lock is for the buffers, adding/removing channel buffers
+				Iterator<IChannel> i = Pokebot.buffers.keySet().iterator();
+				while(i.hasNext()){
+					IChannel channel = i.next();
+					StringBuilder builder = Pokebot.buffers.get(channel);
+					Pokebot.locks.get(channel).lock(); //This lock is for changing channel buffers
 					try{
-						channel.sendMessage(builder.toString()); //If it fails at this point, then the next message tick will try again
-						i.remove();
-					}catch(RateLimitException e){
+						if(builder.length() > 2000){ //This is the character limit TODO make it not hardcoded
+							int k = builder.lastIndexOf("\n", 2000);
+							if(k == -1){
+								System.err.println(builder);
+								System.err.println("2000+ characters, not a single line break");
+								channel.sendMessage("Exceeded max characters per message");
+								i.remove();
+							} else {
+								String remainder = builder.substring(k+1);
+								builder.setLength(k);
+								channel.sendMessage(builder.toString());
+								builder.setLength(0);
+								builder.append(remainder);
+							}
+						} else if(builder.length() > 0){
+							//If it fails at this point, then the next message tick will try again
+							channel.sendMessage(builder.toString());
+							i.remove();
+						} else {
+							i.remove();
+						}
+					} catch(RateLimitException e){
 						System.err.println("We are being rate limited in channel "
 								+channel.getGuild().getID()+'/'+channel.getID());
-					}catch(MissingPermissionsException e){
+					} catch(MissingPermissionsException e){
 						System.err.println("We do not have permission to send messages in channel "
 								+channel.getGuild().getID()+'/'+channel.getID());
-					}catch(DiscordException e){
+					} catch(DiscordException e){
 						e.printStackTrace();
 						System.err.println("\nWe were unable to send messages in channel "
 								+channel.getGuild().getID()+'/'+channel.getID());
 					} finally {
-						locks.get(channel).unlock();
+						Pokebot.locks.get(channel).unlock();
 					}
 				}
 			}

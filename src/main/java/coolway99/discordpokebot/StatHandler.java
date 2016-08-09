@@ -1,6 +1,8 @@
 package coolway99.discordpokebot;
 
+import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
+import coolway99.discordpokebot.states.Moves;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -29,13 +31,13 @@ public class StatHandler{
 	public static final int MAX_TOTAL_EV_POINTS = 127; //Got by dividing 510 by 4 then rounding
 	public static final int MAX_SINGLE_EV_POINTS = 63; //Got by dividing 252 by 4
 	
-	public static final int[] MAX_SINGLE_SUBSTATS = new int[]{
+	private static final int[] MAX_SINGLE_SUBSTATS = new int[]{
 			MAX_SINGLE_STAT_POINTS,
 			MAX_SINGLE_IV_POINTS,
 			MAX_SINGLE_EV_POINTS
 	};
 	
-	public static final int[] MAX_TOTAL_SUBSTATS = new int[]{
+	private static final int[] MAX_TOTAL_SUBSTATS = new int[]{
 			MAX_TOTAL_STAT_POINTS,
 			31*6,
 			MAX_TOTAL_EV_POINTS
@@ -129,6 +131,7 @@ public class StatHandler{
 			return;
 		}
 		player.stats[s.getIndex()][subS.getIndex()] = newStat;
+		Pokebot.sendMessage(channel, "Set "+s+" "+subS+" to "+newStat);
 	}
 	
 	public static double getModifierChange(byte mod){
@@ -189,5 +192,21 @@ public class StatHandler{
 			}
 		}
 		Pokebot.sendMessage(channel, b.toString());
+	}
+
+	public static boolean wouldExceedTotalPoints(Player player, int oldAmount, int newAmount){
+		return wouldExceed(getTotalPoints(player), oldAmount, newAmount, MAX_TOTAL_POINTS);
+	}
+
+	public static boolean wouldExceedTotalPoints(Player player, Moves oldMove, Moves newMove){
+		return wouldExceedTotalPoints(player, oldMove.getCost(), newMove.getCost());
+	}
+
+	public static boolean wouldExceedTotalPoints(Player player, Abilities oldAbility, Abilities newAbilitiy){
+		return wouldExceedTotalPoints(player, oldAbility.getCost(), newAbilitiy.getCost());
+	}
+
+	public static boolean wouldExceed(int current, int oldAmount, int newAmount, int max){
+		return current-oldAmount+newAmount > max;
 	}
 }

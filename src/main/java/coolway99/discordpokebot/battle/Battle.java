@@ -113,7 +113,9 @@ public class Battle{
 				attack.cancel();
 				this.threatenTimeout.remove(attack.attacker);
 				//We know it's sorted by speed, so only the fastest go first
-				this.attackLogic(attack);
+				if(this.attackLogic(attack)){
+					return;
+				}
 				//Both a recoil check and a failsafe
 				if(attack.attacker.HP <= 0){
 					this.sendMessage(attack.attacker.mention()+" fainted!");
@@ -197,17 +199,17 @@ public class Battle{
 		}
 	}
 
-	private void attackLogic(final IAttack attack){
+	private boolean attackLogic(final IAttack attack){
 		//Check for flinch status
 		if(attack.attacker.has(Effects.Volatile.FLINCH)){
 			this.sendMessage("But "+attack.attacker.mention()+" is flinching!");
 			attack.attacker.remove(Effects.Volatile.FLINCH);
-			return;
+			return false;
 		}
 		if(!this.participants.contains(attack.defender)){
 			this.sendMessage(attack.attacker.mention()
 					+" went to attack, but there was no target!");
-			return;
+			return false;
 		}
 		if(Moves.attack(this.channel, attack)){
 			if(attack.defender.lastMove == Moves.DESTINY_BOND){
@@ -226,7 +228,7 @@ public class Battle{
 				}
 			}
 			if(this.playerFainted(attack.defender)){
-				return;
+				return true;
 			}
 			if(attack.defender.hasAbility(Abilities.AFTERMATH)){
 				for(Player player : this.participants){
@@ -235,13 +237,14 @@ public class Battle{
 					if(player.hasAbility(Abilities.DAMP)){
 						this.preventExplosion(player, attack.defender);
 						//If the player has <= 0 HP, then the after-attacks check will catch it
-						return;
+						return false;
 					}
 				}
 				//Else we actually do damage
 				attack.attacker.HP -= attack.attacker.getMaxHP()/4;
 			}
 		}
+		return false;
 	}
 
 	public void set(BattleEffects effect, int duration){

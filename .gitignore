@@ -55,3 +55,5 @@ pokebot.conf
 .idea/
 *.xml
 !pom.xml
+/wiki/
+/build/
