@@ -166,6 +166,24 @@ public class EventHandler{
 					reply(message, "I sent a PM to you with your stats");
 					return;
 				}
+				case "clearstats":
+				case "cs":{
+					if(args.length < 2){
+						reply(message, "for safety, you must type your user id\nUsage: clearstats "+author.getID());
+						return;
+					}
+					if(!args[1].equals(author.getID())){
+						reply(message, "That is not your user id!");
+						return;
+					}
+					Player player = PlayerHandler.getPlayer(author);
+					for(int x = 0; x < player.stats.length; x++){
+						for(int y = 0; y < player.stats[x].length; y++){
+							player.stats[x][y] = 0;
+						}
+					}
+					reply(message, "stats cleared");
+				}
 				case "gn":
 				case "getnature":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
@@ -215,6 +233,7 @@ public class EventHandler{
 					Player player = PlayerHandler.getPlayer(author);
 					try{
 						Abilities ability = Abilities.valueOf(args[1].toUpperCase());
+						if(StatHandler.wouldExceedTotalPoints(player, ability)) StatHandler.exceedWarning(channel, player);
 						player.setAbility(ability);
 						reply(message, "Set ability to "+ability);
 					} catch(IndexOutOfBoundsException e){
@@ -261,14 +280,17 @@ public class EventHandler{
 							return;
 						}
 						if(player.numOfAttacks < 4){
-							slot = player.numOfAttacks++;
-							reply(message, "Less than 4 moves detected, setting slot to the last slot in the list...");
-						} else {
-							slot--;
+							if(slot != player.numOfAttacks++){
+								reply(message, "Less than 4 moves detected, setting slot to the last slot in the list...");
+							}
+							slot = player.numOfAttacks;
 						}
+						slot--;
+
 						if(StatHandler.wouldExceedTotalPoints(player, player.moves[slot], move)){
-							reply(message, "You don't have enough points left for that move!");
-							return;
+							/*reply(message, "You don't have enough points left for that move!");
+							return;*/
+							StatHandler.exceedWarning(channel, player);
 						}
 						player.moves[slot] = move;
 						player.PP[slot] = move.getPP();
@@ -326,11 +348,53 @@ public class EventHandler{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
 					Moves[] moves = Moves.values();
 					for(int x = 1; x < moves.length; x++){ //Starting at one to prevent the NULL move
-						builder.append(moves[x].toString()).append(" (").append(moves[x].getMoveType()).append(')')
-								.append("\n");
+						builder.append(moves[x].toString()).append(" (").append(moves[x].getMoveType()).append(')').append("\n");
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent you all the moves I know");
+					return;
+				}
+				case "removemove":
+				case "deletemove":
+				case "clearmove":
+				case "rm":
+				case "dm":
+				case "cm":{
+					Player player = PlayerHandler.getPlayer(author);
+					if(player.inBattle()){
+						inBattleMessage(message);
+						return;
+					}
+					if(args.length < 2){
+						reply(message, "Usage: clearMove <slotnumber>");
+						return;
+					}
+					try{
+						int slot = Integer.parseInt(args[1]);
+						if(slot > 4 || slot < 1){
+							reply(message, "Invalid slot. Slots are 1-4");
+							return;
+						}
+						slot--; //So that it corisponds to computer code
+						if(player.numOfAttacks < slot){
+							reply(message, "You don't have a move in that slot!");
+							return;
+						}
+						player.numOfAttacks--;
+						player.moves[slot] = Moves.NULL;
+						player.PP[slot] = 0;
+						for(int x = 0; x < player.moves.length-1; x++){
+							if(player.moves[x] == Moves.NULL){
+								player.moves[x] = player.moves[x+1];
+								player.PP[x] = player.PP[x+1];
+								player.moves[x+1] = Moves.NULL;
+								player.PP[x+1] = 0;
+							}
+						}
+						reply(message, "Cleared move in slot "+(slot+1));
+					} catch(NumberFormatException e){
+						reply(message, "That is not a valid number!");
+					}
 					return;
 				}
 				case "setlevel":
@@ -349,9 +413,10 @@ public class EventHandler{
 							reply(message, "that's not a valid level. The range is 1-"+StatHandler.MAX_LEVEL);
 							return;
 						}
-						if(StatHandler.getTotalPoints(player)-player.level+newL > StatHandler.MAX_TOTAL_POINTS){
-							reply(message, "you don't have enough points left for that!");
-							return;
+						if(StatHandler.wouldExceedTotalPoints(player, player.level, newL)){
+							//reply(message, "you don't have enough points left for that!");
+							//return;
+							StatHandler.exceedWarning(channel, player);
 						}
 						player.level = newL;
 						reply(message, "set new level to "+newL);

@@ -123,12 +123,14 @@ public class StatHandler{
 			Pokebot.sendMessage(channel, "Not enough points left to do that, you have "
 					+(MAX_TOTAL_SUBSTATS[subS.getIndex()]-
 							(getCombinedPoints(player, subS)-player.stats[s.getIndex()][subS.getIndex()]))
-					+" points left for this category");
+					+" points left for "+(subS == SubStats.EV ? "EV's" : subS == SubStats.BASE ? "base stats" :
+					"ERROR"));
 			return;
 		}
 		if(getTotalPoints(player) + change > MAX_TOTAL_POINTS){
-			Pokebot.sendMessage(channel, "You don't have enough points overall to do this!");
-			return;
+			//Pokebot.sendMessage(channel, "You don't have enough points overall to do this!");
+			//return;
+			exceedWarning(channel, player);
 		}
 		player.stats[s.getIndex()][subS.getIndex()] = newStat;
 		Pokebot.sendMessage(channel, "Set "+s+" "+subS+" to "+newStat);
@@ -206,7 +208,16 @@ public class StatHandler{
 		return wouldExceedTotalPoints(player, oldAbility.getCost(), newAbilitiy.getCost());
 	}
 
+	public static boolean wouldExceedTotalPoints(Player player, Abilities newAbility){
+		return wouldExceedTotalPoints(player, player.getAbility(), newAbility);
+	}
+
 	public static boolean wouldExceed(int current, int oldAmount, int newAmount, int max){
 		return current-oldAmount+newAmount > max;
+	}
+
+	public static void exceedWarning(IChannel channel, Player player){
+		Pokebot.sendMessage(channel, player.mention()+" warning! You have exceeded the maximum total points. You will" +
+				" not be able to attack or battle until this is resolved");
 	}
 }
