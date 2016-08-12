@@ -6,16 +6,15 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class PreBattle{
 
 	private final IUser host;
 	public final IChannel channel;
-	public final List<Player> participants;
+	public final ArrayList<Player> participants;
 	public final int turnTimer;
-	private final PreBattleTimeout waitTimer;
+	public final PreBattleTimeout waitTimer;
 	
 	public PreBattle(IChannel channel, Player host, int turnTimer){
 		this.channel = channel;

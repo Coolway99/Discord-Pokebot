@@ -10,3 +10,5 @@ That being said, you can authorize Pokébot [here](https://discordapp.com/oauth2
 NOTE: THIS BOT IS STILL IN DEVELOPMENT
 
 Please note that I cannot work on this bot 24/7, as such documentation or code may be out of date
+
+Pokébot is licensed under GNU GPL v3. Any code here without a license is also licensed under GNU GPL v3.

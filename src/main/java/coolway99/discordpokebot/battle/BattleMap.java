@@ -8,7 +8,7 @@ import java.util.*;
  * @author Coolway
  * @since 2016-07-26
  */
-@SuppressWarnings("InstanceofInterfaces")
+@SuppressWarnings({"ClassNamePrefixedWithPackageName", "InstanceofInterfaces"})
 public class BattleMap implements SortedMap<Player, IAttack>, Comparator<IAttack>{
 
 	private final ArrayList<Player> players;

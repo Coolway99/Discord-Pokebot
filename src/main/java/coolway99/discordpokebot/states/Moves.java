@@ -17,8 +17,7 @@ import java.util.List;
 //For multi-hit moves, refer to PMD if needed
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
 public enum Moves{
-	//ENUM_NAME(Type, isSpecial", PP, Power, Accuracy (either int or double)
-	//hasTarget, hasBefore, hasAfter, cost),
+	//ENUM_NAME(Type, MoveType, PP, Power, Accuracy, cost, battlepriority, flags)
 	NULL(Types.NULL, MoveType.PHYSICAL, 0, 0, 0), //TODO perhaps make this Struggle
 	ABSORB(Types.GRASS, MoveType.SPECIAL, 25, 20, 100, 40, Flags.HAS_BEFORE), //Double it's cost because it heals
 	ACID(Types.POISON, MoveType.SPECIAL, 30, 40, 100, 45, Flags.HAS_AFTER), //Has a chance of lowering special defense
@@ -52,14 +51,13 @@ public enum Moves{
 	DOUBLE_SLAP(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 15, Flags.HAS_BEFORE), //Same as Comet Punch
 	FAIRY_WIND(Types.FAIRY, MoveType.SPECIAL, 30, 40, 100), //Same as scratch
 	FIRE_PUNCH(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
-	//TODO using the multiturn flags
-	FLY(Types.FLYING, MoveType.PHYSICAL, 15, 90, 95, 120, Flags.HAS_BEFORE, Flags.FLIGHT), //Multiturn, boosted cost
-	// because of semiinvul
+	//Multiturn, boosted cost because of semiinvul
 	HEAL_BELL(Types.NORMAL, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
+	FLY(Types.FLYING, MoveType.PHYSICAL, 15, 90, 95, 120, Flags.HAS_BEFORE, Flags.FLIGHT, Flags.MULTITURN),
 	ICE_PUNCH(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	GASTRO_ACID(Types.POISON, MoveType.STATUS, 10, -1, 100, 150, Flags.HAS_BEFORE), //Suppresses the target's ability
 	GRAVITY(Types.PSYCHIC, MoveType.BATTLE_STATUS, 5, -1, -1, 100, Flags.HAS_BEFORE, Flags.UNTARGETABLE),
-	GUILLOTINE(Types.NORMAL, MoveType.PHYSICAL, 5, -1, 30, 50, Flags.HAS_BEFORE),
+	GUILLOTINE(Types.NORMAL, MoveType.PHYSICAL, 5, -1, 30, 150, Flags.HAS_BEFORE),
 	//Affects fly and other moves like that, dealing double damage. +10 cost because of that
 	GUST(Types.FLYING, MoveType.SPECIAL, 35, 40, 100, 50), //Same as scratch, affects fly, bounce, etc
 	JUMP_KICK(Types.FIGHTING, MoveType.PHYSICAL, 10, 100, 95, 100, Flags.HAS_BEFORE, Flags.FLIGHT), //Has recoil
@@ -411,7 +409,7 @@ public enum Moves{
 			case FLY:{
 				switch(attacker.lastMoveData){
 					case MoveConstants.NOTHING:{
-						if(!checkParalysis(attacker)) return BeforeResult.STOP;
+						if(checkParalysis(attacker)) return BeforeResult.STOP;
 						Pokebot.sendMessage(channel, attacker.mention()+" flew up high!");
 						attacker.lastMoveData = MoveConstants.FLYING;
 						attacker.set(Effects.VBattle.SEMI_INVULNERABLE);
@@ -430,7 +428,7 @@ public enum Moves{
 			case SKY_ATTACK:{
 				switch(attacker.lastMoveData){
 					case MoveConstants.NOTHING:{
-						if(!checkParalysis(attacker)) return BeforeResult.STOP;
+						if(checkParalysis(attacker)) return BeforeResult.STOP;
 						switch(this){
 							case SKY_ATTACK:
 								Pokebot.sendMessage(channel, attacker.mention()+" is glowing!");
@@ -493,9 +491,7 @@ public enum Moves{
 			cont = move.runBefore(channel, attacker, defender);
 		}
 		if(cont != BeforeResult.STOP){
-			if(!(slot < 0 || slot > 4)){
-				attacker.PP[slot]--;
-			}
+			if(slot >= 0 && slot < 4) attacker.PP[slot]--;
 			//We can assume we are in a battle context from inBattle. Also, the move.has operation is faster than the
 			// player.inBattle operation
 			if(move.has(Flags.MULTITURN) && attacker.inBattle()){
@@ -548,7 +544,7 @@ public enum Moves{
 				return getDamage(attacker, this, defender, this.power*2);
 			}
 			case GUILLOTINE:{
-				return getDamage(attacker, this, defender, defender.HP);
+				return defender.HP;
 			}
 			default:
 				return 0;

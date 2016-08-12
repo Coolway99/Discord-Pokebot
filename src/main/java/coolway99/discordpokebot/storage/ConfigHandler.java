@@ -16,6 +16,7 @@ public class ConfigHandler{
 	public final String SAVEDIR;
 	public final String OPSPATH;
 	public final String OWNERID;
+	public final String TOKEN;
 	
 	private final Properties prop;
 	
@@ -30,7 +31,9 @@ public class ConfigHandler{
 	private static final String OPSPATHDEFAULT = "/botdata/ops.conf";
 	private static final String SAVEDIRKEY = "USER_POKEMON_DIR";
 	private static final String SAVEDIRDEFAULT = "/botdata/userpokemon";
-	
+	private static final String TOKENKEY = "TOKEN";
+	private static final String TOKENDEFAULT = "";
+
 	public ConfigHandler(){
 		Properties config = new Properties();
 		File file = new File(CONFPATH);
@@ -47,6 +50,7 @@ public class ConfigHandler{
 		this.OWNERID = config.getProperty(OWNERIDKEY, OWNERIDDEFAULT);
 		this.SAVEDIR = config.getProperty(SAVEDIRKEY, SAVEDIRDEFAULT);
 		this.OPSPATH = config.getProperty(OPSPATHKEY, OPSPATHDEFAULT);
+		this.TOKEN = config.getProperty(TOKENKEY, TOKENDEFAULT);
 		
 		this.prop = config;
 		
@@ -64,10 +68,11 @@ public class ConfigHandler{
 		this.prop.setProperty(OWNERIDKEY, OWNERIDDEFAULT);
 		this.prop.setProperty(SAVEDIRKEY, SAVEDIRDEFAULT);
 		this.prop.setProperty(OPSPATHKEY, OPSPATHDEFAULT);
+		this.prop.setProperty(TOKENKEY, TOKENDEFAULT);
 		File file = new File(CONFPATH);
 		if(!file.exists() && file.getParentFile() != null) file.getParentFile().mkdirs();
 		try(OutputStream out = new FileOutputStream(file)){
-			this.prop.store(out, "Full documentation can be found at TODO"
+			this.prop.store(out, "Full documentation can be found at TODO" //TODO
 					+ "\nComment out lines with #"
 					+ "\nCommented out lines will return to default");
 		}catch(IOException e){

@@ -9,6 +9,7 @@ import sx.blah.discord.handle.obj.IUser;
 
 import java.util.*;
 
+@SuppressWarnings("ClassNamePrefixedWithPackageName")
 public class BattleManager{
 
 	public static final int BATTLE_TIMEOUT = 10; //In Minutes
@@ -76,8 +77,19 @@ public class BattleManager{
 	//Ideally only ever called from the command
 	public static void onLeaveBattle(Player player){
 		if(player.battle == null) return;
-		Pokebot.sendMessage(player.battle.channel, player.user.mention()+" left the battle!");
+		Pokebot.sendMessage(player.battle.channel, player.mention()+" left the battle!");
 		player.battle.onLeaveBattle(player);
+	}
+
+	public static void onCancelBattle(IChannel channel, IUser user){
+		PreBattle battle = preBattles.remove(user);
+		if(battle == null){
+			Pokebot.sendMessage(channel, user.mention()+", you don't have a battle pending!");
+			return;
+		}
+		inPreBattle.removeAll(battle.participants);
+		battle.waitTimer.cancel();
+		Pokebot.sendMessage(channel, user.mention()+" canceled their pending battle!");
 	}
 
 	public static void onExitBattle(Player player){

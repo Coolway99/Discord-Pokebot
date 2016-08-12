@@ -18,7 +18,7 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.MessageBuilder;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventHandler{
@@ -32,15 +32,11 @@ public class EventHandler{
 		IMessage message = event.getMessage();
 		if(message.mentionsEveryone()) return; //We don't want to respond to @everyone
 		IUser author = message.getAuthor(); //The author of the message
-		if(author.isBot()) return; //We don't want to respond to bots
+		//We don't want to respond to bots
+		if(author.isBot() && !author.getID().equals(Pokebot.client.getOurUser().getID())) return;
 		IChannel channel = message.getChannel();
-		IUser mentionOrAuthor = message.getMentions().isEmpty() ?
-				author : message.getMentions().get(0); //The first person the author mentioned, or the author if there
-		// was nobody
-		/*if(message.toString().toLowerCase().contains("pokemon go")){
-			Pokebot.sendMessage(channel, "Our servers are experiencing issues. Please come back later");
-			return;
-		}*/
+		//The first person the author mentioned, or the author if there was nobody
+		IUser mentionOrAuthor = message.getMentions().isEmpty() ? author : message.getMentions().get(0);
 		if(!message.toString().startsWith(Pokebot.config.COMMAND_PREFIX)) return;
 		String[] args = message.toString().split(" ");
 		try{
@@ -85,7 +81,7 @@ public class EventHandler{
 				case "getusedpoints":
 				case "gup":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-					Pokebot.sendMessage(channel, player.user.mention()
+					Pokebot.sendMessage(channel, player.mention()
 							+" has a total point count of "+StatHandler.getTotalPoints(player)
 							+" out of a maximum of "+StatHandler.MAX_TOTAL_POINTS);
 					return;
@@ -126,6 +122,7 @@ public class EventHandler{
 					try{
 						StatHandler.setStats(channel, player, args[1], Integer.parseInt(args[2]),
 								args.length > 3 ? args[3] : null);
+						player.HP = player.getMaxHP();
 					} catch(NumberFormatException e){
 						reply(message, "Invalid number");
 					}
@@ -366,7 +363,7 @@ public class EventHandler{
 				case "getlevel":
 				case "gl":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-					reply(message, player.user.mention()+" is level "+player.level);
+					reply(message, player.mention()+" is level "+player.level);
 					return;
 				}
 				case "attack":{
@@ -401,13 +398,18 @@ public class EventHandler{
 						}
 						if(attacker.HP < 1 || defender.HP < 1){
 							reply(message, attacker.HP < 1 ? "You have fainted and are unable to move!"
-									: defender.user.mention()+" has already fainted!");
+									: defender.mention()+" has already fainted!");
 							return;
 						}
 						//At this point, we know there's a valid move in the slot and neither party has fainted
 						//Before anything else, lets see if the target is the bot
 						if(defender.user.getID().equals(Pokebot.client.getOurUser().getID()) && !attacker.inBattle()){
 							Pokebot.sendMessage(channel, author.mention()+" tried hurting me!");
+							return;
+						}
+						//Sanity check for points, due to prevent "errors" between versions and balancing
+						if(StatHandler.getTotalPoints(attacker) > StatHandler.MAX_TOTAL_POINTS){
+							reply(message, "you have used too many points! You need to reduce them before attacking");
 							return;
 						}
 						//If the player is in a battle, we want to pass on the message
@@ -470,6 +472,11 @@ public class EventHandler{
 						reply(message, "You're already in a battle!");
 						return;
 					}
+					//Sanity check for points, due to prevent "errors" between versions and balancing
+					if(StatHandler.getTotalPoints(PlayerHandler.getPlayer(author)) > StatHandler.MAX_TOTAL_POINTS){
+						reply(message, "you have used too many points! You need to reduce them before making a battle");
+						return;
+					}
 					try{
 						if(args.length < 3 || message.getMentions().isEmpty()){
 							reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+"battle <time for turns> "
@@ -494,6 +501,12 @@ public class EventHandler{
 						reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+"joinbattle <@host>");
 						return;
 					}
+					//Sanity check for points, due to prevent "errors" between versions and balancing
+					if(StatHandler.getTotalPoints(PlayerHandler.getPlayer(author)) > StatHandler.MAX_TOTAL_POINTS){
+						reply(message, "you have used too many points! You need to reduce them before joining a " +
+								"battle");
+						return;
+					}
 					BattleManager.onJoinBattle(channel,
 							author, message.getMentions().get(0));
 					return;
@@ -501,6 +514,11 @@ public class EventHandler{
 				case "lb":
 				case "leavebattle":{
 					BattleManager.onLeaveBattle(PlayerHandler.getPlayer(author));
+					return;
+				}
+				case "cb":
+				case "cancelbattle":{
+					BattleManager.onCancelBattle(channel, author);
 					return;
 				}
 				case "saveall":{
@@ -532,7 +550,7 @@ public class EventHandler{
 							Pokebot.client.changePresence(true);
 							Pokebot.timer.shutdownNow();
 							BattleManager.nukeBattles();
-							new Pokebot.MessageTimer().run();
+							Pokebot.sendAllMessages();
 							PlayerHandler.saveAll();
 							Pokebot.client.logout();
 						} catch(Exception e){
@@ -562,8 +580,10 @@ public class EventHandler{
 				}
 				case "testbattle":{
 					if(!author.getID().equals(Pokebot.config.OWNERID)) break;
-					Battle battle = new Battle(message.getChannel(), 200000, Arrays.asList(PlayerHandler.getPlayer
-							(author), PlayerHandler.getPlayer(Pokebot.client.getOurUser())));
+					ArrayList<Player> list = new ArrayList<>();
+					list.add(PlayerHandler.getPlayer(author));
+					list.add(PlayerHandler.getPlayer(Pokebot.client.getOurUser()));
+					Battle battle = new Battle(message.getChannel(), 200000, list);
 					BattleManager.battles.add(battle);
 					return;
 				}
@@ -586,7 +606,8 @@ public class EventHandler{
 							"The concept is that YOU are the Pokémon, and I am built off of that idea.\n" +
 							"While I am released to the public, I am currently incomplete and may change overtime.\n" +
 							"I was built by Coolway99, and you can find my source code and more information at " +
-							"https://github.com/Coolway99/Discord-Pokebot");
+							"https://github.com/Coolway99/Discord-Pokebot\n" +
+							"Licensed under GNU GPL v3");
 					return;
 				}
 				case "version":{
@@ -596,7 +617,7 @@ public class EventHandler{
 				default:
 					break;
 			}
-			reply(message, "invalid command");
+			//reply(message, "invalid command");
 		} catch(Exception e){
 			reply(message, "there was an exception");
 			e.printStackTrace();

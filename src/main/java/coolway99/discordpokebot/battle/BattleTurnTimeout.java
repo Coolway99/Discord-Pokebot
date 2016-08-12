@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.battle;
 
+@SuppressWarnings("ClassNamePrefixedWithPackageName")
 public class BattleTurnTimeout implements Runnable{
 	
 	private final Battle battle;

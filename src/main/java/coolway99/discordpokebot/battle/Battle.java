@@ -14,10 +14,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("ClassNamePrefixedWithPackageName")
 public class Battle{
 
 	public final IChannel channel;
-	private final List<Player> participants;
+	private final ArrayList<Player> participants;
 	/**
 	 * Used to make kick those who are inactive from the battle
 	 */
@@ -34,7 +35,7 @@ public class Battle{
 	private final BattleTurnTimeout timer;
 	private final HashMap<BattleEffects, Integer> battleEffects;
 
-	public Battle(IChannel channel, int turnTime, List<Player> participants){
+	public Battle(IChannel channel, int turnTime, ArrayList<Player> participants){
 		this.channel = channel;
 		this.participants = participants;
 		this.turnTime = turnTime;
@@ -180,8 +181,7 @@ public class Battle{
 				this.onSafeLeaveBattle(player);
 				this.sendMessage(player.mention()+" got eliminated for inactivity!");
 			}
-			if(this.checkDefaultWin())
-				return;
+			if(this.checkDefaultWin()) return;
 			this.threatenTimeout.clear();
 			this.threatenTimeout.addAll(this.participants);
 			this.threatenTimeout.removeAll(this.attacks.keySet());
@@ -280,7 +280,10 @@ public class Battle{
 	private boolean checkDefaultWin(){
 		if(this.participants.size() == 1){
 			Player player = this.participants.remove(0);
-			this.onLeaveBattle(player);
+			BattleManager.onExitBattle(player);
+			this.participants.clear();
+			this.attacks.clear();
+			this.threatenTimeout.clear();
 			this.sendMessage(player.mention()+" won the battle by default!");
 			BattleManager.battles.remove(this);
 			return true;
@@ -298,6 +301,7 @@ public class Battle{
 		this.participants.remove(player);
 		this.attacks.remove(player);
 		this.threatenTimeout.remove(player);
+		this.checkDefaultWin();
 	}
 
 	private void onSafeLeaveBattle(Player player){
@@ -314,7 +318,7 @@ public class Battle{
 	 * so any multi-turn attacks can auto-queue themselves without consequence
 	 */
 	private void onPostTurn(Player player){
-		switch(player.lastMove){
+		/*switch(player.lastMove){
 			case FLY:{
 				switch(player.lastMoveData){
 					case MoveConstants.FLYING:{
@@ -330,23 +334,24 @@ public class Battle{
 			}
 			default:
 				break;
-		}
-		
-		/*{
-			Iterator<Effects.Volatile> i = player.vEffects.iterator();
-			while(i.hasNext()){
-				switch(i.next()){
-					case FLINCH:{
-						//in this case, 
-						continue;
-					}
-					default:
-						continue;
-				}
-			}
 		}*/
+		if(player.lastMoveData != MoveConstants.NOTHING) this.onAutoAttack(player, player.lastMove, player.lastTarget);
+		for(Effects.VBattle effect : player.getVB()){
+			switch(effect){
+				case RECHARGING:{
+					IAttack fakeAttack = new IAttack(player, Moves.NULL, null);
+					fakeAttack.cancel();
+					this.sendMessage(player.mention()+" must recharge!");
+					this.attacks.put(player, fakeAttack);
+					continue;
+				}
+				default:
+					continue;
+			}
+		}
 	}
 
+	@SuppressWarnings("ClassNamePrefixedWithPackageName")
 	public enum BattleEffects{
 		GRAVITY,
 		TRICK_ROOM
