@@ -10,7 +10,7 @@ import java.util.Properties;
 @SuppressWarnings("UnqualifiedStaticUsage")
 public class ConfigHandler{
 	
-	public static final String CONFPATH = "pokebot.conf"; //WITHOUT THE "." IT CRASHES
+	public static final String CONFPATH = "pokebot.conf";
 	public final String BOTNAME;
 	public final String COMMAND_PREFIX;
 	public final String SAVEDIR;
