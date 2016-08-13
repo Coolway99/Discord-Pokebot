@@ -57,3 +57,4 @@ pokebot.conf
 !pom.xml
 /wiki/
 /build/
+/commandList.txt

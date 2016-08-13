@@ -475,8 +475,10 @@ public enum Moves{
 						switch(this){
 							case SKY_ATTACK:
 								Pokebot.sendMessage(channel, attacker.mention()+" is glowing!");
+								break;
 							case RAZOR_WIND:
 								Pokebot.sendMessage(channel, attacker.mention()+" whipped up a whirlwind!");
+								break;
 						}
 						attacker.lastMoveData = MoveConstants.GLOWING;
 						attacker.set(Effects.VBattle.CHARGING);

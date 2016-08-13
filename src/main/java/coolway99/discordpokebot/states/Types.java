@@ -396,6 +396,6 @@ public enum Types{
 				}
 			}
 		}
-		return multiplier;	
+		return multiplier;
 	}
 }
