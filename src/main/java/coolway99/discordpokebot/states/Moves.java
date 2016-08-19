@@ -59,8 +59,8 @@ public enum Moves{
 	COMET_PUNCH(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 18, Flags.HAS_BEFORE),
 	CUT(Types.NORMAL, MoveType.PHYSICAL, 30, 50, 95),
 	DESTINY_BOND(Types.GHOST, MoveType.STATUS, 5, -1, -1, 100, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
-	DOUBLE_KICK(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 30, Flags.HAS_BEFORE), //TODO hits twice
-	DOUBLE_SLAP(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 15, Flags.HAS_BEFORE), //Same as Comet Punch
+	DOUBLE_KICK(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 60, Flags.HAS_BEFORE), //TODO hits twice
+	DOUBLE_SLAP(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 30, Flags.HAS_BEFORE), //Same as Comet Punch
 	FAIRY_WIND(Types.FAIRY, MoveType.SPECIAL, 30, 40, 100), //Same as scratch
 	FIRE_PUNCH(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	//Multiturn, boosted cost because of semiinvul
@@ -288,6 +288,7 @@ public enum Moves{
 					Pokebot.sendMessage(channel, "But "+defender.mention()+" is immune to that type of attack!");
 					return BeforeResult.STOP;
 				}
+				//fallthru
 			case ARM_THRUST:
 			case COMET_PUNCH:
 			case DOUBLE_SLAP:{
@@ -322,6 +323,9 @@ public enum Moves{
 			case DESTINY_BOND:{
 				Pokebot.sendMessage(channel, attacker.mention()+" will take it's foe down with it!");
 				return BeforeResult.STOP;
+			}
+			case DOUBLE_KICK:{
+				return BeforeResult.HAS_ADJUSTED_DAMAGE;
 			}
 			case GASTRO_ACID:{
 				if(willHit(this, attacker, defender, true)){
@@ -590,6 +594,9 @@ public enum Moves{
 			}
 			case AVALANCHE:{
 				return getDamage(attacker, this, defender); //TODO does double damage if attacker was hit
+			}
+			case DOUBLE_KICK:{
+				return getDamage(attacker, this, defender)*2;
 			}
 			case GUILLOTINE:{
 				return defender.HP;

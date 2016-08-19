@@ -33,9 +33,6 @@ public class CommandListGenerator{
 		} catch(FileNotFoundException e){
 			System.err.println("File not found");
 			System.exit(0);
-		} catch(IOException e){
-			e.printStackTrace();
-			System.exit(0);
 		}
 		try(PrintWriter out = new PrintWriter(new FileOutputStream(new File(outputFile)))){
 			out.print(commandList);
