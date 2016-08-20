@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<style>
+			.center {text-align:center;}
+			.left {text-align:left;}
+			.right {text-align:right;}
+
+			.centeredBox {
+				width: 800px;
+				border-radius: 5px;
+				background: #eef;
+				padding: 10px;
+				height: 500px;
+				position: absolute;
+				margin-top: -300px;
+				margin-left: -400px;
+				top: 50%;
+				left: 50%;
+			}
+		</style>
+		<script>
+			function process(){
+				document.title("Hello World!");
+			}
+		</script>
+	</head>
+	<body>
+		<form name="form" method="post" action="/submit">
+			<div class="centeredBox">
+				<h1 class="center">Pokébot Online Player editor</h1>
+				<div style="position:relative;left:10%">
+					<b>User:</b> ~user~
+					<b>ID:</b> ~id~
+				</div>
+				~typeList~<br />
+
+				<button type="submit" onclick="process();">Submit</button>
+			</div>
+		</form>
+	</body>
+</html>

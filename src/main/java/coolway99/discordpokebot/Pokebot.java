@@ -3,6 +3,7 @@ package coolway99.discordpokebot;
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.storage.PlayerHandler;
+import coolway99.discordpokebot.web.WebInterface;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -40,6 +41,10 @@ public class Pokebot{
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
 
 	public static void main(String... args) throws Exception{
+		/*if(config.WEBENABLED){
+			WebInterface.initWebInterface(config.PORT);
+		}
+		if(true) return;*/
 		if(config.TOKEN.isEmpty()){
 			System.out.println("Error: No token found in pokebot.conf file");
 			System.exit(0);

@@ -9,6 +9,7 @@ import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
+import coolway99.discordpokebot.web.FormHandler;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
@@ -677,6 +678,10 @@ public class EventHandler{
 				}
 				case "version":{
 					reply(message, "I am version "+Pokebot.VERSION);
+					return;
+				}
+				case "test":{
+					System.out.println(new FormHandler(author).render());
 					return;
 				}
 				default:
