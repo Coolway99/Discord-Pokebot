@@ -1,7 +1,6 @@
 package coolway99.discordpokebot.web;
 
 import coolway99.discordpokebot.states.Types;
-import org.eclipse.jetty.http.MimeTypes;
 import org.watertemplate.Template;
 
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.Arrays;
 public class TypeList extends Template{
 
 	private static String render = null;
-
 
 	private TypeList(){
 		ArrayList<Types> typesList = new ArrayList<>();

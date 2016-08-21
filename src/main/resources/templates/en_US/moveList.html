@@ -1,0 +1,39 @@
+<label>Moves:
+	<select id="move1" onchange="updatePoints()">
+		~for move in moves:
+		<option value="~move.cost~|~move.name~">~move.name~ (~move.cost~)</option>
+		:~
+	</select>
+	<select id="move2" onchange="updatePoints()">
+		~for move in moves:
+		<option value="~move.cost~|~move.name~">~move.name~ (~move.cost~)</option>
+		:~
+	</select>
+	<select id="move3" onchange="updatePoints()">
+		~for move in moves:
+		<option value="~move.cost~|~move.name~">~move.name~ (~move.cost~)</option>
+		:~
+	</select>
+	<select id="move4" onchange="updatePoints()">
+		~for move in moves:
+		<option value="~move.cost~|~move.name~">~move.name~ (~move.cost~)</option>
+		:~
+	</select>
+</label>
+<script>
+	function shiftMoves(){
+		var move2 = getId("move2");
+		var move3 = getId("move3");
+		var move4 = getId("move4");
+		if(move2.value == "0|NONE"){
+			var temp = move3.value;
+			move3.value = move2.value;
+			move2.value = temp;
+		}
+		if(move3.value == "0|NONE"){
+			var temp = move4.value;
+			move4.value = move3.value;
+			move3.value = temp;
+		}
+	}
+</script>

@@ -21,6 +21,7 @@ public class ConfigHandler{
 	public final int PORT;
 	public final String CLIENT_ID;
 	public final String CLIENT_SECRET;
+	public final String REDIRECT_URL;
 	
 	private final Properties prop;
 	
@@ -45,6 +46,8 @@ public class ConfigHandler{
 	private static final String CLIENTIDDEFAULT = "";
 	private static final String CLIENTSECRETKEY = "CLIENT_SECRET";
 	private static final String CLIENTSECRETDEFAULT = "";
+	private static final String REDIRECTURLKEY = "REDIRECT_URL";
+	private static final String REDIRECTURLDEFAULT = "";
 
 	public ConfigHandler(){
 		Properties config = new Properties();
@@ -87,10 +90,12 @@ public class ConfigHandler{
 				System.err.println("CLIENT_SECRET NOT SPECIFIED, NEEDED FOR WEB FUNCTIONALITY");
 				System.exit(1);
 			}
+			this.REDIRECT_URL = config.getProperty(REDIRECTURLKEY);
 		} else {
 			this.PORT = 0;
 			this.CLIENT_ID = CLIENTIDDEFAULT;
 			this.CLIENT_SECRET = CLIENTSECRETDEFAULT;
+			this.REDIRECT_URL = REDIRECTURLDEFAULT;
 		}
 		this.prop = config;
 		
@@ -113,6 +118,7 @@ public class ConfigHandler{
 		this.prop.setProperty(PORTKEY, PORTDEFAULT);
 		this.prop.setProperty(CLIENTIDKEY, CLIENTIDDEFAULT);
 		this.prop.setProperty(CLIENTSECRETKEY, CLIENTSECRETDEFAULT);
+		this.prop.setProperty(REDIRECTURLKEY, REDIRECTURLDEFAULT);
 		File file = new File(CONFPATH);
 		if(!file.exists() && file.getParentFile() != null) file.getParentFile().mkdirs();
 		try(OutputStream out = new FileOutputStream(file)){

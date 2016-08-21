@@ -20,7 +20,7 @@ public class OAuth_Handler{
 			Request request = Request.Post("https://discordapp.com/api/oauth2/token"
 					+"?grant_type=authorization_code"
 					+"&code="+code
-					+"&redirect_uri="+URLEncoder.encode("http://localhost:9009/", "UTF-8") //TODO
+					+"&redirect_uri="+URLEncoder.encode(Pokebot.config.REDIRECT_URL, "UTF-8")
 					+"&client_id="+Pokebot.config.CLIENT_ID
 					+"&client_secret="+Pokebot.config.CLIENT_SECRET);
 					request.addHeader("Content-Type", "application/x-www-form-urlencoded");

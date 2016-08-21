@@ -1,5 +1,68 @@
-~for stat in stats:
-	~for subStat in stat:
+<table>
+	<tr>
+		<th>Stats</th>
+		~for stat in stats:
+		<th>~stat.displayName~</th>
+		:~
+		<th>Totals</th>
+		<th>Maximum Total</th>
+	</tr>
+	<tr>
+		<th>Base</th>
+		~for stat in stats:
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="255" id="~stat.name~.BASE" value="~stat.base~" maxlength="3" onchange="updateStats()"/></td>
+		:~
+		<td id="baseTotal" class="center"></td>
+		<td class="center">~baseMax~</td>
+	</tr>
+	<tr>
+		<th>IV</th>
+		~for stat in stats:
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="31" id="~stat.name~.IV" value="~stat.iv~" maxlength="2"  onchange="updateStats()"/></td>
+		:~
+		<td id="ivTotal" class="center"></td>
+		<td class="center">N/A</td>
+	</tr>
+	<tr>
+		<th>EV</th>
+		~for stat in stats:
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="63" id="~stat.name~.EV" value="~stat.ev~" maxlength="2"  onchange="updateStats()"/></td>
+		:~
+		<td id="evTotal" class="center"></td>
+		<td class="center">~evMax~</td>
+	</tr>
+</table>
+<script type="text/javascript">
+	var baseMax = ~baseMax~;
+	var evMax = ~evMax~;
+	var statNames = [
+		~for stat in stats:
+			"~stat.name~",
+		:~
+	];
+	function updateStats(){
+		var base = 0;
+		var iv = 0;
+		var ev = 0;
+		for(var x = 0; x < statNames.length; x++){
+			base += parseInt(getId(statNames[x]+".BASE").value);
+			iv += parseInt(getId(statNames[x]+".IV").value);
+			ev += parseInt(getId(statNames[x]+".EV").value);
+		}
+		getId("baseTotal").innerHTML = base;
+		getId("ivTotal").innerHTML = iv;
+		getId("evTotal").innerHTML = ev;
+		if(base > baseMax){
+			getId("baseTotal").style = "color: red";
+		} else {
+			getId("baseTotal").style = "";
+		}
 
-	:~
-:~
+		if(ev > evMax){
+			getId("evTotal").style = "color: red";
+		} else {
+			getId("evTotal").style = "";
+		}
+	}
+	updateStats();
+</script>

@@ -41,10 +41,9 @@ public class Pokebot{
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
 
 	public static void main(String... args) throws Exception{
-		/*if(config.WEBENABLED){
-			WebInterface.initWebInterface(config.PORT);
+		if(config.WEBENABLED){
+			WebInterface.initWebInterface(config.REDIRECT_URL, config.PORT);
 		}
-		if(true) return;*/
 		if(config.TOKEN.isEmpty()){
 			System.out.println("Error: No token found in pokebot.conf file");
 			System.exit(0);

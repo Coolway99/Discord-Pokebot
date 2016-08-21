@@ -680,9 +680,9 @@ public class EventHandler{
 					reply(message, "I am version "+Pokebot.VERSION);
 					return;
 				}
-				case "test":{
-					System.out.println(new FormHandler(author).render());
-					return;
+				case "webinterface":
+				case "wi":{
+					reply(message, "My web interface can be found here: "+Pokebot.config.REDIRECT_URL);
 				}
 				default:
 					break;
