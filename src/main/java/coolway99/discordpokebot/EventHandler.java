@@ -9,7 +9,6 @@ import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
-import coolway99.discordpokebot.web.FormHandler;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
@@ -184,6 +183,7 @@ public class EventHandler{
 						}
 					}
 					reply(message, "stats cleared");
+					return;
 				}
 				case "gn":
 				case "getnature":{
@@ -328,6 +328,7 @@ public class EventHandler{
 				case "gpp":
 				case "gp":
 					Pokebot.sendMessage(channel, "Depreciated, use listMoves instead");
+					//fallthru
 				case "lm":
 				case "listmoves":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
@@ -683,6 +684,7 @@ public class EventHandler{
 				case "webinterface":
 				case "wi":{
 					reply(message, "My web interface can be found here: "+Pokebot.config.REDIRECT_URL);
+					return;
 				}
 				default:
 					break;

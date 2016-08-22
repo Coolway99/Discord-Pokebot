@@ -5,6 +5,7 @@ import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
@@ -44,7 +45,16 @@ public class WebInterface{
 			if(user == null){
 				return "ERROR: UNABLE TO GET USER OBJECT";
 			}
-			return new FormHandler(user, token).render();
+			System.out.println("Preparing to render");
+			String render;
+			try{
+				render = new FormHandler(user, token).render();
+			}catch(Exception e){
+				e.printStackTrace();
+				return null;
+			}
+			return render;
+			//return new FormHandler(user, token).render();
 		});
 		Spark.post("/submit", (req, res) -> {
 			try{
@@ -56,6 +66,7 @@ public class WebInterface{
 				if(!id.equals(req.headers("id"))){
 					return "Authorization error: ID mismatch (have you been tinkering with me?)";
 				}
+
 				Moves[] moves = new Moves[4];
 				try{
 					String[] moveNames = {req.headers("move1"), req.headers("move2"), req.headers("move3"), req.headers("move4")};
@@ -63,8 +74,6 @@ public class WebInterface{
 						String moveSelector = moveNames[x];
 						int cost = Integer.parseInt(moveSelector.substring(0, moveSelector.indexOf('|')));
 						String moveName = moveSelector.substring(moveSelector.indexOf('|')+1);
-						//TODO Make display and value types different
-						moveName = moveName.replaceAll(" ", "_");
 						if(moveName.equals("NONE")) moveName = "NULL";
 						Moves move = Moves.valueOf(moveName);
 						if(cost != move.getCost()) return "Move Checksum Error (did you try setting a move manually?)";
@@ -73,15 +82,18 @@ public class WebInterface{
 				} catch(IllegalArgumentException e){
 					return "Move Checksum Error (did you try setting a move manually?)";
 				}
+
 				Types primary, secondary;
 				try{
 					primary = Types.valueOf(req.headers("primary"));
+					if(primary == Types.NULL) return "Type Checksum Error (did you try setting a type manually?)"; //Sanity Check
 					String s = req.headers("secondary");
 					if(s.equals("NONE")) s = "NULL";
 					secondary = Types.valueOf(s);
 				} catch(IllegalArgumentException e){
 					return "Type Checksum Error (did you try setting a type manually?)";
 				}
+
 				int[][] stats = new int[6][3];
 				try{
 					for(int x = 0; x < stats.length; x++){
@@ -89,19 +101,20 @@ public class WebInterface{
 						for(int y = 0; y < stats[x].length; y++){
 							SubStats subStat = SubStats.getSubStatFromIndex(y);
 							int val = Integer.parseInt(req.headers(stat.toString()+'.'+subStat.toString()));
+							if(val < 0) throw new NumberFormatException();
 							stats[x][y] = val;
 						}
 					}
 				} catch(NumberFormatException e){
-					return "Stat Error: Something other than numbers was inputted into the Stat Grid\n"+
-							"If there were only numbers in there, then screenshot this and report it to the bot author";
+					return "Stat Error: Something other than positive numbers was inputted into the Stat Grid\n"+
+							"If there were only positive numbers in there, then screenshot this and report it to the bot author";
 				}
+
 				Abilities ability;
 				try{
 					String abilitySelector = req.headers("ability");
 					int cost = Integer.parseInt(abilitySelector.substring(0, abilitySelector.indexOf('|')));
-					//TODO Make display and value types different
-					String abilityName = abilitySelector.substring(abilitySelector.indexOf('|')+1).replaceAll(" ", "_");
+					String abilityName = abilitySelector.substring(abilitySelector.indexOf('|')+1);
 					ability = Abilities.valueOf(abilityName);
 					if(ability.getCost() != cost){
 						return "Ability Checksum Error (did you try setting an ability manually?)";
@@ -119,21 +132,33 @@ public class WebInterface{
 					return "Level Checksum Error (are you sure it's a number?)";
 				}
 
+				Natures nature;
+				try{
+					String natureSelector = req.headers("nature");
+					nature = Natures.valueOf(natureSelector.substring(natureSelector.indexOf('|')+1));
+					//TODO checksum? idk
+				}catch(IllegalArgumentException e){
+					return "Nature Checksum Error (have you been messing with my source code?)";
+				}
+
 				Player player = PlayerHandler.getPlayer(Pokebot.client.getUserByID(id));
 				if(player.inBattle()) return "Error: You are in a battle, your stats cannot be set";
+				player.numOfAttacks = 0;
 				for(int x = 0; x < player.moves.length; x++){
 					player.moves[x] = moves[x];
 					player.PP[x] = moves[x].getPP();
+					if(moves[x] != Moves.NULL){
+						player.numOfAttacks++;
+					}
 				}
 				player.primary = primary;
 				player.secondary = secondary;
 				player.setAbility(ability);
 				for(int x = 0; x < player.stats.length; x++){
-					for(int y = 0; y < player.stats[x].length; y++){
-						player.stats[x][y] = stats[x][y];
-					}
+					player.stats[x] = stats[x];
 				}
 				player.level = level;
+				player.nature = nature;
 				return "Set your stats successfully!";
 			}catch(NullPointerException e){
 				return "Ah, ye tried not specifying something, didn'tcha?";

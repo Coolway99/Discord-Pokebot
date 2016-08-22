@@ -1,8 +1,8 @@
 <table>
 	<tr>
-		<th>Stats</th>
+		<th>STAT</th>
 		~for stat in stats:
-		<th>~stat.displayName~</th>
+		<th id="~stat.value~.NAME">~stat.name~</th>
 		:~
 		<th>Totals</th>
 		<th>Maximum Total</th>
@@ -10,7 +10,7 @@
 	<tr>
 		<th>Base</th>
 		~for stat in stats:
-		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="255" id="~stat.name~.BASE" value="~stat.base~" maxlength="3" onchange="updateStats()"/></td>
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="255" id="~stat.value~.BASE" value="~stat.base~" maxlength="3" onchange="updateStats()"/></td>
 		:~
 		<td id="baseTotal" class="center"></td>
 		<td class="center">~baseMax~</td>
@@ -18,7 +18,7 @@
 	<tr>
 		<th>IV</th>
 		~for stat in stats:
-		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="31" id="~stat.name~.IV" value="~stat.iv~" maxlength="2"  onchange="updateStats()"/></td>
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="31" id="~stat.value~.IV" value="~stat.iv~" maxlength="2"  onchange="updateStats()"/></td>
 		:~
 		<td id="ivTotal" class="center"></td>
 		<td class="center">N/A</td>
@@ -26,10 +26,16 @@
 	<tr>
 		<th>EV</th>
 		~for stat in stats:
-		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="63" id="~stat.name~.EV" value="~stat.ev~" maxlength="2"  onchange="updateStats()"/></td>
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="63" id="~stat.value~.EV" value="~stat.ev~" maxlength="2"  onchange="updateStats()"/></td>
 		:~
 		<td id="evTotal" class="center"></td>
 		<td class="center">~evMax~</td>
+	</tr>
+	<tr>
+		<th>Stats</th>
+		~for stat in stats:
+		<td class="center" id="~stat.value~.TOTAL"></td>
+		:~
 	</tr>
 </table>
 <script type="text/javascript">
@@ -37,7 +43,7 @@
 	var evMax = ~evMax~;
 	var statNames = [
 		~for stat in stats:
-			"~stat.name~",
+			"~stat.value~",
 		:~
 	];
 	function updateStats(){
@@ -63,6 +69,30 @@
 		} else {
 			getId("evTotal").style = "";
 		}
+		calculateStats();
+		updatePoints();
 	}
-	updateStats();
+
+	function calculateStats(){
+		var level = parseInt(getId("level").value);
+		/*HEALTH*/{
+			var base = parseInt(getId(statNames[0]+".BASE").value);
+			var iv = parseInt(getId(statNames[0]+".IV").value);
+			var ev = parseInt(getId(statNames[0]+".EV").value);
+
+			var total = Math.floor(((2*base+iv+ev)*level)/100);
+			total += level + 10;
+			getId(statNames[0]+".TOTAL").innerHTML = total;
+		}
+		for(var x = 1; x < statNames.length; x++){
+			var base = parseInt(getId(statNames[x]+".BASE").value);
+			var iv = parseInt(getId(statNames[x]+".IV").value);
+			var ev = parseInt(getId(statNames[x]+".EV").value);
+
+			var total = Math.floor(((2*base+iv+ev)*level)/100);
+			total += 5;
+			getId(statNames[x]+".TOTAL").innerHTML = total;
+		}
+		natureChange();
+	}
 </script>

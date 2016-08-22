@@ -1,29 +1,33 @@
 package coolway99.discordpokebot.web;
 
 import coolway99.discordpokebot.states.Moves;
-import coolway99.discordpokebot.states.Types;
 import org.watertemplate.Template;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /*
  * This was a copy/paste of TypeList
  */
-public class MoveList extends Template{
+public final class MoveList extends Template{
+
+	private static final String noMove = "0|NONE";
 
 	private static String render = null;
 
 	private MoveList(){
+		super();
 		this.addCollection("moves", Arrays.asList(Moves.values()), (move, map) -> {
 			if(move == Moves.NULL){
 				map.add("name", "NONE");
+				map.add("value", "NONE");
 				map.add("cost", "0");
 				return;
 			}
 			map.add("name", move.toString().replace("_", " "));
+			map.add("value", move.toString());
 			map.add("cost", Integer.toString(move.getCost()));
 		});
+		this.add("noMove", MoveList.noMove);
 	}
 
 	public static String getMoveList(){
