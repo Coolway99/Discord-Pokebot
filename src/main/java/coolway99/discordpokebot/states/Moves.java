@@ -483,6 +483,8 @@ public enum Moves{
 							case RAZOR_WIND:
 								Pokebot.sendMessage(channel, attacker.mention()+" whipped up a whirlwind!");
 								break;
+							default:
+								break;
 						}
 						attacker.lastMoveData = MoveConstants.GLOWING;
 						attacker.set(Effects.VBattle.CHARGING);

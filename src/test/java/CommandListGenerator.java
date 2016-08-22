@@ -1,17 +1,10 @@
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Scanner;
 
-/**
- * Created by Coolway on 8/13/2016.
- */
 public class CommandListGenerator{
 
 	private static final String commandListPath = "src/main/java/coolway99/discordpokebot/EventHandler.java";

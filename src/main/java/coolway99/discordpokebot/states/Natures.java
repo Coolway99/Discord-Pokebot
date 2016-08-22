@@ -33,8 +33,8 @@ public enum Natures{ //In this case, "Health" is null, since nature never applie
 	QUIRKY(Stats.HEALTH, Stats.HEALTH)
 	;
 	
-	private final Stats increase;
-	private final Stats decrease;
+	public final Stats increase;
+	public final Stats decrease;
 	
 	Natures(Stats increase, Stats decrease){
 		this.increase = increase;

@@ -183,6 +183,7 @@ public class EventHandler{
 						}
 					}
 					reply(message, "stats cleared");
+					return;
 				}
 				case "gn":
 				case "getnature":{
@@ -327,6 +328,7 @@ public class EventHandler{
 				case "gpp":
 				case "gp":
 					Pokebot.sendMessage(channel, "Depreciated, use listMoves instead");
+					//fallthru
 				case "lm":
 				case "listmoves":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
@@ -677,6 +679,11 @@ public class EventHandler{
 				}
 				case "version":{
 					reply(message, "I am version "+Pokebot.VERSION);
+					return;
+				}
+				case "webinterface":
+				case "wi":{
+					reply(message, "My web interface can be found here: "+Pokebot.config.REDIRECT_URL);
 					return;
 				}
 				default:
