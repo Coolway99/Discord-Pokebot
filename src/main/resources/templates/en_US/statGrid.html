@@ -1,0 +1,98 @@
+<table>
+	<tr>
+		<th>STAT</th>
+		~for stat in stats:
+		<th id="~stat.value~.NAME">~stat.name~</th>
+		:~
+		<th>Totals</th>
+		<th>Maximum Total</th>
+	</tr>
+	<tr>
+		<th>Base</th>
+		~for stat in stats:
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="255" id="~stat.value~.BASE" value="~stat.base~" maxlength="3" onchange="updateStats()"/></td>
+		:~
+		<td id="baseTotal" class="center"></td>
+		<td class="center">~baseMax~</td>
+	</tr>
+	<tr>
+		<th>IV</th>
+		~for stat in stats:
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="31" id="~stat.value~.IV" value="~stat.iv~" maxlength="2"  onchange="updateStats()"/></td>
+		:~
+		<td id="ivTotal" class="center"></td>
+		<td class="center">N/A</td>
+	</tr>
+	<tr>
+		<th>EV</th>
+		~for stat in stats:
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="63" id="~stat.value~.EV" value="~stat.ev~" maxlength="2"  onchange="updateStats()"/></td>
+		:~
+		<td id="evTotal" class="center"></td>
+		<td class="center">~evMax~</td>
+	</tr>
+	<tr>
+		<th>Stats</th>
+		~for stat in stats:
+		<td class="center" id="~stat.value~.TOTAL"></td>
+		:~
+	</tr>
+</table>
+<script type="text/javascript">
+	var baseMax = ~baseMax~;
+	var evMax = ~evMax~;
+	var statNames = [
+		~for stat in stats:
+			"~stat.value~",
+		:~
+	];
+	function updateStats(){
+		var base = 0;
+		var iv = 0;
+		var ev = 0;
+		for(var x = 0; x < statNames.length; x++){
+			base += parseInt(getId(statNames[x]+".BASE").value);
+			iv += parseInt(getId(statNames[x]+".IV").value);
+			ev += parseInt(getId(statNames[x]+".EV").value);
+		}
+		getId("baseTotal").innerHTML = base;
+		getId("ivTotal").innerHTML = iv;
+		getId("evTotal").innerHTML = ev;
+		if(base > baseMax){
+			getId("baseTotal").style = "color: red";
+		} else {
+			getId("baseTotal").style = "";
+		}
+
+		if(ev > evMax){
+			getId("evTotal").style = "color: red";
+		} else {
+			getId("evTotal").style = "";
+		}
+		calculateStats();
+		updatePoints();
+	}
+
+	function calculateStats(){
+		var level = parseInt(getId("level").value);
+		/*HEALTH*/{
+			var base = parseInt(getId(statNames[0]+".BASE").value);
+			var iv = parseInt(getId(statNames[0]+".IV").value);
+			var ev = parseInt(getId(statNames[0]+".EV").value);
+
+			var total = Math.floor(((2*base+iv+ev)*level)/100);
+			total += level + 10;
+			getId(statNames[0]+".TOTAL").innerHTML = total;
+		}
+		for(var x = 1; x < statNames.length; x++){
+			var base = parseInt(getId(statNames[x]+".BASE").value);
+			var iv = parseInt(getId(statNames[x]+".IV").value);
+			var ev = parseInt(getId(statNames[x]+".EV").value);
+
+			var total = Math.floor(((2*base+iv+ev)*level)/100);
+			total += 5;
+			getId(statNames[x]+".TOTAL").innerHTML = total;
+		}
+		natureChange();
+	}
+</script>

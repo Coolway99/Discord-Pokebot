@@ -1,0 +1,33 @@
+<label>Nature:
+	<select id="nature" onchange="calculateStats()">
+		~for nature in natures:
+		<option value="~nature.value~">~nature.name~</option>
+		:~
+	</select>
+</label>
+<script>
+	function natureChange(){
+		var increase = parseInt(getId("nature").value.substr(0, 1));
+		var decrease = parseInt(getId("nature").value.substr(1, 1));
+		for(var x = 1; x < statNames.length; x++){
+			var title = getId(statNames[x]+".NAME");
+			var total = getId(statNames[x]+".TOTAL");
+			if(x == increase){
+				title.style = "color: green;";
+				total.style = "color: green;";
+				var y = parseInt(total.innerHTML);
+				y *= 1.1;
+				total.innerHTML = Math.floor(y);
+			} else if(x == decrease){
+				title.style = "color: red;";
+				total.style = "color: red;";
+				var y = parseInt(total.innerHTML);
+				y *= 0.9;
+				total.innerHTML = Math.floor(y);
+			} else {
+				title.style = "";
+				total.style = "";
+			}
+		}
+	}
+</script>

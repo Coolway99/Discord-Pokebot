@@ -43,12 +43,24 @@ public enum Moves{
 	AQUA_RING(Types.WATER, MoveType.STATUS, 20, -1, -1, 150, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
 	ARM_THRUST(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 45, Flags.HAS_BEFORE),
 	AROMATHERAPY(Types.GRASS, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
+	//Aromatic Mist can't apply just yet TODO Team Battles
+	//Assist randomly uses an ally's move TODO Team Battles
+	//TODO Assurance deals double damage if the target has already taken damage that turn
+	ASTONISH(Types.GHOST, MoveType.PHYSICAL, 15, 30, 100, 45, Flags.HAS_AFTER),
+	ATTACK_ORDER(Types.BUG, MoveType.PHYSICAL, 15, 90, 100, 100, Flags.NO_CONTACT),
+	//TODO Attract
+	AURA_SPHERE(Types.FIGHTING, MoveType.SPECIAL, 20, 80, 1000, 100),
+	AURORA_BEAM(Types.ICE, MoveType.SPECIAL, 20, 65, 100, 75, Flags.HAS_AFTER),
+	AUTOTOMIZE(Types.STEEL, MoveType.STATUS, 15, -1, -1, 50, Flags.HAS_BEFORE, Flags.UNTARGETABLE), //TODO lowers weight
+	AVALANCHE(Types.ICE, MoveType.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4, Flags.HAS_BEFORE),
+	BABY_DOLL_EYES(Types.FAIRY, MoveType.STATUS, 30, -1, 100, 25, Battle_Priority.P1, Flags.HAS_BEFORE),
+	BARRAGE(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.HAS_BEFORE, Flags.NO_CONTACT),
 	BIND(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85), //TODO Multiturn
 	COMET_PUNCH(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 18, Flags.HAS_BEFORE),
 	CUT(Types.NORMAL, MoveType.PHYSICAL, 30, 50, 95),
 	DESTINY_BOND(Types.GHOST, MoveType.STATUS, 5, -1, -1, 100, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
-	DOUBLE_KICK(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 30, Flags.HAS_BEFORE), //TODO hits twice
-	DOUBLE_SLAP(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 15, Flags.HAS_BEFORE), //Same as Comet Punch
+	DOUBLE_KICK(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 60, Flags.HAS_BEFORE), //TODO hits twice
+	DOUBLE_SLAP(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 30, Flags.HAS_BEFORE), //Same as Comet Punch
 	FAIRY_WIND(Types.FAIRY, MoveType.SPECIAL, 30, 40, 100), //Same as scratch
 	FIRE_PUNCH(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	//Multiturn, boosted cost because of semiinvul
@@ -73,10 +85,10 @@ public enum Moves{
 	SKY_ATTACK(Types.FLYING, MoveType.PHYSICAL, 5, 140, 90, Flags.MULTITURN, Flags.HAS_AFTER), //TODO multiturn
 	SIGNAL_BEAM(Types.BUG, MoveType.SPECIAL, 15, 75, 100, 80, Flags.HAS_AFTER), //TODO confusion
 	SLAM(Types.NORMAL, MoveType.PHYSICAL, 20, 80, 75),
-	STEAM_ROLLER(Types.BUG, MoveType.PHYSICAL, 20, 65, 100, 65, Flags.HAS_BEFORE, Flags.HAS_AFTER), //Same as Stomp,
+	STEAM_ROLLER(Types.BUG, MoveType.PHYSICAL, 20, 65, 100, 80, Flags.HAS_BEFORE, Flags.HAS_AFTER), //Same as Stomp,
 	//Fine, you people win
 	SPLASH(Types.WATER, MoveType.PHYSICAL, 999, 0, 100, 200, Flags.UNTARGETABLE, Flags.HAS_BEFORE, Flags.FLIGHT),
-	STOMP(Types.NORMAL, MoveType.PHYSICAL, 20, 65, 100, 65, Flags.HAS_BEFORE, Flags.HAS_AFTER),
+	STOMP(Types.NORMAL, MoveType.PHYSICAL, 20, 65, 100, 80, Flags.HAS_BEFORE, Flags.HAS_AFTER),
 	THUNDER_PUNCH(Types.ELECTRIC, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	VICE_GRIP(Types.NORMAL, MoveType.PHYSICAL, 30, 55, 100),
 	WATER_GUN(Types.WATER, MoveType.SPECIAL, 25, 40, 100), //Same as scratch
@@ -109,6 +121,9 @@ public enum Moves{
 		} else {
 			this.flags = EnumSet.copyOf(Arrays.asList(flags));
 		}
+		if(moveType == MoveType.PHYSICAL){
+			if(!this.flags.contains(Flags.NO_CONTACT)) this.flags.add(Flags.CONTACT); //If the override isn't set, then set the default
+		} else if(!this.flags.contains(Flags.CONTACT)) this.flags.add(Flags.NO_CONTACT);
 	}
 
 	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Flags... flags){
@@ -268,6 +283,12 @@ public enum Moves{
 				}
 				return BeforeResult.STOP;
 			}
+			case BARRAGE:
+				if(defender.hasAbility(Abilities.BULLETPROOF)){
+					Pokebot.sendMessage(channel, "But "+defender.mention()+" is immune to that type of attack!");
+					return BeforeResult.STOP;
+				}
+				//fallthru
 			case ARM_THRUST:
 			case COMET_PUNCH:
 			case DOUBLE_SLAP:{
@@ -284,9 +305,27 @@ public enum Moves{
 				}
 				return BeforeResult.STOP;
 			}
+			case AUTOTOMIZE:{
+				StatHandler.changeStat(channel, attacker, Stats.SPEED, 2);
+				return BeforeResult.STOP;
+			}
+			case AVALANCHE:{
+				return BeforeResult.HAS_ADJUSTED_DAMAGE;
+			}
+			case BABY_DOLL_EYES:{
+				if(willHit(this, attacker, defender, true)){
+					StatHandler.changeStat(channel, defender, Stats.ATTACK, -1);
+				} else {
+					missMessage(channel, attacker);
+				}
+				return BeforeResult.STOP;
+			}
 			case DESTINY_BOND:{
 				Pokebot.sendMessage(channel, attacker.mention()+" will take it's foe down with it!");
 				return BeforeResult.STOP;
+			}
+			case DOUBLE_KICK:{
+				return BeforeResult.HAS_ADJUSTED_DAMAGE;
 			}
 			case GASTRO_ACID:{
 				if(willHit(this, attacker, defender, true)){
@@ -355,6 +394,14 @@ public enum Moves{
 				if(/*defender.inBattle() &&*/ diceRoll(30)){
 					flinch(channel, defender);
 				}
+				break;
+			}
+			case ASTONISH:{
+				if(diceRoll(30)) flinch(channel, defender);
+				break;
+			}
+			case AURORA_BEAM:{
+				if(diceRoll(10)) StatHandler.changeStat(channel, defender, Stats.ATTACK, -1);
 				break;
 			}
 			case FIRE_PUNCH:{
@@ -432,8 +479,12 @@ public enum Moves{
 						switch(this){
 							case SKY_ATTACK:
 								Pokebot.sendMessage(channel, attacker.mention()+" is glowing!");
+								break;
 							case RAZOR_WIND:
 								Pokebot.sendMessage(channel, attacker.mention()+" whipped up a whirlwind!");
+								break;
+							default:
+								break;
 						}
 						attacker.lastMoveData = MoveConstants.GLOWING;
 						attacker.set(Effects.VBattle.CHARGING);
@@ -542,6 +593,12 @@ public enum Moves{
 			case STEAM_ROLLER:
 			case STOMP:{
 				return getDamage(attacker, this, defender, this.power*2);
+			}
+			case AVALANCHE:{
+				return getDamage(attacker, this, defender); //TODO does double damage if attacker was hit
+			}
+			case DOUBLE_KICK:{
+				return getDamage(attacker, this, defender)*2;
 			}
 			case GUILLOTINE:{
 				return defender.HP;
@@ -888,6 +945,8 @@ public enum Moves{
 		BYPASSES_IMMUNITIES,
 		MULTITURN, //If a move takes more than one turn
 		FLIGHT, //If a move requires the use of flying
+		CONTACT, //Overrides the default setting
+		NO_CONTACT, //Overrides the default setting
 	}
 
 	public enum Battle_Priority{

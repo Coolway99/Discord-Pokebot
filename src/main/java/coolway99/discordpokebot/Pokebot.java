@@ -3,6 +3,7 @@ package coolway99.discordpokebot;
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.storage.PlayerHandler;
+import coolway99.discordpokebot.web.WebInterface;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
-	public static final String VERSION = "1.0.2";
+	public static final String VERSION = "1.1.0";
 	//TODO make the rest of these configs
 	private static final byte SAVE_DELAY = 1; //In minutes
 	private static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
@@ -40,6 +41,9 @@ public class Pokebot{
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
 
 	public static void main(String... args) throws Exception{
+		if(config.WEBENABLED){
+			WebInterface.initWebInterface(config.REDIRECT_URL, config.PORT);
+		}
 		if(config.TOKEN.isEmpty()){
 			System.out.println("Error: No token found in pokebot.conf file");
 			System.exit(0);

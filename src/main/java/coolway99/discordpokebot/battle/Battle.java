@@ -346,7 +346,7 @@ public class Battle{
 					continue;
 				}
 				default:
-					continue;
+					break;
 			}
 		}
 	}

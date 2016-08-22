@@ -1,0 +1,146 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<style>
+			.center {text-align:center;}
+			.left {text-align:left;}
+			.right {text-align:right;}
+
+			.centeredBox {
+				width: 800px;
+				border-radius: 5px;
+				background: #eef;
+				padding: 10px;
+				height: 500px;
+				position: absolute;
+				margin-top: -300px;
+				margin-left: -400px;
+				top: 50%;
+				left: 50%;
+			}
+		</style>
+		<script type="text/javascript">
+			function getId(id){
+				return document.getElementById(id);
+			}
+
+			var maxPoints = ~maxPoints~;
+
+			function updatePoints(){
+				var points = 0;
+				points += parseInt(getId("baseTotal").innerHTML);
+				points += parseInt(getId("ivTotal").innerHTML);
+				points += parseInt(getId("evTotal").innerHTML);
+				points += parseInt(getId("level").value);
+				for(var x = 1; x <= 4; x++){
+					var move = getId("move"+x).value;
+					points += parseInt(move.substring(0, move.indexOf("|")));
+				}
+				var ability = getId("ability").value;
+				points += parseInt(ability.substring(0, move.indexOf("|")));
+
+				var ElPoints = getId("totalPoints");
+				if(points > maxPoints){
+					ElPoints.style = "color: red;"
+				} else {
+					ElPoints.style = "";
+				}
+				ElPoints.innerHTML = points;
+				getId("response").innerHTML = "";
+			}
+
+			function process(){
+				updatePoints();
+				shiftMoves();
+
+				var request = new XMLHttpRequest();
+				request.open("POST", "/submit", true);
+				request.setRequestHeader("token", getId("token").value);
+				request.setRequestHeader("id", getId("id").value);
+				for(var x = 1; x <= 4; x++){
+					request.setRequestHeader("move"+x, getId("move"+x).value);
+				}
+				request.setRequestHeader("ability", getId("ability").value);
+				request.setRequestHeader("level", getId("level").value);
+				request.setRequestHeader("primary", getId("PType").value);
+				request.setRequestHeader("secondary", getId("SType").value);
+				for(var x = 0; x < statNames.length; x++){
+					request.setRequestHeader(statNames[x]+".BASE", getId(statNames[x]+".BASE").value);
+					request.setRequestHeader(statNames[x]+".IV", getId(statNames[x]+".IV").value);
+					request.setRequestHeader(statNames[x]+".EV", getId(statNames[x]+".EV").value);
+				}
+				request.setRequestHeader("nature", getId("nature").value);
+				request.onreadystatechange = function(){
+					if(request.readyState == 4 && request.status == 200){
+						getId("response").innerHTML = request.responseText;
+					}
+				}
+				request.send();
+			}
+
+			function levelChange(){
+				calculateStats();
+				updatePoints();
+			}
+		</script>
+	</head>
+	<body>
+		<form id="form" method="post" action="/submit">
+			<div class="centeredBox">
+				<input type="hidden" value="~token~" id="token" />
+				<input type="hidden" value="~id~" id="id" />
+				<h1 class="center">Pokébot Online Player Editor</h1>
+				<span style="width: 100%;">
+					<span>
+						<b>User:</b> ~user~
+						<b>ID:</b> ~id~
+					</span>
+					<span style="position: absolute; right:10px;">
+						Total Points Used:
+						<span id="totalPoints"></span>
+						/ ~maxPoints~
+					</span>
+				</span>
+				<br />
+				<span style="width: 100%">
+					~typeList~
+					<span style="position: absolute; right:10px;">
+						Level:
+						<input type="number" autocomplete="off" style="width: 50px" min="1" max="~maxLevel~" id="level" value="~level~" maxlength="3" onchange="levelChange()"/>
+					</span>
+				</span>
+				<br />
+				~statGrid~
+				<b>Note: EV's are assumed to be divided by 4, since that's the true impact they have on the math</b>
+				<br /><br />
+				<span style="width: 100%;">
+					~moveList~
+				</span>
+				<br /><br />
+				<span style="width: 100%;">
+					~abilityList~
+					<span style="position: absolute; right: 10px;">
+						~natureList~
+					</span>
+				</span>
+				<br /><br /><br />
+				<input type="button" value="Submit" onclick="process()"/>
+				<br /><br />
+				<span style="width: 100%" id="response"></span>
+			</div>
+		</form>
+		<script>
+			getId("PType").value = "~primary~";
+			getId("SType").value = "~secondary~";
+			getId("move1").value = "~move1~";
+			getId("move2").value = "~move2~";
+			getId("move3").value = "~move3~";
+			getId("move4").value = "~move4~";
+			getId("ability").value = "~ability~";
+			getId("nature").value = "~nature~";
+
+			updateStats();
+			updatePoints();
+		</script>
+	</body>
+</html>
