@@ -15,7 +15,6 @@ public final class MoveList extends Template{
 	private static String render = null;
 
 	private MoveList(){
-		super();
 		this.addCollection("moves", Arrays.asList(Moves.values()), (move, map) -> {
 			if(move == Moves.NULL){
 				map.add("name", "NONE");

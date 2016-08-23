@@ -18,9 +18,11 @@ public class StatGrid extends Template{
 	}
 
 	public StatGrid(Player player){
-		super();
 		this.add("baseMax", Integer.toString(StatHandler.MAX_TOTAL_STAT_POINTS));
 		this.add("evMax", Integer.toString(StatHandler.MAX_TOTAL_EV_POINTS));
+		this.add("singleBaseMax", Integer.toString(StatHandler.MAX_SINGLE_STAT_POINTS));
+		this.add("singleIvMax", Integer.toString(StatHandler.MAX_SINGLE_IV_POINTS));
+		this.add("singleEvMax", Integer.toString(StatHandler.MAX_SINGLE_EV_POINTS));
 		ArrayList<Stats> statList = new ArrayList<>();
 		statList.addAll(Arrays.asList(Stats.values()).subList(0, 6));
 		this.addCollection("stats", statList, (stat, map) -> {

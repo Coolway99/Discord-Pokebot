@@ -10,7 +10,6 @@ public final class AbilityList extends Template{
 	private static String render = null;
 
 	private AbilityList(){
-		super();
 		this.addCollection("abilities", Arrays.asList(Abilities.values()), (ability, map) -> {
 			map.add("name", ability.toString().replace("_", " "));
 			map.add("value", ability.toString());

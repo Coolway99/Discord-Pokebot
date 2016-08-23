@@ -101,13 +101,14 @@ public class WebInterface{
 						for(int y = 0; y < stats[x].length; y++){
 							SubStats subStat = SubStats.getSubStatFromIndex(y);
 							int val = Integer.parseInt(req.headers(stat.toString()+'.'+subStat.toString()));
-							if(val < 0) throw new NumberFormatException();
+							if(val < 0 || val > StatHandler.MAX_SINGLE_SUBSTATS[subStat.getIndex()]){
+								return "Stat Error: "+stat+" "+subStat+" "+val+" is outside of the range";
+							}
 							stats[x][y] = val;
 						}
 					}
 				} catch(NumberFormatException e){
-					return "Stat Error: Something other than positive numbers was inputted into the Stat Grid\n"+
-							"If there were only positive numbers in there, then screenshot this and report it to the bot author";
+					return "Stat Error: Are you sure you only entered numbers into the stat grid?";
 				}
 
 				Abilities ability;
@@ -122,6 +123,7 @@ public class WebInterface{
 				} catch(IllegalArgumentException e){
 					return "Ability Checksum Error (did you try setting an ability manually?)";
 				}
+
 				int level;
 				try{
 					level = Integer.parseInt(req.headers("level"));

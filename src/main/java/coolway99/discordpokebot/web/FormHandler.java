@@ -12,7 +12,6 @@ import sx.blah.discord.handle.obj.IUser;
 public class FormHandler extends Template{
 
 	public FormHandler(IUser user, String token){
-		super();
 		Player player = PlayerHandler.getPlayer(user);
 		this.add("maxPoints", Integer.toString(StatHandler.MAX_TOTAL_POINTS));
 		this.add("maxLevel", Integer.toString(StatHandler.MAX_LEVEL));

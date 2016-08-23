@@ -10,7 +10,6 @@ public final class NatureList extends Template{
 	private static String render = null;
 
 	private NatureList(){
-		super();
 		this.addCollection("natures", Arrays.asList(Natures.values()), (nature, map) -> {
 			map.add("value", getNatureIdentifier(nature));
 			map.add("name", nature.getExpandedText().replaceAll("_", " "));

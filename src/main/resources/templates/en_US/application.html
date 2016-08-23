@@ -37,7 +37,7 @@
 					points += parseInt(move.substring(0, move.indexOf("|")));
 				}
 				var ability = getId("ability").value;
-				points += parseInt(ability.substring(0, move.indexOf("|")));
+				points += parseInt(ability.substring(0, ability.indexOf("|")));
 
 				var ElPoints = getId("totalPoints");
 				if(points > maxPoints){

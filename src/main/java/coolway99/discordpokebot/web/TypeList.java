@@ -11,7 +11,6 @@ public final class TypeList extends Template{
 	private static String render = null;
 
 	private TypeList(){
-		super();
 		ArrayList<Types> typesList = new ArrayList<>();
 		for(Types type : Types.values()){
 			if(type == Types.NULL) continue;

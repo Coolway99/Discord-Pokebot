@@ -6,7 +6,7 @@
 	<artifactId>discordpokebot</artifactId>
 	<name>Discord Pokemon Battle Bot</name>
 	<description>A bot for discord adding better pokemon battles</description>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<url>https://github.com/Coolway99/Discord-Pokebot</url>
 	<repositories>
 		<repository>
@@ -67,5 +67,31 @@
 		<java.version>1.8</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	<build>
+		<plugins>
+			<!-- For building the jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.4.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>coolway99.discordpokebot.Pokebot</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

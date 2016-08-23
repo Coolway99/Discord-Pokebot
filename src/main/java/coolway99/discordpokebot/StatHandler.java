@@ -30,8 +30,11 @@ public class StatHandler{
 	public static final int MAX_SINGLE_IV_POINTS = 31;
 	public static final int MAX_TOTAL_EV_POINTS = 127; //Got by dividing 510 by 4 then rounding
 	public static final int MAX_SINGLE_EV_POINTS = 63; //Got by dividing 252 by 4
-	
-	private static final int[] MAX_SINGLE_SUBSTATS = new int[]{
+
+	/**
+	 * An array for convinence
+	 */
+	public static final int[] MAX_SINGLE_SUBSTATS = new int[]{
 			MAX_SINGLE_STAT_POINTS,
 			MAX_SINGLE_IV_POINTS,
 			MAX_SINGLE_EV_POINTS
