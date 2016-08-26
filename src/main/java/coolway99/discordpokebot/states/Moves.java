@@ -64,8 +64,8 @@ public enum Moves{
 	FAIRY_WIND(Types.FAIRY, MoveType.SPECIAL, 30, 40, 100), //Same as scratch
 	FIRE_PUNCH(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	//Multiturn, boosted cost because of semiinvul
-	HEAL_BELL(Types.NORMAL, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
 	FLY(Types.FLYING, MoveType.PHYSICAL, 15, 90, 95, 120, Flags.HAS_BEFORE, Flags.FLIGHT, Flags.MULTITURN),
+	HEAL_BELL(Types.NORMAL, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
 	ICE_PUNCH(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	GASTRO_ACID(Types.POISON, MoveType.STATUS, 10, -1, 100, 150, Flags.HAS_BEFORE), //Suppresses the target's ability
 	GRAVITY(Types.PSYCHIC, MoveType.BATTLE_STATUS, 5, -1, -1, 100, Flags.HAS_BEFORE, Flags.UNTARGETABLE),
@@ -85,18 +85,19 @@ public enum Moves{
 	SKY_ATTACK(Types.FLYING, MoveType.PHYSICAL, 5, 140, 90, Flags.MULTITURN, Flags.HAS_AFTER), //TODO multiturn
 	SIGNAL_BEAM(Types.BUG, MoveType.SPECIAL, 15, 75, 100, 80, Flags.HAS_AFTER), //TODO confusion
 	SLAM(Types.NORMAL, MoveType.PHYSICAL, 20, 80, 75),
+	//TODO Named wrong
 	STEAM_ROLLER(Types.BUG, MoveType.PHYSICAL, 20, 65, 100, 80, Flags.HAS_BEFORE, Flags.HAS_AFTER), //Same as Stomp,
 	//Fine, you people win
 	SPLASH(Types.WATER, MoveType.PHYSICAL, 999, 0, 100, 200, Flags.UNTARGETABLE, Flags.HAS_BEFORE, Flags.FLIGHT),
 	STOMP(Types.NORMAL, MoveType.PHYSICAL, 20, 65, 100, 80, Flags.HAS_BEFORE, Flags.HAS_AFTER),
 	THUNDER_PUNCH(Types.ELECTRIC, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
-	VICE_GRIP(Types.NORMAL, MoveType.PHYSICAL, 30, 55, 100),
-	WATER_GUN(Types.WATER, MoveType.SPECIAL, 25, 40, 100), //Same as scratch
-	//WHIRLWIND does not apply
-	RAZOR_WIND(Types.NORMAL, MoveType.SPECIAL, 10, 80, 100, Flags.MULTITURN), //TODO It's a multiturn-attack
+	RAZOR_WIND(Types.NORMAL, MoveType.SPECIAL, 10, 80, 100, Flags.MULTITURN), //TODO It's a multiturn-attack,
 	SWORDS_DANCE(Types.NORMAL, MoveType.STATUS, 20, -1, -1, 50, Flags.UNTARGETABLE, Flags.HAS_BEFORE), //Status attack
+	WATER_GUN(Types.WATER, MoveType.SPECIAL, 25, 40, 100), //Same as scratch
 	WING_ATTACK(Types.FLYING, MoveType.SPECIAL, 35, 60, 100),
-	VINE_WHIP(Types.GRASS, MoveType.PHYSICAL, 25, 45, 100),;
+	//WHIRLWIND does not apply
+	VICE_GRIP(Types.NORMAL, MoveType.PHYSICAL, 30, 55, 100),
+	VINE_WHIP(Types.GRASS, MoveType.PHYSICAL, 25, 45, 100);
 
 	private final Types type;
 	private final int power;

@@ -169,15 +169,10 @@ public class WebInterface{
 				return "A unknown error occurred, please report this to the bot author:\n" + e.getCause();
 			}
 		});
-		Spark.get("/test", (req, res) -> new FormHandler(Pokebot.client.getUserByID(Pokebot.config.OWNERID), "WIP").render());
+		//Spark.get("/test", (req, res) -> new FormHandler(Pokebot.client.getUserByID(Pokebot.config.OWNERID), "WIP").render());
 		/*Spark.get("/submit", (req, res) -> {
 			res.redirect("/application", 307);
 			return "INVALID METHOD, REDIRECTING TO APPLICATION";
 		});*/
-		//IUser test = Pokebot.client.getUserByID("blehblah");
-		/*
-		Spark.port(port);
-		Spark.get("/", (request, response) -> "blargh");
-*/
 	}
 }
