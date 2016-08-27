@@ -23,7 +23,7 @@ public enum Moves{
 	ACID(Types.POISON, MoveType.SPECIAL, 30, 40, 100, 45, Flags.HAS_AFTER), //Has a chance of lowering special defense
 	ACID_ARMOR(Types.POISON, MoveType.STATUS, 20, -1, -1, 50, Flags.UNTARGETABLE, Flags.HAS_BEFORE), //Increases the
 	// user's defense by two stages
-	ACID_SPRAY(Types.POISON, MoveType.SPECIAL, 20, 40, 100, 100, Flags.HAS_BEFORE, Flags.HAS_AFTER), //Lowers special
+	ACID_SPRAY(Types.POISON, MoveType.SPECIAL, 20, 40, 100, 100, Flags.HAS_AFTER, Flags.BALLBASED), //Lowers special
 	// defense by two
 	ACROBATICS(Types.FLYING, MoveType.PHYSICAL, 15, 55, 100, 120, Flags.HAS_BEFORE), //If the user has no item, the
 	// power is doubled
@@ -51,11 +51,31 @@ public enum Moves{
 	//TODO Attract
 	AURA_SPHERE(Types.FIGHTING, MoveType.SPECIAL, 20, 80, 1000, 100),
 	AURORA_BEAM(Types.ICE, MoveType.SPECIAL, 20, 65, 100, 75, Flags.HAS_AFTER),
+	//TODO Lowers user's weight
 	AUTOTOMIZE(Types.STEEL, MoveType.STATUS, 15, -1, -1, 50, Flags.HAS_BEFORE, Flags.UNTARGETABLE), //TODO lowers weight
 	AVALANCHE(Types.ICE, MoveType.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4, Flags.HAS_BEFORE),
 	BABY_DOLL_EYES(Types.FAIRY, MoveType.STATUS, 30, -1, 100, 25, Battle_Priority.P1, Flags.HAS_BEFORE),
 	BARRAGE(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.HAS_BEFORE, Flags.NO_CONTACT),
+	BARRIER(Types.PSYCHIC, MoveType.STATUS, 20, -1, -1, 50, Flags.HAS_BEFORE, Flags.UNTARGETABLE),
+	//TODO Baton Pass
+	//TODO BEAT_UP(Types.DARK, MoveType.PHYSICAL, 10, -1, 100, Flags.NO_CONTACT)
+	//TODO BELCH(Types.POISON, MoveType.SPECIAL, 10, 120, 90)
+	BELLY_DRUM(Types.NORMAL, MoveType.STATUS, 10, -1, -1, 150, Flags.HAS_BEFORE, Flags.UNTARGETABLE),
+	//TODO Bestow
+	//TODO Bide
+	//TODO This is going to be a bit tricky to implement. Look at BIDE
 	BIND(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85), //TODO Multiturn
+	BITE(Types.DARK, MoveType.PHYSICAL, 25, 60, 100, 75, Flags.HAS_AFTER),
+	BLAST_BURN(Types.FIRE, MoveType.SPECIAL, 5, 150, 90, Flags.HAS_BEFORE),
+	BLAZE_KICK(Types.FIRE, MoveType.PHYSICAL, 10, 85, 90, 90, Flags.HAS_AFTER),
+	BLIZZARD(Types.ICE, MoveType.SPECIAL, 5, 110, 70, 115, Flags.HAS_BEFORE, Flags.HAS_AFTER),
+	//TODO Block
+	//One of the signature moves of Reshiram, boosts fusion bolt
+	BLUE_FLARE(Types.FIRE, MoveType.SPECIAL, 5, 130, 85, 140, Flags.HAS_AFTER),
+	BODY_SLAM(Types.NORMAL, MoveType.PHYSICAL, 15, 85, 100, 100, Flags.HAS_BEFORE, Flags.HAS_AFTER),
+	//One of the signature moves of Zekrom, boosts fusion flare
+	BOLT_STRIKE(Types.ELECTRIC, MoveType.PHYSICAL, 5, 130, 85, 95, Flags.HAS_AFTER),
+	BONE_CLUB(Types.GROUND, MoveType.PHYSICAL, 20, 65, 85, 70, Flags.HAS_AFTER, Flags.NO_CONTACT),
 	COMET_PUNCH(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 18, Flags.HAS_BEFORE),
 	CUT(Types.NORMAL, MoveType.PHYSICAL, 30, 50, 95),
 	DESTINY_BOND(Types.GHOST, MoveType.STATUS, 5, -1, -1, 100, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
@@ -122,9 +142,18 @@ public enum Moves{
 		} else {
 			this.flags = EnumSet.copyOf(Arrays.asList(flags));
 		}
-		if(moveType == MoveType.PHYSICAL){
-			if(!this.flags.contains(Flags.NO_CONTACT)) this.flags.add(Flags.CONTACT); //If the override isn't set, then set the default
-		} else if(!this.flags.contains(Flags.CONTACT)) this.flags.add(Flags.NO_CONTACT);
+
+		switch(moveType){
+			case PHYSICAL:{
+				if(!this.flags.contains(Flags.NO_CONTACT)) this.flags.add(Flags.CONTACT);
+				break;
+			}
+			case SPECIAL:
+			default:{
+					if(!this.flags.contains(Flags.CONTACT)) this.flags.add(Flags.NO_CONTACT);
+				break;
+			}
+		}
 	}
 
 	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Flags... flags){
@@ -201,7 +230,7 @@ public enum Moves{
 						if(damage > defender.HP) damage = defender.HP;
 						defender.HP -= damage; //Don't have to check here, we did it above
 						attackMessage(channel, attacker, this, defender, damage);
-						//If the defender has liquid ooze ability, then the attacker is actually hurt by this amount
+						//TODO If the defender has liquid ooze ability, then the attacker is actually hurt by this amount
 						heal(channel, attacker, damage/2); //BigRoot increases this to +80% instead of +50%
 					} else {
 						failMessage(channel, attacker);
@@ -213,13 +242,6 @@ public enum Moves{
 				attackMessage(channel, attacker, this);
 				StatHandler.changeStat(channel, attacker, Stats.DEFENSE, 2);
 				return BeforeResult.STOP;
-			}
-			case ACID_SPRAY:{
-				if(defender.hasAbility(Abilities.BULLETPROOF)){
-					Pokebot.sendMessage(channel, defender.mention()+" is immune to the attack!");
-					return BeforeResult.STOP;
-				}
-				return BeforeResult.CONTINUE;
 			}
 			case ACROBATICS:{
 				//TODO if a user has an item then this loses power
@@ -298,7 +320,7 @@ public enum Moves{
 				if(willHit(this, attacker, defender, true)){
 					int timesHit = getTimesHit(5, 100, 33.3, 33.3, 16.7, 16.7);
 					int damage = getDamage(attacker, this, defender)*timesHit;
-					Pokebot.sendMessage(channel, attacker.mention()+" attacked "+defender.user.mention()
+					Pokebot.sendMessage(channel, attacker.mention()+" attacked "+defender.mention()
 							+" "+timesHit+" times for a total of "+damage+"HP of damage!");
 					defender.HP = Math.max(0, defender.HP-damage);
 				} else {
@@ -320,6 +342,30 @@ public enum Moves{
 					missMessage(channel, attacker);
 				}
 				return BeforeResult.STOP;
+			}
+			case BARRIER:{
+				StatHandler.changeStat(channel, attacker, Stats.DEFENSE, 2);
+				return BeforeResult.STOP;
+			}
+			case BELLY_DRUM:{
+				if(attacker.HP <= Math.floor(attacker.getMaxHP()/2F)){
+					failMessage(channel, attacker);
+					return BeforeResult.STOP;
+				}
+				StatHandler.changeStat(channel, attacker, Stats.ATTACK, 12);
+				Pokebot.sendMessage(channel, attacker.mention()+" maxed out their attack!");
+				attacker.HP -= (int) Math.floor(attacker.getMaxHP()/2F);
+				return BeforeResult.STOP;
+			}
+			case BLAST_BURN:{
+				//Even if the user misses, they have to recharge
+				attacker.set(Effects.VBattle.RECHARGING);
+				return BeforeResult.CONTINUE;
+			}
+			case BLIZZARD:{
+				//TODO Weather-HAIL
+				//TODO This hits every opponent
+				return BeforeResult.CONTINUE;
 			}
 			case DESTINY_BOND:{
 				Pokebot.sendMessage(channel, attacker.mention()+" will take it's foe down with it!");
@@ -352,6 +398,7 @@ public enum Moves{
 				StatHandler.changeStat(channel, attacker, Stats.ATTACK, 2);
 				return BeforeResult.STOP;
 			}
+			case BODY_SLAM:
 			case STOMP:
 			case STEAM_ROLLER:{
 				if(defender.has(Effects.VBattle.MINIMIZE)){
@@ -391,12 +438,7 @@ public enum Moves{
 				StatHandler.changeStat(channel, defender, Stats.SPECIAL_DEFENSE, -2);
 				break;
 			}
-			case AIR_SLASH:{
-				if(/*defender.inBattle() &&*/ diceRoll(30)){
-					flinch(channel, defender);
-				}
-				break;
-			}
+			case AIR_SLASH:
 			case ASTONISH:{
 				if(diceRoll(30)) flinch(channel, defender);
 				break;
@@ -405,11 +447,21 @@ public enum Moves{
 				if(diceRoll(10)) StatHandler.changeStat(channel, defender, Stats.ATTACK, -1);
 				break;
 			}
+			case BLAZE_KICK:
 			case FIRE_PUNCH:{
 				if(/*defender.inBattle() &&*/ diceRoll(10)){
-					if(!isType(defender, Types.FIRE)) defender.set(Effects.NonVolatile.BURN);
 					burn(channel, defender);
 				}
+				break;
+			}
+			case BLUE_FLARE:{
+				if(diceRoll(20)){
+					burn(channel, defender);
+				}
+				break;
+			}
+			case BONE_CLUB:{
+				if(diceRoll(10)) flinch(channel, defender);
 				break;
 			}
 			case ANCIENT_POWER:{
@@ -421,6 +473,15 @@ public enum Moves{
 				}
 				break;
 			}
+			case BODY_SLAM:{
+				if(diceRoll(30)) paralyze(channel, defender);
+				break;
+			}
+			case BOLT_STRIKE:{
+				if(diceRoll(20)) paralyze(channel, defender);
+				break;
+			}
+			case BLIZZARD:
 			case ICE_PUNCH:{
 				if(/*defender.inBattle() &&*/ diceRoll(10)){
 					freeze(channel, defender);
@@ -433,6 +494,7 @@ public enum Moves{
 				}
 				break;
 			}
+			case BITE:
 			case SKY_ATTACK:
 			case STEAM_ROLLER:
 			case STOMP:{
@@ -454,6 +516,15 @@ public enum Moves{
 	// outside of battle context
 	public BeforeResult runMultiturn(IChannel channel, Player attacker, Player defender){
 		switch(this){
+			//TODO Bind
+			/*case BIND:{
+				if(attacker.lastMoveData == MoveConstants.NOTHING){
+					//TODO Rapid spin
+					//TODO Grip claw
+					//TODO Binding band
+
+				}
+			}*/
 			case FLY:{
 				switch(attacker.lastMoveData){
 					case MoveConstants.NOTHING:{
@@ -849,32 +920,46 @@ public enum Moves{
 	@SuppressWarnings("BooleanParameter")
 	public static boolean willHit(Moves move, Player attacker, Player defender, boolean factorChanges){
 		if(checkParalysis(attacker)) return false;
-		if(defender.has(Effects.VBattle.SEMI_INVULNERABLE)){
-			switch(move){
-				//Pokémon that use Fly, Bounce, or Sky Drop, or are targeted by Sky Drop fly or are flown up high, and
-				// are vulnerable to Gust, Smack Down, Sky Uppercut, Thunder, Twister, and Hurricane
-				//If the move Gravity is used, these moves cannot be used and any Pokémon in the air return to the ground with their move cancelled
-				case GUST:{
-					switch(defender.lastMove){
-						case FLY:{
-							//case BOUNCE:{
-							return true;
+		if(defender.inBattle()){
+			if(defender.has(Effects.VBattle.SEMI_INVULNERABLE)){
+				switch(move){
+					//Pokémon that use Fly, Bounce, or Sky Drop, or are targeted by Sky Drop fly or are flown up high, and
+					// are vulnerable to Gust, Smack Down, Sky Uppercut, Thunder, Twister, and Hurricane
+					//If the move Gravity is used, these moves cannot be used and any Pokémon in the air return to the ground with their move cancelled
+
+					case GUST:{
+						switch(defender.lastMove){
+							case FLY:{
+								//case BOUNCE:{
+								return true;
+							}
+							default:
+								return false;
 						}
-						default:
-							return false;
 					}
+					default:
+						return false;
+				}
+			}
+			if(defender.has(Effects.VBattle.PROTECTION)){
+				switch(move){
+					//TODO Shadow Force and Fient remove protection for the rest of the turn
+					//TODO
+					default:
+						Pokebot.sendMessage(defender.battle.channel, "But "+defender.mention()+" protected itself!");
+						return false;
+				}
+			}
+			switch(defender.getModifiedAbility()){
+				case BULLETPROOF:{
+					if(move.has(Flags.BALLBASED)){
+						Pokebot.sendMessage(defender.battle.channel, defender.mention()+" is immune to the attack!");
+						return false;
+					}
+					break;
 				}
 				default:
-					return false;
-			}
-		}
-		if(defender.has(Effects.VBattle.PROTECTION)){
-			switch(move){
-				//TODO Shadow Force and Fient remove protection for the rest of the turn
-				//TODO
-				default:
-					Pokebot.sendMessage(defender.battle.channel, "But "+defender.mention()+" protected itself!");
-					return false;
+					break;
 			}
 		}
 
@@ -948,6 +1033,7 @@ public enum Moves{
 		FLIGHT, //If a move requires the use of flying
 		CONTACT, //Overrides the default setting
 		NO_CONTACT, //Overrides the default setting
+		BALLBASED, //The move is based on balls or bombs
 	}
 
 	public enum Battle_Priority{
