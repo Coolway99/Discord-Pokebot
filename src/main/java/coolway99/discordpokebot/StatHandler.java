@@ -2,7 +2,7 @@ package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -203,7 +203,7 @@ public class StatHandler{
 		return wouldExceed(getTotalPoints(player), oldAmount, newAmount, MAX_TOTAL_POINTS);
 	}
 
-	public static boolean wouldExceedTotalPoints(Player player, Moves oldMove, Moves newMove){
+	public static boolean wouldExceedTotalPoints(Player player, Move oldMove, Move newMove){
 		return wouldExceedTotalPoints(player, oldMove.getCost(), newMove.getCost());
 	}
 

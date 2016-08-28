@@ -1,4 +1,4 @@
-package coolway99.discordpokebot.states;
+package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
@@ -6,6 +6,10 @@ import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.IAttack;
+import coolway99.discordpokebot.states.Abilities;
+import coolway99.discordpokebot.states.Effects;
+import coolway99.discordpokebot.states.Stats;
+import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
 import java.util.Arrays;
@@ -16,7 +20,7 @@ import java.util.List;
 //Any accuracy over 100 or over 1D will always hit, and will automatically have evasion and accuracy excluded
 //For multi-hit moves, refer to PMD if needed
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
-public enum Moves{
+public enum Move{
 	//ENUM_NAME(Type, MoveType, PP, Power, Accuracy, cost, battlepriority, flags)
 	NULL(Types.NULL, MoveType.PHYSICAL, 0, 0, 0), //TODO perhaps make this Struggle
 	ABSORB(Types.GRASS, MoveType.SPECIAL, 25, 20, 100, 40, Flags.HAS_BEFORE), //Double it's cost because it heals
@@ -128,8 +132,8 @@ public enum Moves{
 	private final int cost; //How many points will this move use?
 	private final EnumSet<Flags> flags;
 
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
-			Flags... flags){
+	Move(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
+		 Flags... flags){
 		this.type = type;
 		this.power = power;
 		this.moveType = moveType;
@@ -156,11 +160,11 @@ public enum Moves{
 		}
 	}
 
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Flags... flags){
+	Move(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Flags... flags){
 		this(type, moveType, PP, power, accuracy, cost, Battle_Priority.P0, flags);
 	}
 
-	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, Flags... flags){
+	Move(Types type, MoveType moveType, int PP, int power, int accuracy, Flags... flags){
 		this(type, moveType, PP, power, accuracy, power, flags);
 	}
 
@@ -583,7 +587,7 @@ public enum Moves{
 
 	//Returns ifDefenderFainted
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
-	public static boolean attack(IChannel channel, Player attacker, Moves move, Player defender, int slot){
+	public static boolean attack(IChannel channel, Player attacker, Move move, Player defender, int slot){
 		if(!attacker.inBattle() &&
 				(move.getMoveType() == MoveType.STATUS || move.getMoveType() == MoveType.BATTLE_STATUS)){
 			Pokebot.sendMessage(channel, "But it doesn't work here!");
@@ -680,17 +684,17 @@ public enum Moves{
 		}
 	}
 
-	private static void attackMessage(IChannel channel, Player attacker, Moves move, Player defender, int damage){
+	private static void attackMessage(IChannel channel, Player attacker, Move move, Player defender, int damage){
 		Pokebot.sendMessage(channel, attacker.mention()
 				+" attacked "+defender.mention()+" with "+move.getName()
 				+" for "+damage+" damage!");
 	}
 
-	private static void attackMessage(IChannel channel, Player attacker, Moves move, Player defender){
+	private static void attackMessage(IChannel channel, Player attacker, Move move, Player defender){
 		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+" on "+defender.mention()+'!');
 	}
 
-	private static void attackMessage(IChannel channel, Player attacker, Moves move){
+	private static void attackMessage(IChannel channel, Player attacker, Move move){
 		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+'!');
 	}
 
@@ -849,11 +853,11 @@ public enum Moves{
 		return attacker.inBattle() && defender.inBattle() && attacker.battle == defender.battle;
 	}
 
-	public static int getDamage(Player attacker, Moves move, Player defender){
+	public static int getDamage(Player attacker, Move move, Player defender){
 		return getDamage(attacker, move, defender, move.getPower());
 	}
 
-	public static int getDamage(Player attacker, Moves move, Player defender, int power){
+	public static int getDamage(Player attacker, Move move, Player defender, int power){
 		double modifier =
 				getStab(attacker, move) //STAB
 						*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
@@ -874,7 +878,7 @@ public enum Moves{
 		return (int) (((a*b*power)+2)*modifier);
 	}
 
-	public static double getStab(Player attacker, Moves move){
+	public static double getStab(Player attacker, Move move){
 		if(isType(attacker, move.getType(attacker))){
 			if(attacker.hasAbility(Abilities.ADAPTABILITY)) return 2;
 			return 1.5;
@@ -883,7 +887,7 @@ public enum Moves{
 	}
 
 	@SuppressWarnings("UnusedParameters")
-	public static double getPowerChange(Player attacker, Moves move, Player defender, double power){
+	public static double getPowerChange(Player attacker, Move move, Player defender, double power){
 		switch(attacker.getModifiedAbility()){
 			case AERILATE:{
 				power *= 1.3;
@@ -896,7 +900,7 @@ public enum Moves{
 	}
 
 	//TODO perhaps this isn't necessary?
-	public static int getOtherModifiers(Moves move, Player defender){
+	public static int getOtherModifiers(Move move, Player defender){
 		switch(move){
 			case GUST:{
 				switch(defender.lastMove){
@@ -918,7 +922,7 @@ public enum Moves{
 	//Dice rolls for a hit, if not factoring in changes to accuracy and evasion, you can safely
 	//pass in null for Attacker and Defender
 	@SuppressWarnings("BooleanParameter")
-	public static boolean willHit(Moves move, Player attacker, Player defender, boolean factorChanges){
+	public static boolean willHit(Move move, Player attacker, Player defender, boolean factorChanges){
 		if(checkParalysis(attacker)) return false;
 		if(defender.inBattle()){
 			if(defender.has(Effects.VBattle.SEMI_INVULNERABLE)){
@@ -1060,5 +1064,12 @@ public enum Moves{
 		public int getPriority(){
 			return this.priority;
 		}
+	}
+
+	public enum MoveType{
+		PHYSICAL,
+		SPECIAL,
+		STATUS,
+		BATTLE_STATUS
 	}
 }

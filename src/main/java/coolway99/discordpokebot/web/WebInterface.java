@@ -4,7 +4,7 @@ import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -67,7 +67,7 @@ public class WebInterface{
 					return "Authorization error: ID mismatch (have you been tinkering with me?)";
 				}
 
-				Moves[] moves = new Moves[4];
+				Move[] moves = new Move[4];
 				try{
 					String[] moveNames = {req.headers("move1"), req.headers("move2"), req.headers("move3"), req.headers("move4")};
 					for(int x = 0; x < moveNames.length; x++){
@@ -75,7 +75,7 @@ public class WebInterface{
 						int cost = Integer.parseInt(moveSelector.substring(0, moveSelector.indexOf('|')));
 						String moveName = moveSelector.substring(moveSelector.indexOf('|')+1);
 						if(moveName.equals("NONE")) moveName = "NULL";
-						Moves move = Moves.valueOf(moveName);
+						Move move = Move.valueOf(moveName);
 						if(cost != move.getCost()) return "Move Checksum Error (did you try setting a move manually?)";
 						moves[x] = move;
 					}
@@ -149,7 +149,7 @@ public class WebInterface{
 				for(int x = 0; x < player.moves.length; x++){
 					player.moves[x] = moves[x];
 					player.PP[x] = moves[x].getPP();
-					if(moves[x] != Moves.NULL){
+					if(moves[x] != Move.NULL){
 						player.numOfAttacks++;
 					}
 				}

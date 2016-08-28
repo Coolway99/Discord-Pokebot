@@ -3,7 +3,7 @@ package coolway99.discordpokebot;
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -269,8 +269,8 @@ public class EventHandler{
 						return;
 					}
 					try{
-						Moves move = Moves.valueOf(args[2].toUpperCase());
-						if(move.equals(Moves.NULL)) throw new IllegalArgumentException("Null move");
+						Move move = Move.valueOf(args[2].toUpperCase());
+						if(move.equals(Move.NULL)) throw new IllegalArgumentException("Null move");
 						int slot = Integer.parseInt(args[1]);
 						if(slot > 4 || slot < 1){
 							reply(message, "Invalid slot. Slots are 1-4");
@@ -310,7 +310,7 @@ public class EventHandler{
 							reply(message, "Usage: gmi <move>");
 							return;
 						}
-						Moves move = Moves.valueOf(args[1].toUpperCase());
+						Move move = Move.valueOf(args[1].toUpperCase());
 						String b = "Stats of "+move+
 								"\nType: "+move.getType(Abilities.MC_NORMAL_PANTS)+
 								"\nPower: "+move.getPower()+
@@ -348,7 +348,7 @@ public class EventHandler{
 				case "lam":
 				case "listallmoves":{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
-					Moves[] moves = Moves.values();
+					Move[] moves = Move.values();
 					for(int x = 1; x < moves.length; x++){ //Starting at one to prevent the NULL move
 						builder.append(moves[x].toString()).append(" (").append(moves[x].getMoveType()).append(')').append("\n");
 					}
@@ -383,13 +383,13 @@ public class EventHandler{
 							return;
 						}
 						player.numOfAttacks--;
-						player.moves[slot] = Moves.NULL;
+						player.moves[slot] = Move.NULL;
 						player.PP[slot] = 0;
 						for(int x = 0; x < player.moves.length-1; x++){
-							if(player.moves[x] == Moves.NULL){
+							if(player.moves[x] == Move.NULL){
 								player.moves[x] = player.moves[x+1];
 								player.PP[x] = player.PP[x+1];
-								player.moves[x+1] = Moves.NULL;
+								player.moves[x+1] = Move.NULL;
 								player.PP[x+1] = 0;
 							}
 						}
@@ -455,10 +455,10 @@ public class EventHandler{
 							reply(message, "You have no PP left for that move!");
 							return;
 						}
-						Moves move = attacker.moves[slot];
+						Move move = attacker.moves[slot];
 						Player defender;
 						//If this is a status move, then usually we are targeting ourselves
-						if(move.has(Moves.Flags.UNTARGETABLE)){
+						if(move.has(Move.Flags.UNTARGETABLE)){
 							defender = PlayerHandler.getPlayer(author);
 						} else {
 							defender = PlayerHandler.getPlayer(message.getMentions().get(0));
@@ -498,7 +498,7 @@ public class EventHandler{
 							return;
 						}
 						//This is the normal neither-in-battle mess around attack
-						Moves.attack(channel, attacker, move, defender, slot);
+						Move.attack(channel, attacker, move, defender, slot);
 						if(StatHandler.getStatPoints(defender) <= 10){
 							Pokebot.sendMessage(channel, defender.mention()+", it looks like you haven't set any stats!"
 									+" Set some with setstats");

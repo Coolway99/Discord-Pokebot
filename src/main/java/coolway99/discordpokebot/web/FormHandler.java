@@ -3,7 +3,7 @@ package coolway99.discordpokebot.web;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import org.watertemplate.Template;
@@ -32,8 +32,8 @@ public class FormHandler extends Template{
 			this.add("secondary", player.secondary.toString());
 		}
 		for(int x = 0; x < 4; x++){
-			Moves move = player.moves[x];
-			if(move == Moves.NULL){
+			Move move = player.moves[x];
+			if(move == Move.NULL){
 				this.add("move"+(x+1), "0|NONE");
 			} else {
 				this.add("move"+(x+1), move.getCost()+"|"+move.toString());

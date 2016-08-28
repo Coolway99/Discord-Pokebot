@@ -1,6 +1,6 @@
 package coolway99.discordpokebot.web;
 
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import org.watertemplate.Template;
 
 import java.util.Arrays;
@@ -15,8 +15,8 @@ public final class MoveList extends Template{
 	private static String render = null;
 
 	private MoveList(){
-		this.addCollection("moves", Arrays.asList(Moves.values()), (move, map) -> {
-			if(move == Moves.NULL){
+		this.addCollection("moves", Arrays.asList(Move.values()), (move, map) -> {
+			if(move == Move.NULL){
 				map.add("name", "NONE");
 				map.add("value", "NONE");
 				map.add("cost", "0");

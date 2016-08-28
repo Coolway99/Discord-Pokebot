@@ -1,6 +1,7 @@
 package coolway99.discordpokebot.states;
 
 import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.moves.Move;
 
 public enum Types{
 	NULL,
@@ -345,7 +346,7 @@ public enum Types{
 		}
 	}
 	
-	public static boolean isImmune(Player attacker, Moves move, Player defender){
+	public static boolean isImmune(Player attacker, Move move, Player defender){
 		for(Types type : getImmune(defender.primary)){
 			if(move.getType(attacker) == type){
 				return true;
@@ -362,7 +363,7 @@ public enum Types{
 	}
 	
 	//THIS DOES NOT FACTOR IN STAB
-	public static double getTypeMultiplier(Player attacker, Moves move, Player defender){
+	public static double getTypeMultiplier(Player attacker, Move move, Player defender){
 		if(isImmune(attacker, move, defender)) return 0;
 		
 		double multiplier = 1D; //We start with 1X damage
