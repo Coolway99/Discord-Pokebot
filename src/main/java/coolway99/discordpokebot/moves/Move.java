@@ -13,53 +13,47 @@ import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.TreeMap;
 
 //Fire punch, Ice punch, Thunder punch, Signal Beam, and Relic song are all the same, except with different effects
 //Any accuracy over 100 or over 1D will always hit, and will automatically have evasion and accuracy excluded
 //For multi-hit moves, refer to PMD if needed
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
-public enum Move{
-	//ENUM_NAME(Type, MoveType, PP, Power, Accuracy, cost, battlepriority, flags)
+public abstract class Move{
+
+	public static final TreeMap<String, Move> REGISTRY = new TreeMap<>(new MoveSorter());
+	/*//ENUM_NAME(Type, MoveType, PP, Power, Accuracy, cost, battlepriority, flags)
 	NULL(Types.NULL, MoveType.PHYSICAL, 0, 0, 0), //TODO perhaps make this Struggle
 	ABSORB(Types.GRASS, MoveType.SPECIAL, 25, 20, 100, 40, Flags.HAS_BEFORE), //Double it's cost because it heals
-	ACID(Types.POISON, MoveType.SPECIAL, 30, 40, 100, 45, Flags.HAS_AFTER), //Has a chance of lowering special defense
-	ACID_ARMOR(Types.POISON, MoveType.STATUS, 20, -1, -1, 50, Flags.UNTARGETABLE, Flags.HAS_BEFORE), //Increases the
-	// user's defense by two stages
+	ACUPRESSURE(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 100),
 	ACID_SPRAY(Types.POISON, MoveType.SPECIAL, 20, 40, 100, 100, Flags.HAS_AFTER, Flags.BALLBASED), //Lowers special
 	// defense by two
 	ACROBATICS(Types.FLYING, MoveType.PHYSICAL, 15, 55, 100, 120, Flags.HAS_BEFORE), //If the user has no item, the
 	// power is doubled
-	ACUPRESSURE(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 100),
 	AERIAL_ACE(Types.FLYING, MoveType.PHYSICAL, 20, 60, 1000, 80),
 	AEROBLAST(Types.FLYING, MoveType.SPECIAL, 5, 100, 95), //Lugia's signature move, only benefit is higher critical
 	// hit ratio and can target any opponent or ally
 	//TODO After You makes the opponent attack first
 	AFTER_YOU(Types.NORMAL, MoveType.STATUS, 15, -1, -1, 50, Flags.HAS_BEFORE),
-	AGILITY(Types.PSYCHIC, MoveType.STATUS, 30, -1, -1, 50, Flags.UNTARGETABLE, Flags.HAS_BEFORE), //Has no target
 	AIR_CUTTER(Types.FLYING, MoveType.SPECIAL, 25, 60, 95),
-	AIR_SLASH(Types.FLYING, MoveType.SPECIAL, 15, 75, 95, 90, Flags.HAS_AFTER),
 	//Ally Switch can't be /used/ here
-	AMNESIA(Types.PSYCHIC, MoveType.STATUS, 20, -1, -1, 50, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
 	ANCIENT_POWER(Types.ROCK, MoveType.SPECIAL, 5, 60, 100, 130, Flags.HAS_AFTER),
 	AQUA_JET(Types.WATER, MoveType.PHYSICAL, 20, 40, 100, 60, Battle_Priority.P1),
 	AQUA_RING(Types.WATER, MoveType.STATUS, 20, -1, -1, 150, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
-	ARM_THRUST(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 45, Flags.HAS_BEFORE),
 	AROMATHERAPY(Types.GRASS, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
 	//Aromatic Mist can't apply just yet TODO Team Battles
 	//Assist randomly uses an ally's move TODO Team Battles
 	//TODO Assurance deals double damage if the target has already taken damage that turn
-	ASTONISH(Types.GHOST, MoveType.PHYSICAL, 15, 30, 100, 45, Flags.HAS_AFTER),
 	ATTACK_ORDER(Types.BUG, MoveType.PHYSICAL, 15, 90, 100, 100, Flags.NO_CONTACT),
 	//TODO Attract
 	AURA_SPHERE(Types.FIGHTING, MoveType.SPECIAL, 20, 80, 1000, 100),
-	AURORA_BEAM(Types.ICE, MoveType.SPECIAL, 20, 65, 100, 75, Flags.HAS_AFTER),
 	//TODO Lowers user's weight
 	AUTOTOMIZE(Types.STEEL, MoveType.STATUS, 15, -1, -1, 50, Flags.HAS_BEFORE, Flags.UNTARGETABLE), //TODO lowers weight
 	AVALANCHE(Types.ICE, MoveType.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4, Flags.HAS_BEFORE),
 	BABY_DOLL_EYES(Types.FAIRY, MoveType.STATUS, 30, -1, 100, 25, Battle_Priority.P1, Flags.HAS_BEFORE),
-	BARRAGE(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.HAS_BEFORE, Flags.NO_CONTACT),
 	BARRIER(Types.PSYCHIC, MoveType.STATUS, 20, -1, -1, 50, Flags.HAS_BEFORE, Flags.UNTARGETABLE),
 	//TODO Baton Pass
 	//TODO BEAT_UP(Types.DARK, MoveType.PHYSICAL, 10, -1, 100, Flags.NO_CONTACT)
@@ -71,7 +65,6 @@ public enum Move{
 	BIND(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85), //TODO Multiturn
 	BITE(Types.DARK, MoveType.PHYSICAL, 25, 60, 100, 75, Flags.HAS_AFTER),
 	BLAST_BURN(Types.FIRE, MoveType.SPECIAL, 5, 150, 90, Flags.HAS_BEFORE),
-	BLAZE_KICK(Types.FIRE, MoveType.PHYSICAL, 10, 85, 90, 90, Flags.HAS_AFTER),
 	BLIZZARD(Types.ICE, MoveType.SPECIAL, 5, 110, 70, 115, Flags.HAS_BEFORE, Flags.HAS_AFTER),
 	//TODO Block
 	//One of the signature moves of Reshiram, boosts fusion bolt
@@ -80,11 +73,8 @@ public enum Move{
 	//One of the signature moves of Zekrom, boosts fusion flare
 	BOLT_STRIKE(Types.ELECTRIC, MoveType.PHYSICAL, 5, 130, 85, 95, Flags.HAS_AFTER),
 	BONE_CLUB(Types.GROUND, MoveType.PHYSICAL, 20, 65, 85, 70, Flags.HAS_AFTER, Flags.NO_CONTACT),
-	COMET_PUNCH(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 18, Flags.HAS_BEFORE),
 	CUT(Types.NORMAL, MoveType.PHYSICAL, 30, 50, 95),
 	DESTINY_BOND(Types.GHOST, MoveType.STATUS, 5, -1, -1, 100, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
-	DOUBLE_KICK(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 60, Flags.HAS_BEFORE), //TODO hits twice
-	DOUBLE_SLAP(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 30, Flags.HAS_BEFORE), //Same as Comet Punch
 	FAIRY_WIND(Types.FAIRY, MoveType.SPECIAL, 30, 40, 100), //Same as scratch
 	FIRE_PUNCH(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	//Multiturn, boosted cost because of semiinvul
@@ -116,12 +106,11 @@ public enum Move{
 	STOMP(Types.NORMAL, MoveType.PHYSICAL, 20, 65, 100, 80, Flags.HAS_BEFORE, Flags.HAS_AFTER),
 	THUNDER_PUNCH(Types.ELECTRIC, MoveType.PHYSICAL, 15, 75, 100, 80, Flags.HAS_AFTER),
 	RAZOR_WIND(Types.NORMAL, MoveType.SPECIAL, 10, 80, 100, Flags.MULTITURN), //TODO It's a multiturn-attack,
-	SWORDS_DANCE(Types.NORMAL, MoveType.STATUS, 20, -1, -1, 50, Flags.UNTARGETABLE, Flags.HAS_BEFORE), //Status attack
 	WATER_GUN(Types.WATER, MoveType.SPECIAL, 25, 40, 100), //Same as scratch
 	WING_ATTACK(Types.FLYING, MoveType.SPECIAL, 35, 60, 100),
 	//WHIRLWIND does not apply
 	VICE_GRIP(Types.NORMAL, MoveType.PHYSICAL, 30, 55, 100),
-	VINE_WHIP(Types.GRASS, MoveType.PHYSICAL, 25, 45, 100);
+	VINE_WHIP(Types.GRASS, MoveType.PHYSICAL, 25, 45, 100);*/
 
 	private final Types type;
 	private final int power;
@@ -132,7 +121,7 @@ public enum Move{
 	private final int cost; //How many points will this move use?
 	private final EnumSet<Flags> flags;
 
-	Move(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
+	protected Move(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
 		 Flags... flags){
 		this.type = type;
 		this.power = power;
@@ -180,9 +169,10 @@ public enum Move{
 		return this.power;
 	}
 
-	public String getName(){
+	//TODO this is crucial
+	/*public String getName(){
 		return this.toString().replace('_', ' ');
-	}
+	}*/
 
 	public Types getType(Player attacker){
 		return this.getType(attacker.getModifiedAbility());
@@ -219,10 +209,15 @@ public enum Move{
 		return this.flags.contains(flag);
 	}
 
+
+
 	//Still run the normal battle logic?
 	//If this move returns false, you have to manually damage the player then
 	//Thankfully, there's still the getDamage() function that only gets the raw damage
 	public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+		return BeforeResult.CONTINUE;
+	}
+	/*public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 		switch(this){
 			case ABSORB:{
 				if(willHit(this, attacker, defender, true)){
@@ -240,11 +235,6 @@ public enum Move{
 						failMessage(channel, attacker);
 					}
 				}
-				return BeforeResult.STOP;
-			}
-			case ACID_ARMOR:{
-				attackMessage(channel, attacker, this);
-				StatHandler.changeStat(channel, attacker, Stats.DEFENSE, 2);
 				return BeforeResult.STOP;
 			}
 			case ACROBATICS:{
@@ -266,16 +256,6 @@ public enum Move{
 					}
 				}
 				failMessage(channel, attacker);
-				return BeforeResult.STOP;
-			}
-			case AGILITY:{
-				attackMessage(channel, attacker, this);
-				StatHandler.changeStat(channel, attacker, Stats.SPEED, 2);
-				return BeforeResult.STOP;
-			}
-			case AMNESIA:{
-				attackMessage(channel, attacker, this);
-				StatHandler.changeStat(channel, attacker, Stats.SPECIAL_DEFENSE, 2);
 				return BeforeResult.STOP;
 			}
 			case AQUA_RING:{
@@ -307,28 +287,6 @@ public enum Move{
 					break;
 					default:
 					break;
-				}
-				return BeforeResult.STOP;
-			}
-			case BARRAGE:
-				if(defender.hasAbility(Abilities.BULLETPROOF)){
-					Pokebot.sendMessage(channel, "But "+defender.mention()+" is immune to that type of attack!");
-					return BeforeResult.STOP;
-				}
-				//fallthru
-			case ARM_THRUST:
-			case COMET_PUNCH:
-			case DOUBLE_SLAP:{
-				//TODO when items are in, each attack can be blocked
-				//TODO protect and the stuff
-				if(willHit(this, attacker, defender, true)){
-					int timesHit = getTimesHit(5, 100, 33.3, 33.3, 16.7, 16.7);
-					int damage = getDamage(attacker, this, defender)*timesHit;
-					Pokebot.sendMessage(channel, attacker.mention()+" attacked "+defender.mention()
-							+" "+timesHit+" times for a total of "+damage+"HP of damage!");
-					defender.HP = Math.max(0, defender.HP-damage);
-				} else {
-					missMessage(channel, attacker);
 				}
 				return BeforeResult.STOP;
 			}
@@ -397,11 +355,6 @@ public enum Move{
 			case GUILLOTINE:{
 				return BeforeResult.HAS_ADJUSTED_DAMAGE;
 			}
-			case SWORDS_DANCE:{
-				attackMessage(channel, attacker, this);
-				StatHandler.changeStat(channel, attacker, Stats.ATTACK, 2);
-				return BeforeResult.STOP;
-			}
 			case BODY_SLAM:
 			case STOMP:
 			case STEAM_ROLLER:{
@@ -427,37 +380,12 @@ public enum Move{
 				break;
 		}
 		return BeforeResult.CONTINUE;
-	}
+	}*/
 
+	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){}
 	@SuppressWarnings("unused")
-	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
+	/*public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
 		if(!defender.inBattle()) return; //So far, any move that has after-effects needs a battle
-		switch(this){
-			case ACID:{
-				if(/*defender.inBattle() &&*/ diceRoll(10))
-					StatHandler.changeStat(channel, defender, Stats.SPECIAL_DEFENSE, -1);
-				break;
-			}
-			case ACID_SPRAY:{
-				StatHandler.changeStat(channel, defender, Stats.SPECIAL_DEFENSE, -2);
-				break;
-			}
-			case AIR_SLASH:
-			case ASTONISH:{
-				if(diceRoll(30)) flinch(channel, defender);
-				break;
-			}
-			case AURORA_BEAM:{
-				if(diceRoll(10)) StatHandler.changeStat(channel, defender, Stats.ATTACK, -1);
-				break;
-			}
-			case BLAZE_KICK:
-			case FIRE_PUNCH:{
-				if(/*defender.inBattle() &&*/ diceRoll(10)){
-					burn(channel, defender);
-				}
-				break;
-			}
 			case BLUE_FLARE:{
 				if(diceRoll(20)){
 					burn(channel, defender);
@@ -487,18 +415,17 @@ public enum Move{
 			}
 			case BLIZZARD:
 			case ICE_PUNCH:{
-				if(/*defender.inBattle() &&*/ diceRoll(10)){
+				if(diceRoll(10)){
 					freeze(channel, defender);
 				}
 				break;
 			}
 			case POISON_TAIL:{
-				if(/*defender.inBattle() &&*/ diceRoll(10)){
+				if(diceRoll(10)){
 					poison(channel, defender);
 				}
 				break;
 			}
-			case BITE:
 			case SKY_ATTACK:
 			case STEAM_ROLLER:
 			case STOMP:{
@@ -506,7 +433,7 @@ public enum Move{
 				break;
 			}
 			case THUNDER_PUNCH:{
-				if(/*defender.inBattle() &&*/ diceRoll(10)){
+				if(diceRoll(10)){
 					paralyze(channel, defender);
 				}
 				break;
@@ -514,7 +441,7 @@ public enum Move{
 			default:
 				break;
 		}
-	}
+	}*/
 
 	//This only runs in a battle context, has the same as runBefore. Multiturn attacks act like normal attacks
 	// outside of battle context
@@ -578,6 +505,59 @@ public enum Move{
 			default:
 				return BeforeResult.CONTINUE;
 		}
+	}
+
+	private int getAdjustedDamage(Player attacker, Player defender){
+		switch(this){
+			case ACROBATICS:
+			case STEAM_ROLLER:
+			case STOMP:{
+				return getDamage(attacker, this, defender, this.power*2);
+			}
+			case AVALANCHE:{
+				return getDamage(attacker, this, defender); //TODO does double damage if attacker was hit
+			}
+			case DOUBLE_KICK:{
+				return getDamage(attacker, this, defender)*2;
+			}
+			case GUILLOTINE:{
+				return defender.HP;
+			}
+			default:
+				return 0;
+		}
+	}
+
+	public static void registerMoves(){
+		System.out.println("Registering moves...");
+		final float[] typicalHitRate = {100, 33.3F, 33.3F, 16.7F, 16.7F};
+		REGISTRY.put("ARM_THRUST", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50, typicalHitRate));
+		REGISTRY.put("BARRAGE", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, typicalHitRate, Flags.NO_CONTACT,
+				Flags.BALLBASED));
+		REGISTRY.put("COMET_PUNCH", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60, typicalHitRate));
+		REGISTRY.put("DOUBLE_SLAP", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50, typicalHitRate));
+		REGISTRY.put("DOUBLE_KICK", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
+
+		REGISTRY.put("ACID_ARMOR", new StatusChange(Types.POISON, 20, Stats.DEFENSE, 2, Flags.UNTARGETABLE));
+		REGISTRY.put("AGILITY", new StatusChange(Types.PSYCHIC, 30, Stats.SPEED, 2, Flags.UNTARGETABLE));
+		REGISTRY.put("AMNESIA", new StatusChange(Types.PSYCHIC, 20, Stats.SPECIAL_DEFENSE, 2, Flags.UNTARGETABLE));
+		REGISTRY.put("SWORDS_DANCE", new StatusChange(Types.NORMAL, 20, Stats.ATTACK, 2, Flags.UNTARGETABLE));
+
+		REGISTRY.put("ACID", new StatChangeDamageMove(Types.POISON, MoveType.SPECIAL, 30, 40, 100, 10, Stats.SPECIAL_DEFENSE,
+				-1, StatChangeDamageMove.Who.DEFENDER));
+		REGISTRY.put("ACID_SPRAY", new StatChangeDamageMove(Types.POISON, MoveType.SPECIAL, 20, 40, 100, 100, 100, Stats
+				.SPECIAL_DEFENSE, -2, StatChangeDamageMove.Who.DEFENDER, Flags.BALLBASED));
+		REGISTRY.put("AURORA_BEAM", new StatChangeDamageMove(Types.ICE, MoveType.SPECIAL, 20, 65, 100, 75, 10, Stats.ATTACK,
+				-1, StatChangeDamageMove.Who.DEFENDER));
+
+		REGISTRY.put("AIR_SLASH", new FlinchDamageMove(Types.FLYING, MoveType.SPECIAL, 15, 75, 95, 90, 30));
+		REGISTRY.put("ASTONISH", new FlinchDamageMove(Types.GHOST, MoveType.PHYSICAL, 15, 30, 100, 45, 30));
+		REGISTRY.put("BITE", new FlinchDamageMove(Types.DARK, MoveType.PHYSICAL, 25, 60, 100, 75, 30));
+
+		REGISTRY.put("BLAZE_KICK", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 10, 85, 90, 90, 10, Move::burn));
+		REGISTRY.put("FIRE_PUNCH", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, 10, Move::burn));
+
+		System.out.println("Done registering moves");
 	}
 
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
@@ -663,27 +643,6 @@ public enum Move{
 		return false;
 	}
 
-	private int getAdjustedDamage(Player attacker, Player defender){
-		switch(this){
-			case ACROBATICS:
-			case STEAM_ROLLER:
-			case STOMP:{
-				return getDamage(attacker, this, defender, this.power*2);
-			}
-			case AVALANCHE:{
-				return getDamage(attacker, this, defender); //TODO does double damage if attacker was hit
-			}
-			case DOUBLE_KICK:{
-				return getDamage(attacker, this, defender)*2;
-			}
-			case GUILLOTINE:{
-				return defender.HP;
-			}
-			default:
-				return 0;
-		}
-	}
-
 	private static void attackMessage(IChannel channel, Player attacker, Move move, Player defender, int damage){
 		Pokebot.sendMessage(channel, attacker.mention()
 				+" attacked "+defender.mention()+" with "+move.getName()
@@ -706,7 +665,7 @@ public enum Move{
 		Pokebot.sendMessage(channel, defender.mention()+" has fainted!");
 	}
 
-	private static void missMessage(IChannel channel, Player attacker){
+	protected static void missMessage(IChannel channel, Player attacker){
 		Pokebot.sendMessage(channel, "But "+attacker.mention()+" missed!");
 	}
 
@@ -820,7 +779,7 @@ public enum Move{
 
 	}
 
-	private static void flinch(IChannel channel, Player defender){
+	protected static void flinch(IChannel channel, Player defender){
 		if(defender.has(Effects.VBattle.SUBSITUTE)){
 			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
 			return;
@@ -983,9 +942,9 @@ public enum Move{
 		return Pokebot.ran.nextDouble()*100D <= chance;
 	}
 
-	public static int getTimesHit(int maxTimes, double... chances){
+	public static int getTimesHit(float... chances){
 		int times = 0;
-		while(times < maxTimes){
+		while(times < chances.length){
 			if(!diceRoll(chances[times])){
 				break;
 			}
@@ -994,7 +953,7 @@ public enum Move{
 		return times;
 	}
 
-	private enum BeforeResult{
+	protected enum BeforeResult{
 		CONTINUE,
 		HAS_ADJUSTED_DAMAGE(false, true),
 		ALWAYS_HIT(true),
@@ -1029,8 +988,6 @@ public enum Move{
 	}
 
 	public enum Flags{
-		HAS_BEFORE,
-		HAS_AFTER,
 		UNTARGETABLE,
 		BYPASSES_IMMUNITIES,
 		MULTITURN, //If a move takes more than one turn
@@ -1071,5 +1028,24 @@ public enum Move{
 		SPECIAL,
 		STATUS,
 		BATTLE_STATUS
+	}
+
+	private static class MoveSorter implements Comparator<String>{
+
+		@Override
+		public int compare(String o1, String o2){
+			try{
+				char c1, c2;
+				for(int x = 0; x < o2.length(); x++){
+					c1 = o1.charAt(x);
+					c2 = o2.charAt(x);
+					if(c1 == c2) continue;
+					return c2 - c1;
+				}
+				return 0;
+			}catch(IndexOutOfBoundsException e){
+				return 1;
+			}
+		}
 	}
 }
