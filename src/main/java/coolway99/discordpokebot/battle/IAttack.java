@@ -1,7 +1,7 @@
 package coolway99.discordpokebot.battle;
 
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.MoveSet;
 
 //Just a storage class for everything
 //I make the fields public because they're final anyways, you can't change them so
@@ -10,12 +10,16 @@ public class IAttack{
 	
 	public final Player attacker;
 	public final Player defender;
-	public final Move move;
+	public final MoveSet move;
 	private boolean canceled;
+
+	public IAttack(Player attacker, int slot, Player defender){
+		this(attacker, attacker.moves[slot], defender);
+	}
 
 	//Why do I do it like this? I like to imagine it like
 	//"Attacker uses move on Defender"
-	public IAttack(Player attacker, Move move, Player defender){
+	public IAttack(Player attacker, MoveSet move, Player defender){
 		this.attacker = attacker;
 		this.move = move;
 		this.defender = defender;
@@ -30,8 +34,7 @@ public class IAttack{
 		return this.canceled;
 	}
 
-	//We check the usual for if IAttacks equal eachother, but we also add code for Player objects, if the attacker is
-	// the same. This is for "ease of use", but rather, two IAttacks may not equal eachother, but their attackers might.
+	//We check the usual for if IAttacks equal each other
 	@Override
 	public boolean equals(Object obj){
 		if(obj instanceof IAttack){

@@ -15,15 +15,12 @@ public final class MoveList extends Template{
 	private static String render = null;
 
 	private MoveList(){
-		this.addCollection("moves", Arrays.asList(Move.values()), (move, map) -> {
-			if(move == Move.NULL){
-				map.add("name", "NONE");
-				map.add("value", "NONE");
-				map.add("cost", "0");
-				return;
-			}
-			map.add("name", move.toString().replace("_", " "));
-			map.add("value", move.toString());
+		this.addCollection("moves", Move.REGISTRY.values(), (move, map) -> {
+			/*map.add("name", "NONE");
+			map.add("value", "NONE");
+			map.add("cost", "0");*/
+			map.add("name", move.getDisplayName());
+			map.add("value", move.getName());
 			map.add("cost", Integer.toString(move.getCost()));
 		});
 		this.add("noMove", MoveList.noMove);

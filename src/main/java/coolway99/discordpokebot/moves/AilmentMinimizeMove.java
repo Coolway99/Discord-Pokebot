@@ -4,20 +4,19 @@ import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
-public class AilmentDamageMove extends DamageMove{
-
+public class AilmentMinimizeMove extends MinimizeMove{
 	private final int chance;
 	private final AilmentEffect ailment;
 
-	public AilmentDamageMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost,
-							int chance, AilmentEffect ailment, Battle_Priority priority, Flags... flags){
+	public AilmentMinimizeMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost,
+							 int chance, AilmentEffect ailment, Battle_Priority priority, Flags... flags){
 		super(type, moveType, PP, power, accuracy, cost, priority, flags);
 		this.chance = chance;
 		this.ailment = ailment;
 	}
 
-	public AilmentDamageMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost,
-							int chance, AilmentEffect ailment, Flags... flags){
+	public AilmentMinimizeMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost,
+							 int chance, AilmentEffect ailment, Flags... flags){
 		this(type, moveType, PP, power, accuracy, cost, chance, ailment, Battle_Priority.P0, flags);
 	}
 

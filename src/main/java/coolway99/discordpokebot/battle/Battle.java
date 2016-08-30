@@ -3,6 +3,7 @@ package coolway99.discordpokebot.battle;
 import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.moves.Move;
@@ -72,19 +73,20 @@ public class Battle{
 		return this.participants;
 	}
 
-	public void onAttack(IChannel channel, Player attacker, Move move, Player defender){
+	public void onAttack(IChannel channel, Player attacker, MoveSet moveSet, Player defender){
 		synchronized(this.attacks){
 			if(this.attacks.containsKey(attacker)){
 				this.sendMessage(attacker.mention()+" you've already sent your attack!");
 				return;
 			}
-			this.attacks.put(attacker, new IAttack(attacker, move, defender));
+			this.attacks.put(attacker, new IAttack(attacker, moveSet, defender));
 			if(!channel.getID().equals(this.channel.getID())){
 				this.sendMessage(attacker.mention()+" sent in their attack from another channel!");
 			} else {
 				this.sendMessage(attacker.mention()+" submitted their attack");
 			}
-			attacker.lastMove = move;
+			Move move = moveSet.getMove();
+			attacker.lastMove = moveSet;
 			attacker.lastTarget = move.has(Move.Flags.UNTARGETABLE) ? null : defender;
 			if(!move.has(Move.Flags.UNTARGETABLE))
 				defender.lastAttacker = attacker; //free-for-all may make it weird, but it's intentional
@@ -96,7 +98,7 @@ public class Battle{
 	}
 
 	//Called for moves that auto-set themselves
-	private void onAutoAttack(Player attacker, Move move, Player defender){
+	private void onAutoAttack(Player attacker, MoveSet move, Player defender){
 		synchronized(this.attacks){
 			this.attacks.put(attacker, new IAttack(attacker, move, defender));
 			this.sendMessage(attacker.mention()+" has a multiturn attack!");
@@ -189,7 +191,7 @@ public class Battle{
 				this.sendMessage("If "+player.mention()
 						+" doesn't attack the next turn, they're out!");
 				player.lastTarget = null;
-				player.lastMove = Move.NULL;
+				player.lastMove = null;
 				player.lastAttacker = null;
 			}
 			this.attacks.clear();
@@ -212,12 +214,12 @@ public class Battle{
 			return false;
 		}
 		if(Move.attack(this.channel, attack)){
-			if(attack.defender.lastMove == Move.DESTINY_BOND){
+			if(attack.defender.lastMove.getMove() == Move.REGISTRY.get("DESTINY_BOND")){
 				this.sendMessage(attack.attacker.mention()
 						+" was taken down with "+attack.defender.mention());
 				attack.attacker.HP = 0;
 			}
-			if(attack.attacker.lastMove == Move.AFTER_YOU){
+			if(attack.attacker.lastMove.getMove() == Move.REGISTRY.get("AFTER_YOU")){
 				IAttack defenderAttack = this.attacks.get(attack.defender);
 				if(defenderAttack != null && !defenderAttack.isCanceled()){
 					this.sendMessage(attack.attacker.mention()+" made "+attack.defender.mention()+" go next!");
@@ -339,7 +341,7 @@ public class Battle{
 		for(Effects.VBattle effect : player.getVB()){
 			switch(effect){
 				case RECHARGING:{
-					IAttack fakeAttack = new IAttack(player, Move.NULL, null);
+					IAttack fakeAttack = new IAttack(player, null, null);
 					fakeAttack.cancel();
 					this.sendMessage(player.mention()+" must recharge!");
 					this.attacks.put(player, fakeAttack);

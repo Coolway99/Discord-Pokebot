@@ -3,6 +3,7 @@ package coolway99.discordpokebot.battle;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
@@ -96,11 +97,9 @@ public class BattleManager{
 		player.HP = player.getMaxHP();
 		player.removeAllEffects();
 		player.lastAttacker = null;
-		player.lastMove = Move.NULL;
+		player.lastMove = null;
 		player.lastMoveData = 0;
-		for(int x = 0; x < player.numOfAttacks; x++){
-			player.PP[x] = player.moves[x].getPP();
-		}
+		for(int x = 0; x < player.numOfAttacks; x++) player.moves[x].resetPP();
 		player.battle = null;
 		inPreBattle.remove(player.user);
 	}

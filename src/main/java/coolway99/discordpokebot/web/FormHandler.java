@@ -2,6 +2,7 @@ package coolway99.discordpokebot.web;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Types;
@@ -32,11 +33,12 @@ public class FormHandler extends Template{
 			this.add("secondary", player.secondary.toString());
 		}
 		for(int x = 0; x < 4; x++){
-			Move move = player.moves[x];
-			if(move == Move.NULL){
+			MoveSet moveSet = player.moves[x];
+			if(moveSet == null){
 				this.add("move"+(x+1), "0|NONE");
 			} else {
-				this.add("move"+(x+1), move.getCost()+"|"+move.toString());
+				Move move = moveSet.getMove();
+				this.add("move"+(x+1), move.getCost()+"|"+move.getName());
 			}
 		}
 		Abilities ability = player.getAbility();

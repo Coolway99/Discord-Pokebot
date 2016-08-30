@@ -3,6 +3,7 @@ package coolway99.discordpokebot.web;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
@@ -68,19 +69,19 @@ public class WebInterface{
 				}
 
 				Move[] moves = new Move[4];
-				try{
-					String[] moveNames = {req.headers("move1"), req.headers("move2"), req.headers("move3"), req.headers("move4")};
-					for(int x = 0; x < moveNames.length; x++){
-						String moveSelector = moveNames[x];
-						int cost = Integer.parseInt(moveSelector.substring(0, moveSelector.indexOf('|')));
-						String moveName = moveSelector.substring(moveSelector.indexOf('|')+1);
-						if(moveName.equals("NONE")) moveName = "NULL";
-						Move move = Move.valueOf(moveName);
+				String[] moveNames = {req.headers("move1"), req.headers("move2"), req.headers("move3"), req.headers("move4")};
+				for(int x = 0; x < moveNames.length; x++){
+					String moveSelector = moveNames[x];
+					int cost = Integer.parseInt(moveSelector.substring(0, moveSelector.indexOf('|')));
+					String moveName = moveSelector.substring(moveSelector.indexOf('|')+1);
+					if(moveName.equals("NONE")){
+						moves[x] = null;
+					} else {
+						Move move = Move.REGISTRY.get(moveName);
+						if(move == null) return "Move Checksum Error (did you try setting a move manually?)";
 						if(cost != move.getCost()) return "Move Checksum Error (did you try setting a move manually?)";
 						moves[x] = move;
 					}
-				} catch(IllegalArgumentException e){
-					return "Move Checksum Error (did you try setting a move manually?)";
 				}
 
 				Types primary, secondary;
@@ -147,9 +148,12 @@ public class WebInterface{
 				if(player.inBattle()) return "Error: You are in a battle, your stats cannot be set";
 				player.numOfAttacks = 0;
 				for(int x = 0; x < player.moves.length; x++){
-					player.moves[x] = moves[x];
-					player.PP[x] = moves[x].getPP();
-					if(moves[x] != Move.NULL){
+					Move move = moves[x];
+					if(move == null){
+						player.moves[x] = null;
+						continue;
+					} else {
+						player.moves[x] = new MoveSet(moves[x]);
 						player.numOfAttacks++;
 					}
 				}
