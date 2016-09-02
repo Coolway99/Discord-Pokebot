@@ -294,7 +294,7 @@ public class Player{
 			this.ability = Abilities.valueOf(in.nextLine());
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
-		}catch(NoSuchElementException e){
+		}catch(NoSuchElementException | NullPointerException e){
 			System.err.println("We read from an incomplete or invalid file");
 		}
 	}

@@ -1,6 +1,7 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.misc.GameList;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import coolway99.discordpokebot.web.WebInterface;
@@ -41,21 +42,25 @@ public class Pokebot{
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
 
 	public static void main(String... args) throws Exception{
-		if(config.WEBENABLED){
-			WebInterface.initWebInterface(config.REDIRECT_URL, config.PORT);
-		}
+		System.out.println("Pokebot version "+VERSION);
 		if(config.TOKEN.isEmpty()){
 			System.out.println("Error: No token found in pokebot.conf file");
 			System.exit(0);
 		}
+		if(config.WEBENABLED){
+			System.out.println("Web interface enabled on port "+config.PORT);
+			WebInterface.initWebInterface(config.REDIRECT_URL, config.PORT);
+		}
 		client = new ClientBuilder().withToken(config.TOKEN).login();
 		System.out.println("Logging in");
-		client.getDispatcher().registerListener(new BotReadyHandler());
+		client.getDispatcher().registerListener(new BotReadyHandler(Thread.currentThread()));
 		timer.scheduleAtFixedRate(PlayerHandler::saveAll, SAVE_DELAY, SAVE_DELAY, TimeUnit.MINUTES);
 		timer.scheduleAtFixedRate(Pokebot::sendAllMessages, MESSAGE_DELAY, MESSAGE_DELAY,
 				TimeUnit.MILLISECONDS);
 		timer.scheduleAtFixedRate(() -> Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()))
 				, GAME_DELAY, GAME_DELAY, TimeUnit.MINUTES);
+		//Now that the main thread is done doing it's business and the bot is busy logging in...
+		Move.registerMoves();
 	}
 
 	public static File getSaveFile(IUser user){

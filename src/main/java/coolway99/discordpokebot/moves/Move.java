@@ -303,13 +303,31 @@ public abstract class Move{
 
 	public static void registerMoves(){
 		System.out.println("Registering moves...");
-		final float[] typicalHitRate = {100, 33.3F, 33.3F, 16.7F, 16.7F};
-		REGISTRY.put("ARM_THRUST", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50, typicalHitRate));
-		REGISTRY.put("BARRAGE", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, typicalHitRate, Flags.NO_CONTACT,
+
+		REGISTRY.put("ARM_THRUST", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50));
+		REGISTRY.put("BARRAGE", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.NO_CONTACT,
 				Flags.BALLBASED));
-		REGISTRY.put("COMET_PUNCH", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60, typicalHitRate));
-		REGISTRY.put("DOUBLE_SLAP", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50, typicalHitRate));
-		REGISTRY.put("DOUBLE_KICK", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
+		REGISTRY.put("COMET_PUNCH", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60));
+		REGISTRY.put("DOUBLE_SLAP", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50));
+
+		//REGISTRY.put("DOUBLE_KICK", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
+		REGISTRY.put("DOUBLE_KICK", new Move(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 60){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				if(willHit(this, attacker, defender, true)){
+					int damage = 0;
+					for(int x = 0; x < 2; x++){
+						damage += getDamage(attacker, this, defender);
+					}
+					Pokebot.sendMessage(channel, attacker.mention()+" attacked "+defender.mention()
+							+" 2 times for a total of "+damage+"HP of damage!");
+					defender.HP = Math.max(0, defender.HP-damage);
+				} else {
+					missMessage(channel, attacker);
+				}
+				return BeforeResult.STOP;
+			}
+		});
 
 		REGISTRY.put("ACID_ARMOR", new StatusChange(Types.POISON, 20, Stats.DEFENSE, 2, Flags.UNTARGETABLE));
 		REGISTRY.put("AGILITY", new StatusChange(Types.PSYCHIC, 30, Stats.SPEED, 2, Flags.UNTARGETABLE));
@@ -822,6 +840,7 @@ public abstract class Move{
 		return Pokebot.ran.nextDouble()*100D <= chance;
 	}
 
+	/* Turns out this is the wrong way to do it.
 	public static int getTimesHit(float... chances){
 		int times = 0;
 		while(times < chances.length){
@@ -831,7 +850,7 @@ public abstract class Move{
 			times++;
 		}
 		return times;
-	}
+	}*/
 
 	protected enum BeforeResult{
 		CONTINUE,
@@ -940,11 +959,11 @@ public abstract class Move{
 						c1 = o1.charAt(x);
 						c2 = o2.charAt(x);
 						if(c1 == c2) continue;
-						return c2-c1;
+						return c1 - c2;
 					}
 					return 0;
 				} catch(IndexOutOfBoundsException e){
-					return 1;
+					return -1;
 				}
 			}
 

@@ -11,8 +11,22 @@ import sx.blah.discord.util.RateLimitException;
 
 public class BotReadyHandler{
 
+	private final Thread mainThread;
+
+	public BotReadyHandler(Thread mainThread){
+		this.mainThread = mainThread;
+	}
+
 	@EventSubscriber
 	public void handle(ReadyEvent event){
+		try{
+			this.mainThread.join();
+		} catch(InterruptedException e){
+			System.err.println("Error in ready thread, Interrupt received");
+			e.printStackTrace();
+			System.exit(-1);
+			return;
+		}
 		System.out.println("The bot is ready");//reggie");
 		Pokebot.client.getDispatcher().registerListener(new EventHandler());
 		Pokebot.client.getDispatcher().unregisterListener(this);

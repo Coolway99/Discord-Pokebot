@@ -5,3 +5,9 @@ Add more moves
 Add balancing of moves
 Add permissions
 The different "get x" commands should have one "get it all" command... Maybe
+Fix saving/loading system
+Implement unimplemented abilities
+Implement items
+Make commands more user-friendly
+Make dialog a bit more conditional
+Add more stuff to config files
