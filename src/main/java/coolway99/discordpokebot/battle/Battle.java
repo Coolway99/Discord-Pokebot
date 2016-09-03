@@ -315,28 +315,8 @@ public class Battle{
 
 	/**
 	 * Used to run things like post-turn damage.
-	 * <p>
-	 * Attacks are already reset by this point,
-	 * so any multi-turn attacks can auto-queue themselves without consequence
 	 */
 	private void onPostTurn(Player player){
-		/*switch(player.lastMove){
-			case FLY:{
-				switch(player.lastMoveData){
-					case MoveConstants.FLYING:{
-						//This attack has charged up
-						this.onAutoAttack(player, player.lastMove, player.lastTarget);
-						break;
-					}
-					default:{
-						break;
-					}
-				}
-				break;
-			}
-			default:
-				break;
-		}*/
 		if(player.lastMoveData != MoveConstants.NOTHING) this.onAutoAttack(player, player.lastMove, player.lastTarget);
 		for(Effects.VBattle effect : player.getVB()){
 			switch(effect){

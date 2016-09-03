@@ -4,6 +4,7 @@ import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.IAttack;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
@@ -14,6 +15,7 @@ import sx.blah.discord.handle.obj.IChannel;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.TreeMap;
 
 //Fire punch, Ice punch, Thunder punch, Signal Beam, and Relic song are all the same, except with different effects
@@ -24,32 +26,25 @@ public abstract class Move{
 
 	public static final TreeMap<String, Move> REGISTRY = new MoveMap();
 
-	/*//ENUM_NAME(Type, MoveType, PP, Power, Accuracy, cost, battlepriority, flags)
-	ACUPRESSURE(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 100),
-	//Ally Switch can't be /used/ here
-	AQUA_RING(Types.WATER, MoveType.STATUS, 20, -1, -1, 150, Flags.UNTARGETABLE, Flags.HAS_BEFORE),
-	AROMATHERAPY(Types.GRASS, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
-	//Aromatic Mist can't apply just yet TODO Team Battles
-	//Assist randomly uses an ally's move TODO Team Battles
-	//TODO Assurance deals double damage if the target has already taken damage that turn
-	//TODO Attract
-	//TODO Lowers user's weight
-	AVALANCHE(Types.ICE, MoveType.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4, Flags.HAS_BEFORE),
-	//TODO Baton Pass
-	//TODO BEAT_UP(Types.DARK, MoveType.PHYSICAL, 10, -1, 100, Flags.NO_CONTACT)
-	//TODO BELCH(Types.POISON, MoveType.SPECIAL, 10, 120, 90)
-	//TODO Bestow
-	//TODO Bide
-	//TODO This is going to be a bit tricky to implement. Look at BIDE
-	BIND(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85), //TODO Multiturn
-	//TODO Block
-
-	HEAL_BELL(Types.NORMAL, MoveType.STATUS, 5, -1, -1, 50, Flags.HAS_BEFORE),
-	GRAVITY(Types.PSYCHIC, MoveType.BATTLE_STATUS, 5, -1, -1, 100, Flags.HAS_BEFORE, Flags.UNTARGETABLE),
-	GUILLOTINE(Types.NORMAL, MoveType.PHYSICAL, 5, -1, 30, 150, Flags.HAS_BEFORE),
-	JUMP_KICK(Types.FIGHTING, MoveType.PHYSICAL, 10, 100, 95, 100, Flags.HAS_BEFORE, Flags.FLIGHT), //Has recoil
-	//WHIRLWIND does not apply
+	/*
+	TODO Ally Switch can't be /used/ here
+	TODO Aromatic Mist can't apply just yet TODO Team Battles
+	TODO Assist randomly uses an ally's move TODO Team Battles
+	TODO Assurance deals double damage if the target has already taken damage that turn
+	TODO Attract
+	TODO Atomonize lowers user's weight
+	TODO Baton Pass
+	TODO BEAT_UP(Types.DARK, MoveType.PHYSICAL, 10, -1, 100, Flags.NO_CONTACT)
+	TODO BELCH(Types.POISON, MoveType.SPECIAL, 10, 120, 90)
+	TODO Bestow
+	TODO Bide
+	TODO This is going to be a bit tricky to implement. Look at BIDE
+	TODO BIND(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85), //TODO Multiturn
+	TODO Block
+	TODO Blizzard
+	TODO WHIRLWIND does not apply
 	*/
+
 	private final Types type;
 	private final int power;
 	private final MoveType moveType;
@@ -177,79 +172,6 @@ public abstract class Move{
 	public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 		return BeforeResult.CONTINUE;
 	}
-	/*public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
-		switch(this){
-			case ACUPRESSURE:{
-				if(attacker != defender && defender.has(Effects.VBattle.SUBSITUTE)){
-					failMessage(channel, attacker);
-					return BeforeResult.STOP;
-				}
-				attackMessage(channel, attacker, this, defender);
-				List<Stats> stats = Arrays.asList(Stats.values());
-				while(!stats.isEmpty()){
-					Stats stat = stats.remove(Pokebot.ran.nextInt(stats.size()));
-					if(defender.modifiers[stat.getIndex()] < 6){
-						StatHandler.changeStat(channel, defender, stat, 2);
-						return BeforeResult.STOP;
-					}
-				}
-				failMessage(channel, attacker);
-				return BeforeResult.STOP;
-			}
-			case AQUA_RING:{
-				//TODO BigRoot increases restoration
-				attacker.set(Effects.VBattle.AQUA_RING);
-				return BeforeResult.STOP;
-			}
-			case AROMATHERAPY:
-			case HEAL_BELL:{
-				//These are status moves, battle checking is done for us
-				attacker.cureNV();
-				for(Player player : attacker.battle.getParticipants()){
-					if(player == attacker) continue;
-					//TODO Sap Sipper will prevent Aromatherapy from working, instead raising their speed by 1 stage
-					player.cureNV();
-					player.lastAttacker = attacker; //Counts as "attacking" that pokemon
-				}
-				switch(this){
-					case AROMATHERAPY:
-					Pokebot.sendMessage(channel, "A soothing aroma wafted through the area, curing everyone of all" +
-								" status effects!");
-					break;
-					case HEAL_BELL:
-					Pokebot.sendMessage(channel, "A bell chimed, curing everyone of all status effects!");
-					break;
-					default:
-					break;
-				}
-				return BeforeResult.STOP;
-			}
-			case AVALANCHE:{
-				return BeforeResult.HAS_ADJUSTED_DAMAGE;
-			}
-			case GRAVITY:{
-				attacker.battle.set(Battle.BattleEffects.GRAVITY, 1);
-				attackMessage(channel, attacker, this);
-				Pokebot.sendMessage(channel, "Gravity Intensified!");
-				return BeforeResult.STOP;
-			}
-			case GUILLOTINE:{
-				return BeforeResult.HAS_ADJUSTED_DAMAGE;
-			}
-			case JUMP_KICK:{
-				if(willHit(this, attacker, defender, true)){
-					return BeforeResult.CONTINUE;
-				}
-				Pokebot.sendMessage(channel, attacker.mention()
-						+" missed and took crash damage instead!");
-				attacker.HP = Math.max(0, attacker.HP-(attacker.getMaxHP()/2));
-				return BeforeResult.STOP;
-			}
-			default:
-				break;
-		}
-		return BeforeResult.CONTINUE;
-	}*/
 
 	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){}
 	@SuppressWarnings("unused")
@@ -264,8 +186,6 @@ public abstract class Move{
 		}
 	}*/
 /*
-	//This only runs in a battle context, has the same as runBefore. Multiturn attacks act like normal attacks
-	// outside of battle context
 	public BeforeResult runMultiturn(IChannel channel, Player attacker, Player defender){
 			//TODO Bind
 			/*case BIND:{
@@ -273,7 +193,6 @@ public abstract class Move{
 					//TODO Rapid spin
 					//TODO Grip claw
 					//TODO Binding band
-
 				}
 			}*//*
 		}
@@ -282,24 +201,6 @@ public abstract class Move{
 	protected int getAdjustedDamage(Player attacker, Player defender){
 		return 0;
 	}
-	/*
-	private int getAdjustedDamage(Player attacker, Player defender){
-		switch(this){
-			case ACROBATICS:
-			case STEAM_ROLLER:
-			case STOMP:{
-				return getDamage(attacker, this, defender, this.power*2);
-			}
-			case AVALANCHE:{
-				return getDamage(attacker, this, defender); //TODO does double damage if attacker was hit
-			}
-			case GUILLOTINE:{
-				return defender.HP;
-			}
-			default:
-				return 0;
-		}
-	}*/
 
 	public static void registerMoves(){
 		System.out.println("Registering moves...");
@@ -421,45 +322,170 @@ public abstract class Move{
 			}
 		});
 
-		//TODO if the user has no item, power is doubled
-		//REGISTRY.put("ACROBATICS", new UniqueMove((channel, attacker, move, defender) -> BeforeResult.HAS_ADJUSTED_DAMAGE,
-		//		Types.FLYING, MoveType.PHYSICAL, 15, 55, 100, 120, Battle_Priority.P0));
-
-		REGISTRY.put("AFTER_YOU", new UniqueMove((a, b, c, d) -> BeforeResult.STOP, Types.NORMAL, MoveType.STATUS,
-				15, -1, -1, 50, Battle_Priority.P0));
-
-		REGISTRY.put("ANCIENT_POWER", new UniqueMove((channel, attacker, move, defender, damage) -> {
-			if(diceRoll(10)){
-				for(int x = 1; x < 6; x++){
-					StatHandler.changeStat(channel, attacker, Stats.getStatFromIndex(x), 1);
-				}
-			}
-		}, Types.ROCK, MoveType.SPECIAL, 5, 60, 100, 150, Battle_Priority.P0));
+		REGISTRY.put("AFTER_YOU", new FlagMove(Types.NORMAL, 15, -1, 50, null));
+		REGISTRY.put("DESTINY_BOND", new FlagMove(Types.GHOST, 5, -1, 100, "%s will take it's foe down with it!",
+				Flags.UNTARGETABLE));
 
 		//TODO Blizzard - doubles power in hail, hits everyone, and has a 10% chance of freezing
 		//BLIZZARD(Types.ICE, MoveType.SPECIAL, 5, 110, 70, 115, Flags.HAS_BEFORE, Flags.HAS_AFTER),
 
-		REGISTRY.put("DESTINY_BOND", new UniqueMove((channel, attacker, move, defender) -> {
-			Pokebot.sendMessage(channel, attacker.mention()+" will take it's foe down with it!");
-			return BeforeResult.STOP;
-		}, Types.GHOST, MoveType.STATUS, 5, -1, -1, 100, Battle_Priority.P0, Flags.UNTARGETABLE));
-
-		REGISTRY.put("GASTRO_ACID", new UniqueMove((channel, attacker, move, defender) -> {
-			if(willHit(move, attacker, defender, true)){ //Implicit battle check, because it's a status move
-				attackMessage(channel, attacker, move, defender);
-				defender.set(Effects.VBattle.ABILITY_BLOCK);
-				Pokebot.sendMessage(channel, defender.mention()+" 's ability was suppressed!");
-			} else {
-				missMessage(channel, attacker);
+		//TODO if the user has no item, power is doubled
+		REGISTRY.put("ACROBATICS", new Move(Types.FLYING, MoveType.PHYSICAL, 15, 55, 100, 120){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				return BeforeResult.HAS_ADJUSTED_DAMAGE;
 			}
-			return BeforeResult.STOP;
-		}, Types.POISON, MoveType.STATUS, 10, -1, 100, 150, Battle_Priority.P0));
 
-		REGISTRY.put("SPLASH", new UniqueMove((channel, attacker, move, defender) -> {
-			Pokebot.sendMessage(channel, "... But nothing happened.");
-			return BeforeResult.STOP;
-		}, Types.WATER, MoveType.PHYSICAL, 999, 0, 100, 200, Battle_Priority.P0, Flags.UNTARGETABLE, Flags.FLIGHT));
+			@Override
+			protected int getAdjustedDamage(Player attacker, Player defender){
+				return getDamage(attacker, this, defender, this.power*2);
+			}
+		});
 
+		REGISTRY.put("ACUPRESSURE", new Move(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 100){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				if(attacker != defender && defender.has(Effects.VBattle.SUBSITUTE)){
+					failMessage(channel, attacker);
+					return BeforeResult.STOP;
+				}
+				attackMessage(channel, attacker, this, defender);
+				List<Stats> stats = Arrays.asList(Stats.values());
+				while(!stats.isEmpty()){
+					Stats stat = stats.remove(Pokebot.ran.nextInt(stats.size()));
+					if(defender.modifiers[stat.getIndex()] < 6){
+						StatHandler.changeStat(channel, defender, stat, 2);
+						return BeforeResult.STOP;
+					}
+				}
+				failMessage(channel, attacker);
+				return BeforeResult.STOP;
+			}
+		});
+
+		REGISTRY.put("ANCIENT_POWER", new DamageMove(Types.ROCK, MoveType.SPECIAL, 5, 60, 100, 150){
+			@Override
+			public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
+				if(diceRoll(10)){
+					for(int x = 1; x < 6; x++){
+						StatHandler.changeStat(channel, attacker, Stats.getStatFromIndex(x), 1);
+					}
+				}
+			}
+		});
+
+		REGISTRY.put("AQUA_RING", new Move(Types.WATER, MoveType.STATUS, 20, -1, -1, 150, Flags.UNTARGETABLE){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				//TODO BigRoot increases restoration
+				attacker.set(Effects.VBattle.AQUA_RING);
+				return BeforeResult.STOP;
+			}
+		});
+
+		REGISTRY.put("AROMATHERAPY", new Move(Types.GRASS, MoveType.STATUS, 5, -1, -1, 50){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				//These are status moves, battle checking is done for us
+				attacker.cureNV();
+				for(Player player : attacker.battle.getParticipants()){
+					if(player == attacker) continue;
+					//TODO Sap Sipper will prevent Aromatherapy from working, instead raising their speed by 1 stage
+					player.cureNV();
+					player.lastAttacker = attacker; //Counts as "attacking" that pokemon
+				}
+				Pokebot.sendMessage(channel, "A soothing aroma wafted through the area, curing everyone of all status effects!");
+				return BeforeResult.STOP;
+			}
+		});
+
+		REGISTRY.put("AVALANCHE", new Move(Types.ICE, MoveType.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				return BeforeResult.HAS_ADJUSTED_DAMAGE;
+			}
+
+			@Override
+			protected int getAdjustedDamage(Player attacker, Player defender){
+				return getDamage(attacker, this, defender); //TODO does double damage if attacker was hit
+			}
+		});
+
+		REGISTRY.put("GRAVITY", new Move(Types.PSYCHIC, MoveType.STATUS, 5, -1, -1, 100, Flags.UNTARGETABLE){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				attacker.battle.set(Battle.BattleEffects.GRAVITY, 1);
+				attackMessage(channel, attacker, this);
+				Pokebot.sendMessage(channel, "Gravity Intensified!");
+				return BeforeResult.STOP;
+			}
+		});
+
+		REGISTRY.put("HEAL_BELL", new Move(Types.NORMAL, MoveType.STATUS, 5, -1, -1, 50){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				//These are status moves, battle checking is done for us
+				attacker.cureNV();
+				for(Player player : attacker.battle.getParticipants()){
+					if(player == attacker) continue;
+					player.cureNV();
+					player.lastAttacker = attacker; //Counts as "attacking" that pokemon
+				}
+				Pokebot.sendMessage(channel, "A bell chimed, curing everyone of all status effects!");
+				return BeforeResult.STOP;
+			}
+		});
+
+		REGISTRY.put("JUMP_KICK", new Move(Types.FIGHTING, MoveType.PHYSICAL, 10, 100, 95, 100, Flags.FLIGHT){
+				//Has recoil){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				if(willHit(this, attacker, defender, true)){
+					return BeforeResult.CONTINUE;
+				}
+				Pokebot.sendMessage(channel, attacker.mention()
+						+" missed and took crash damage instead!");
+				attacker.HP = Math.max(0, attacker.HP-(attacker.getMaxHP()/2));
+				return BeforeResult.STOP;
+			}
+		});
+
+		REGISTRY.put("GASTRO_ACID", new Move(Types.POISON, MoveType.STATUS, 10, -1, 100, 150){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				if(willHit(this, attacker, defender, true)){ //Implicit battle check, because it's a status move
+					attackMessage(channel, attacker, this, defender);
+					defender.set(Effects.VBattle.ABILITY_BLOCK);
+					Pokebot.sendMessage(channel, defender.mention()+" 's ability was suppressed!");
+				} else {
+					missMessage(channel, attacker);
+				}
+				return BeforeResult.STOP;
+			}
+		});
+
+		//TODO this can probably be in a OHKO move class, since other moves will be like it
+		REGISTRY.put("GUILLOTINE", new Move(Types.NORMAL, MoveType.PHYSICAL, 5, -1, 30, 150){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				if(willHit(this, attacker, defender, true)){
+					defender.HP = 0;
+					Pokebot.sendMessage(channel, defender.mention()+" was OHKO'd!");
+				} else {
+					missMessage(channel, attacker);
+				}
+				return BeforeResult.STOP;
+			}
+		});
+
+		REGISTRY.put("SPLASH", new Move(Types.WATER, MoveType.PHYSICAL, 999, -1, 100, 200,
+				Flags.UNTARGETABLE, Flags.FLIGHT){
+			@Override
+			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
+				Pokebot.sendMessage(channel, "... But nothing happened");
+				return BeforeResult.STOP;
+			}
+		});
 
 		System.out.println("Done registering moves");
 	}
@@ -839,18 +865,6 @@ public abstract class Move{
 	public static boolean diceRoll(double chance){
 		return Pokebot.ran.nextDouble()*100D <= chance;
 	}
-
-	/* Turns out this is the wrong way to do it.
-	public static int getTimesHit(float... chances){
-		int times = 0;
-		while(times < chances.length){
-			if(!diceRoll(chances[times])){
-				break;
-			}
-			times++;
-		}
-		return times;
-	}*/
 
 	protected enum BeforeResult{
 		CONTINUE,
