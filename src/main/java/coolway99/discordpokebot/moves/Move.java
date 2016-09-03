@@ -1,6 +1,5 @@
 package coolway99.discordpokebot.moves;
 
-import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
@@ -12,10 +11,10 @@ import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.TreeMap;
 
 //Fire punch, Ice punch, Thunder punch, Signal Beam, and Relic song are all the same, except with different effects
@@ -205,13 +204,13 @@ public abstract class Move{
 	public static void registerMoves(){
 		System.out.println("Registering moves...");
 
-		REGISTRY.put("ARM_THRUST", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50));
-		REGISTRY.put("BARRAGE", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.NO_CONTACT,
+		REGISTRY.put("ARM_THRUST", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50));
+		REGISTRY.put("BARRAGE", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.NO_CONTACT,
 				Flags.BALLBASED));
-		REGISTRY.put("COMET_PUNCH", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60));
-		REGISTRY.put("DOUBLE_SLAP", new MultiHit(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50));
+		REGISTRY.put("COMET_PUNCH", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60));
+		REGISTRY.put("DOUBLE_SLAP", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50));
 
-		//REGISTRY.put("DOUBLE_KICK", new MultiHit(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
+		//REGISTRY.put("DOUBLE_KICK", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
 		REGISTRY.put("DOUBLE_KICK", new Move(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 60){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
@@ -342,23 +341,21 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("ACUPRESSURE", new Move(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 100){
+		REGISTRY.put("ACUPRESSURE", new Move(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 60){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(attacker != defender && defender.has(Effects.VBattle.SUBSITUTE)){
 					failMessage(channel, attacker);
 					return BeforeResult.STOP;
 				}
-				attackMessage(channel, attacker, this, defender);
-				List<Stats> stats = Arrays.asList(Stats.values());
-				while(!stats.isEmpty()){
-					Stats stat = stats.remove(Pokebot.ran.nextInt(stats.size()));
-					if(defender.modifiers[stat.getIndex()] < 6){
-						StatHandler.changeStat(channel, defender, stat, 2);
-						return BeforeResult.STOP;
-					}
+				ArrayList<Stats> stats = new ArrayList<>(Arrays.asList(Stats.values()));
+				stats.remove(Stats.HEALTH);
+				stats.removeIf(stat -> defender.modifiers[stat.getIndex()] == 6);
+				if(stats.isEmpty()){
+					failMessage(channel, attacker);
+					return BeforeResult.STOP;
 				}
-				failMessage(channel, attacker);
+				StatHandler.changeStat(channel, defender, stats.get(Pokebot.ran.nextInt(stats.size())), 2);
 				return BeforeResult.STOP;
 			}
 		});

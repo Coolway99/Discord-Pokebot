@@ -286,7 +286,12 @@ public class Player{
 			this.numOfAttacks = in.nextInt();
 			in.nextLine(); //nextInt tends to leave over the \n, it seems
 			for(int x = 0; x < this.moves.length; x++){
-				this.moves[x] = new MoveSet(Move.REGISTRY.get(in.nextLine()));
+				Move move = Move.REGISTRY.get(in.nextLine());
+				if(move == null){
+					this.moves[x] = null;
+					continue;
+				}
+				this.moves[x] = new MoveSet(move);
 			}
 			this.level = in.nextInt();
 			in.nextLine();
@@ -301,6 +306,7 @@ public class Player{
 	
 	public boolean hasMove(Move move){
 		for(MoveSet set : this.moves){
+			if(set == null) continue;
 			if(set.getMove() == move) return true;
 		}
 		return false;
@@ -328,6 +334,10 @@ public class Player{
 
 			out.println(this.numOfAttacks);
 			for(MoveSet set : this.moves){
+				if(set == null){
+					out.println("null");
+					continue;
+				}
 				out.println(set.getMove().getName());
 			}
 			out.println(this.level);

@@ -10,7 +10,7 @@ import java.util.Arrays;
 /**
  * The main object of typical multi-hit moves, used for convenience.
  */
-public class MultiHit extends Move{
+public class MultiHitMove extends Move{
 	/*(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
 	Flags... flags){*/
 
@@ -27,7 +27,7 @@ public class MultiHit extends Move{
 	 * @param cost The cost of this move
 	 * @param flags The {@link coolway99.discordpokebot.moves.Move.Flags} of the move
 	 */
-	public MultiHit(Types type, MoveType moveType, int PP, int singleHitPower, int accuracy, int cost, Flags... flags){
+	public MultiHitMove(Types type, MoveType moveType, int PP, int singleHitPower, int accuracy, int cost, Flags... flags){
 		super(type, moveType, PP, singleHitPower, accuracy, cost, flags);
 	}
 
