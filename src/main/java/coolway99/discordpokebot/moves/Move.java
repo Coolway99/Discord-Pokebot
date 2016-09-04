@@ -44,17 +44,17 @@ public abstract class Move{
 	TODO WHIRLWIND does not apply
 	*/
 
-	private final Types type;
-	private final int power;
-	private final MoveType moveType;
-	private final int PP; //The default PP of the move
-	private final double accuracy; //From 0 to 1
-	private final Battle_Priority priority;
-	private final int cost; //How many points will this move use?
-	private final EnumSet<Flags> flags;
+	protected final Types type;
+	protected final int power;
+	protected final MoveType moveType;
+	protected final int PP; //The default PP of the move
+	protected final double accuracy; //From 0 to 1
+	protected final Battle_Priority priority;
+	protected final int cost; //How many points will this move use?
+	protected final EnumSet<Flags> flags;
 
-	private String name;
-	private String displayName;
+	protected String name;
+	protected String displayName;
 
 	public Move(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
 		 Flags... flags){
