@@ -14,6 +14,7 @@ import spark.Spark;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.net.URLEncoder;
+import java.util.Random;
 
 public class WebInterface{
 
@@ -32,29 +33,64 @@ public class WebInterface{
 		});
 		Spark.get("/", (req, res) -> {
 			String code = req.queryParams("code");
-			if(code == null || code.equals("") || code.equals("null")){
+
+			if(code == null/* || code.equals("") || code.equals("null")*/){
 				res.redirect("/authorize");
 				return "redirecting";
 			}
-			String token = OAuth_Handler.getToken(req.queryParams("code"));
-			String id = OAuth_Handler.getUserID(token);
-			if(id == null){
-				return "ERROR: UNABLE TO GET USER ID";
+
+			String token, id, ran;
+
+			if("true".equals(req.queryParams("slotChange"))){ //Flipped for null safety
+				token = req.queryParams("token");
+				id = req.queryParams("id");
+				ran = req.queryParams("ran");
+			} else {
+				token = OAuth_Handler.getToken(req.queryParams("code"));
+				if(token == null){
+					return "ERROR: UNABLE TO GET TOKEN";
+				}
+				id = OAuth_Handler.getUserID(token);
+				if(id == null){
+					return "ERROR: UNABLE TO GET USER ID.\nIF THIS ERROR PERSISTS CONTACT THE BOT AUTHOR";
+				}
+				long seed = 0;
+				for(int x = 0; x < (int) Math.floor(code.length()/10F); x++){
+					seed += Long.parseLong(code.toUpperCase().substring(x*10, Math.min((x+1)*10, code.length())), 36);
+				}
+				long numId = Long.parseLong(id);
+				Random random = new Random(seed+numId);
+				for(int x = -2; x < Math.floorMod(numId, 20); x++){
+					random.nextDouble();
+					for(int y = -4; y < x; y++){
+						random.nextLong();
+					}
+				}
+				ran = Integer.toString(random.nextInt());
 			}
 			IUser user = Pokebot.client.getUserByID(id);
 			if(user == null){
-				return "ERROR: UNABLE TO GET USER OBJECT";
+				return "ERROR: UNABLE TO GET USER OBJECT" +
+						"\n\nIf you keep getting this error, please make sure you are in a guild with "+Pokebot.config.BOTNAME +
+						"\nIf this error persists, please contact the bot author";
 			}
-			System.out.println("Preparing to render");
-			String render;
+			byte slot;
+			if(req.queryParams("slot") == null){
+				slot = 0;
+			} else {
+				try{
+					slot = Byte.parseByte(req.queryParams("slot"));
+					if(slot < 0 || slot > PlayerHandler.MAX_SLOTS-1) throw new NumberFormatException();
+				} catch(NumberFormatException e){
+					return "Error getting slot";
+				}
+			}
 			try{
-				render = new FormHandler(user, token).render();
-			}catch(Exception e){
+				return new FormHandler(user, token, code, ran, slot).render();
+			} catch(Exception e){
 				e.printStackTrace();
-				return null;
+				return "There was an internal error. If this error persists, please contact the bot author";
 			}
-			return render;
-			//return new FormHandler(user, token).render();
 		});
 		Spark.post("/submit", (req, res) -> {
 			try{
@@ -65,6 +101,41 @@ public class WebInterface{
 				}
 				if(!id.equals(req.headers("id"))){
 					return "Authorization error: ID mismatch (have you been tinkering with me?)";
+				}
+
+				String code = req.headers("code");
+
+				byte slot;
+				try{
+					slot = (byte) (Byte.parseByte(req.headers("slot"))-1);
+					if(slot < 0 || slot > PlayerHandler.MAX_SLOTS-1) throw new NumberFormatException();
+				} catch(NumberFormatException e){
+					return "Slot Error: Not a valid number for the slot!";
+				} catch(Exception e){
+					return "Slot Error: Something went wrong";
+				}
+
+				int ran;
+				try{
+					ran = Integer.parseInt(req.headers("ran"));
+				} catch(Exception e){
+					return "Checksum error. Reload the application";
+				}
+
+				long seed = 0;
+				for(int x = 0; x < (int) Math.floor(code.length()/10F); x++){
+					seed += Long.parseLong(code.toUpperCase().substring(x*10, Math.min((x+1)*10, code.length())), 36);
+				}
+				long numId = Long.parseLong(id);
+				Random random = new Random(seed+numId);
+				for(int x = -2; x < Math.floorMod(numId, 20); x++){
+					random.nextDouble();
+					for(int y = -4; y < x; y++){
+						random.nextLong();
+					}
+				}
+				if(ran != random.nextInt()){
+					return "Checksum error. Reload the application";
 				}
 
 				Moves[] moves = new Moves[4];
@@ -169,6 +240,10 @@ public class WebInterface{
 				return "A unknown error occurred, please report this to the bot author:\n" + e.getCause();
 			}
 		});
+
+		/*Spark.exception(Exception.class, (e, request, response) -> {
+			e.printStackTrace();
+		});*/
 		//Spark.get("/test", (req, res) -> new FormHandler(Pokebot.client.getUserByID(Pokebot.config.OWNERID), "WIP").render());
 		/*Spark.get("/submit", (req, res) -> {
 			res.redirect("/application", 307);

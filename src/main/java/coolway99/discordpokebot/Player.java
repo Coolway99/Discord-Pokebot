@@ -47,7 +47,7 @@ public class Player{
 	public final int[][] stats = new int[6][3];
 	
 	/**
-	 * An array holding the modifiers for each stat
+	 * An array holding the modifiers for each stat. Health is slot 0, but isn't ever used
 	 */
 	public final byte[] modifiers = new byte[8];
 	/**

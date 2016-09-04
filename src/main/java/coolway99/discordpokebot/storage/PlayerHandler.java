@@ -20,7 +20,7 @@ public class PlayerHandler{
 		return getPlayer(user, getMainFile(user).lastSlot);
 	}
 
-	public static Player getPlayer(IUser user, byte slot){
+	private static Player getPlayer(IUser user, byte slot){
 		if(playerMap.containsKey(user.getID())){
 			if(playerMap.get(user.getID()).slot == slot) return playerMap.get(user.getID());
 			//ELSE
@@ -30,6 +30,7 @@ public class PlayerHandler{
 		return playerMap.get(user.getID());
 	}
 
+	//TODO This shouldn't be returning strings
 	public static String switchSlot(IUser author, byte slot){
 		String ID = author.getID();
 		if(playerMap.containsKey(ID)){

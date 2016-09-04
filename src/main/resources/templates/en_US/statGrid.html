@@ -79,8 +79,8 @@
 	function getStatValue(element, max, min){
 		var value = parseInt(element.value);
 		if(value > max){
-			value = singleBaseMax;
-			element.value = singleBaseMax;
+			value = max;
+			element.value = max;
 		} else if(value < min){
 			value = min;
 			element.value = min;
