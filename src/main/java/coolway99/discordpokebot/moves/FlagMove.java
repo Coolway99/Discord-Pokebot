@@ -1,9 +1,9 @@
 package coolway99.discordpokebot.moves;
 
-import com.sun.istack.internal.Nullable;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.states.Types;
+import org.jetbrains.annotations.Nullable;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**

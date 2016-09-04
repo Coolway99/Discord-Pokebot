@@ -43,5 +43,6 @@
 		<level name="Maven: commons-codec:commons-codec:1.9" value="project"/>
 		<level name="Maven: org.apache.httpcomponents:fluent-hc:4.5.2" value="project"/>
 		<level name="Maven: com.google.code.gson:gson:2.7" value="project"/>
+		<level name="Maven: com.intellij:annotations:12.0" value="project"/>
 	</levels>
 </component>
