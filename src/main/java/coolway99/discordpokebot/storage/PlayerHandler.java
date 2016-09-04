@@ -16,10 +16,10 @@ public class PlayerHandler{
 	
 	public static Player getPlayer(IUser user){
 		if(playerMap.containsKey(user.getID())) return playerMap.get(user.getID());
-		//TODO use main file for last slot
 		return getPlayer(user, getMainFile(user).lastSlot);
 	}
 
+	//TODO This is a mess
 	private static Player getPlayer(IUser user, byte slot){
 		if(playerMap.containsKey(user.getID())){
 			if(playerMap.get(user.getID()).slot == slot) return playerMap.get(user.getID());
@@ -30,16 +30,11 @@ public class PlayerHandler{
 		return playerMap.get(user.getID());
 	}
 
-	//TODO This shouldn't be returning strings
-	public static String switchSlot(IUser author, byte slot){
-		String ID = author.getID();
-		if(playerMap.containsKey(ID)){
-			Player player = playerMap.get(ID);
-			if(player.inBattle()) return "You are in a battle!";
-			playerMap.remove(ID).saveData();
-		}
-		getPlayer(author, slot);
-		return "Switched slot to "+(slot+1);
+	public static void switchSlot(IUser user, byte slot){
+		String ID = user.getID();
+		if(playerMap.containsKey(ID)) playerMap.remove(ID).saveData();
+		getPlayer(user, slot);
+		return;
 	}
 
 	public static void removePlayer(IUser user){

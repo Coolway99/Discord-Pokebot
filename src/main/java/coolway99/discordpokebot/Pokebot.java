@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
-	public static final String VERSION = "dev-1.2.0";
+	public static final String VERSION = "1.2.0";
 	//TODO make the rest of these configs
 	private static final byte SAVE_DELAY = 1; //In minutes
 	private static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);

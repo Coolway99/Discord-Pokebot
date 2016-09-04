@@ -205,7 +205,7 @@ public class EventHandler{
 						return;
 					}
 					try{
-						Natures nature = Natures.valueOf(args[1]);
+						Natures nature = Natures.valueOf(args[1].toUpperCase());
 						player.nature = nature;
 						reply(message, "Set nature to "+nature.toString());
 					} catch(IllegalArgumentException e){
@@ -693,7 +693,13 @@ public class EventHandler{
 					try{
 						slot = (byte) (Byte.parseByte(args[1])-1);
 						if(slot < 0 || slot >= PlayerHandler.MAX_SLOTS) throw new NumberFormatException();
-						reply(message, PlayerHandler.switchSlot(author, slot));
+						//reply(message, PlayerHandler.switchSlot(author, slot));
+						if(PlayerHandler.getPlayer(author).inBattle()){
+							reply(message, "You are in a battle!");
+							return;
+						}
+						PlayerHandler.switchSlot(author, slot);
+						reply(message,  "Switched slot to "+(slot+1));
 					} catch(NumberFormatException e){
 						reply(message, "Invalid slot, slots are 1-"+PlayerHandler.MAX_SLOTS);
 						return;
@@ -702,6 +708,11 @@ public class EventHandler{
 				}
 				case "getslot":{
 					reply(message, "your slot is "+(PlayerHandler.getMainFile(author).lastSlot+1));
+					return;
+				}
+				case "guilds":{
+					if(!author.getID().equals(Pokebot.config.OWNERID)) break;
+					reply(message, "I am in "+Pokebot.client.getGuilds().size()+" guilds.");
 					return;
 				}
 				default:

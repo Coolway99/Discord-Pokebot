@@ -1,6 +1,7 @@
 package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
@@ -40,9 +41,27 @@ public class StatChangeDamageMove extends DamageMove{
 					StatHandler.changeStat(channel, attacker, this.stat, this.change);
 					break;
 				}
-				case DEFENDER:
+				case DEFENDER:{
+					switch(defender.getModifiedAbility()){
+						case BIG_PECKS:{
+							if(this.stat == Stats.DEFENSE && this.change < 0 && attacker != defender){ //TODO does not negate guard swap
+								Pokebot.sendMessage(channel, defender.mention()+"'s ability prevents lowering it's defense!");
+								return;
+							}
+							break;
+						}
+						case CLEAR_BODY:{
+							if(this.change < 0 && attacker != defender){
+								Pokebot.sendMessage(channel, defender.mention()+"'s ability prevents lowering it's stats!");
+							}
+							break;
+						}
+						default:
+							break;
+					}
 					StatHandler.changeStat(channel, defender, this.stat, this.change);
 					break;
+				}
 			}
 		}
 	}

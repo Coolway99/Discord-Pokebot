@@ -16,9 +16,6 @@ public final class MoveList extends Template{
 
 	private MoveList(){
 		this.addCollection("moves", Move.REGISTRY.values(), (move, map) -> {
-			/*map.add("name", "NONE");
-			map.add("value", "NONE");
-			map.add("cost", "0");*/
 			map.add("name", move.getDisplayName());
 			map.add("value", move.getName());
 			map.add("cost", Integer.toString(move.getCost()));

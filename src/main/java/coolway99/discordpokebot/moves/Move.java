@@ -26,14 +26,14 @@ public abstract class Move{
 	public static final TreeMap<String, Move> REGISTRY = new MoveMap();
 
 	/*
-	TODO Ally Switch can't be /used/ here
+	TODO Ally Switch can't be used here
 	TODO Aromatic Mist can't apply just yet TODO Team Battles
 	TODO Assist randomly uses an ally's move TODO Team Battles
 	TODO Assurance deals double damage if the target has already taken damage that turn
-	TODO Attract
+	TODO Attract needs genders
 	TODO Atomonize lowers user's weight
-	TODO Baton Pass
-	TODO BEAT_UP(Types.DARK, MoveType.PHYSICAL, 10, -1, 100, Flags.NO_CONTACT)
+	TODO Baton Pass needs party pokemon
+	TODO BEAT_UP(Types.DARK, MoveType.PHYSICAL, 10, -1, 100, Flags.NO_CONTACT) needs party pokemon
 	TODO BELCH(Types.POISON, MoveType.SPECIAL, 10, 120, 90)
 	TODO Bestow
 	TODO Bide
@@ -744,7 +744,20 @@ public abstract class Move{
 						*getOtherModifiers(move, defender)
 						*((Pokebot.ran.nextInt(100-85)+85)/100D) //Random chance
 				;
-		if(attacker.hasAbility(Abilities.ANALYTIC)) modifier *= 1.3; //30% increase
+		switch(attacker.getModifiedAbility()){
+			case ANALYTIC:{
+				modifier *= 1.3; //30% increase
+				break;
+			}
+			case BLAZE:{
+				if(move.getType(attacker) == Types.FIRE && attacker.HP < Math.floorDiv(attacker.getMaxHP(), 3)){
+					modifier *= 1.5;
+				}
+				break;
+			}
+			default:
+				break;
+		}
 		double a = ((2*attacker.level)+10D)/250D;
 		double b;
 		if(move.isSpecial()){

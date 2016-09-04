@@ -37,7 +37,7 @@
 		<level name="Maven: org.eclipse.jetty.websocket:websocket-server:9.3.6.v20151106" value="project"/>
 		<level name="Maven: org.eclipse.jetty.websocket:websocket-servlet:9.3.6.v20151106" value="project"/>
 		<level name="Maven: org.eclipse.jetty.websocket:websocket-api:9.3.6.v20151106" value="project"/>
-		<level name="Maven: org.watertemplate:watertemplate-engine:1.2.1" value="project"/>
+		<level name="Maven: org.watertemplate:watertemplate-engine:1.2.2" value="project"/>
 		<level name="Maven: org.apache.httpcomponents:httpclient:4.5.2" value="project"/>
 		<level name="Maven: commons-logging:commons-logging:1.2" value="project"/>
 		<level name="Maven: commons-codec:commons-codec:1.9" value="project"/>
