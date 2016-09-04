@@ -166,7 +166,7 @@ public class BattleMap implements SortedMap<Player, IAttack>, Comparator<IAttack
 		if(o2.move == null || o1.move == null){
 			ret = 0;
 		} else {
-			ret = o2.move.getPriority()-o1.move.getPriority();
+			ret = o2.move.getMove().getPriority()-o1.move.getMove().getPriority();
 		}
 		if(ret == 0){
 			ret = o2.attacker.getSpeedStat()-o1.attacker.getSpeedStat();

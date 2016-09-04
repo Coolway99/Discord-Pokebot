@@ -1,20 +1,24 @@
 <label>Moves:
 	<select id="move1" onchange="updatePoints()">
+		<option value="~noMove~">NONE (0)</option>
 		~for move in moves:
 		<option value="~move.cost~|~move.value~">~move.name~ (~move.cost~)</option>
 		:~
 	</select>
 	<select id="move2" onchange="updatePoints()">
+		<option value="~noMove~">NONE (0)</option>
 		~for move in moves:
 		<option value="~move.cost~|~move.value~">~move.name~ (~move.cost~)</option>
 		:~
 	</select>
 	<select id="move3" onchange="updatePoints()">
+		<option value="~noMove~">NONE (0)</option>
 		~for move in moves:
 		<option value="~move.cost~|~move.value~">~move.name~ (~move.cost~)</option>
 		:~
 	</select>
 	<select id="move4" onchange="updatePoints()">
+		<option value="~noMove~">NONE (0)</option>
 		~for move in moves:
 		<option value="~move.cost~|~move.value~">~move.name~ (~move.cost~)</option>
 		:~

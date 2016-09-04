@@ -20,6 +20,13 @@
 			}
 		</style>
 		<script type="text/javascript">
+			var url = window.location.href;
+			url = url.substring(0, url.indexOf("?"));
+			if(url != ""){
+				history.replaceState("{}", "", url);
+			}
+			url = null;
+
 			function getId(id){
 				return document.getElementById(id);
 			}
@@ -37,7 +44,7 @@
 					points += parseInt(move.substring(0, move.indexOf("|")));
 				}
 				var ability = getId("ability").value;
-				points += parseInt(ability.substring(0, move.indexOf("|")));
+				points += parseInt(ability.substring(0, ability.indexOf("|")));
 
 				var ElPoints = getId("totalPoints");
 				if(points > maxPoints){
@@ -57,6 +64,9 @@
 				request.open("POST", "/submit", true);
 				request.setRequestHeader("token", getId("token").value);
 				request.setRequestHeader("id", getId("id").value);
+				request.setRequestHeader("slot", getId("slot").value);
+				request.setRequestHeader("code", getId("code").value);
+				request.setRequestHeader("ran", getId("ran").value);
 				for(var x = 1; x <= 4; x++){
 					request.setRequestHeader("move"+x, getId("move"+x).value);
 				}
@@ -82,6 +92,22 @@
 				calculateStats();
 				updatePoints();
 			}
+
+			function updateSlot(){
+				getStatValue(getId("slot"), ~maxSlot~, 0);
+			}
+
+			function changeSlot(){
+				var url = window.location.href;
+				url += "?slot=" + (parseInt(getId("slot").value)-1);
+				url += "&code=" + getId("code").value;
+				url += "&token=" + getId("token").value;
+				url += "&id=" + getId("id").value;
+				url += "&ran=" + getId("ran").value;
+				//I'm aware this can be "hacked" to display other user's data. I honestly don't care, because you can't change it
+				url += "&slotChange=true";
+				window.location.href = url;
+			}
 		</script>
 	</head>
 	<body>
@@ -89,11 +115,14 @@
 			<div class="centeredBox">
 				<input type="hidden" value="~token~" id="token" />
 				<input type="hidden" value="~id~" id="id" />
+				<input type="hidden" value="~code~" id="code" />
+				<input type="hidden" value="~ran~" id="ran" />
 				<h1 class="center">Pokébot Online Player Editor</h1>
 				<span style="width: 100%;">
 					<span>
 						<b>User:</b> ~user~
 						<b>ID:</b> ~id~
+						<b>Slot:</b> ~slot~
 					</span>
 					<span style="position: absolute; right:10px;">
 						Total Points Used:
@@ -124,7 +153,13 @@
 					</span>
 				</span>
 				<br /><br /><br />
-				<input type="button" value="Submit" onclick="process()"/>
+				<span style="width: 100%">
+					<input type="button" value="Submit" onclick="process()"/>
+					<span style="position: absolute; right:10px;">
+						<input type="number" autocomplete="off" style="width: 30px" min="1" max="~maxSlot~" id="slot" value="~slot~" maxlength="1" onchange="updateSlot()"/>
+						<input type="button" value="Change Slot" onclick="changeSlot()"/>
+					</span>
+				</span>
 				<br /><br />
 				<span style="width: 100%" id="response"></span>
 			</div>

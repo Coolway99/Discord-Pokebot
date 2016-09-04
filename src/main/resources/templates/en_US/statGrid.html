@@ -10,7 +10,7 @@
 	<tr>
 		<th>Base</th>
 		~for stat in stats:
-		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="255" id="~stat.value~.BASE" value="~stat.base~" maxlength="3" onchange="updateStats()"/></td>
+	<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="~singleBaseMax~" id="~stat.value~.BASE" value="~stat.base~" onchange="updateStats()"/></td>
 		:~
 		<td id="baseTotal" class="center"></td>
 		<td class="center">~baseMax~</td>
@@ -18,7 +18,7 @@
 	<tr>
 		<th>IV</th>
 		~for stat in stats:
-		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="31" id="~stat.value~.IV" value="~stat.iv~" maxlength="2"  onchange="updateStats()"/></td>
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="~singleIvMax~" id="~stat.value~.IV" value="~stat.iv~" onchange="updateStats()"/></td>
 		:~
 		<td id="ivTotal" class="center"></td>
 		<td class="center">N/A</td>
@@ -26,7 +26,7 @@
 	<tr>
 		<th>EV</th>
 		~for stat in stats:
-		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="63" id="~stat.value~.EV" value="~stat.ev~" maxlength="2"  onchange="updateStats()"/></td>
+		<td><input type="number" autocomplete="off" style="width: 100px" min="0" max="~singleEvMax~" id="~stat.value~.EV" value="~stat.ev~" onchange="updateStats()"/></td>
 		:~
 		<td id="evTotal" class="center"></td>
 		<td class="center">~evMax~</td>
@@ -39,6 +39,9 @@
 	</tr>
 </table>
 <script type="text/javascript">
+	var singleBaseMax = ~singleBaseMax~;
+	var singleIvMax = ~singleIvMax~;
+	var singleEvMax = ~singleEvMax~;
 	var baseMax = ~baseMax~;
 	var evMax = ~evMax~;
 	var statNames = [
@@ -51,9 +54,9 @@
 		var iv = 0;
 		var ev = 0;
 		for(var x = 0; x < statNames.length; x++){
-			base += parseInt(getId(statNames[x]+".BASE").value);
-			iv += parseInt(getId(statNames[x]+".IV").value);
-			ev += parseInt(getId(statNames[x]+".EV").value);
+			base += getStatValue(getId(statNames[x]+".BASE"), singleBaseMax, 0);
+			iv += getStatValue(getId(statNames[x]+".IV"), singleIvMax, 0);
+			ev += getStatValue(getId(statNames[x]+".EV"), singleEvMax, 0);
 		}
 		getId("baseTotal").innerHTML = base;
 		getId("ivTotal").innerHTML = iv;
@@ -71,6 +74,18 @@
 		}
 		calculateStats();
 		updatePoints();
+	}
+
+	function getStatValue(element, max, min){
+		var value = parseInt(element.value);
+		if(value > max){
+			value = max;
+			element.value = max;
+		} else if(value < min){
+			value = min;
+			element.value = min;
+		}
+		return value;
 	}
 
 	function calculateStats(){

@@ -2,8 +2,9 @@ package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
+import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -204,7 +205,7 @@ public class EventHandler{
 						return;
 					}
 					try{
-						Natures nature = Natures.valueOf(args[1]);
+						Natures nature = Natures.valueOf(args[1].toUpperCase());
 						player.nature = nature;
 						reply(message, "Set nature to "+nature.toString());
 					} catch(IllegalArgumentException e){
@@ -269,8 +270,11 @@ public class EventHandler{
 						return;
 					}
 					try{
-						Moves move = Moves.valueOf(args[2].toUpperCase());
-						if(move.equals(Moves.NULL)) throw new IllegalArgumentException("Null move");
+						Move move = Move.REGISTRY.get(args[2].toUpperCase());
+						if(move == null){
+							reply(message, "That is not a valid move!");
+							return;
+						}
 						int slot = Integer.parseInt(args[1]);
 						if(slot > 4 || slot < 1){
 							reply(message, "Invalid slot. Slots are 1-4");
@@ -288,18 +292,15 @@ public class EventHandler{
 						}
 						slot--;
 
-						if(StatHandler.wouldExceedTotalPoints(player, player.moves[slot], move)){
+						if(StatHandler.wouldExceedTotalPoints(player, player.moves[slot].getMove(), move)){
 							/*reply(message, "You don't have enough points left for that move!");
 							return;*/
 							StatHandler.exceedWarning(channel, player);
 						}
-						player.moves[slot] = move;
-						player.PP[slot] = move.getPP();
+						player.moves[slot] = new MoveSet(move);
 						reply(message, "Set move "+(slot+1)+" to "+move.getName());
 					} catch(NumberFormatException e){
 						reply(message, "That is not a valid number!");
-					} catch(IllegalArgumentException e){
-						reply(message, "That is not a valid move!");
 					}
 					return;
 				}
@@ -310,7 +311,7 @@ public class EventHandler{
 							reply(message, "Usage: gmi <move>");
 							return;
 						}
-						Moves move = Moves.valueOf(args[1].toUpperCase());
+						Move move = Move.REGISTRY.get(args[1].toUpperCase());
 						String b = "Stats of "+move+
 								"\nType: "+move.getType(Abilities.MC_NORMAL_PANTS)+
 								"\nPower: "+move.getPower()+
@@ -338,9 +339,10 @@ public class EventHandler{
 					}
 					StringBuilder builder = new StringBuilder("The moves for ").append(player.mention()).append(" are:\n");
 					for(int x = 0; x < player.numOfAttacks; x++){
-						builder.append(x+1).append(": ").append(player.moves[x].toString());
-						builder.append(" [").append(player.PP[x]).append('/')
-								.append(player.moves[x].getPP()).append("]\n");
+						MoveSet set = player.moves[x];
+						builder.append(x+1).append(": ").append(set.getMove().getDisplayName());
+						builder.append(" [").append(set.getPP()).append('/')
+								.append(player.moves[x].getMaxPP()).append("]\n");
 					}
 					Pokebot.sendMessage(channel, builder.toString());
 					return;
@@ -348,9 +350,8 @@ public class EventHandler{
 				case "lam":
 				case "listallmoves":{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
-					Moves[] moves = Moves.values();
-					for(int x = 1; x < moves.length; x++){ //Starting at one to prevent the NULL move
-						builder.append(moves[x].toString()).append(" (").append(moves[x].getMoveType()).append(')').append("\n");
+					for(Move move : Move.REGISTRY.values()){ //Starting at one to prevent the NULL move
+						builder.append(move.getDisplayName()).append(" (").append(move.getMoveType()).append(')').append("\n");
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent you all the moves I know");
@@ -383,14 +384,11 @@ public class EventHandler{
 							return;
 						}
 						player.numOfAttacks--;
-						player.moves[slot] = Moves.NULL;
-						player.PP[slot] = 0;
+						player.moves[slot] = null;
 						for(int x = 0; x < player.moves.length-1; x++){
-							if(player.moves[x] == Moves.NULL){
+							if(player.moves[x] == null){
 								player.moves[x] = player.moves[x+1];
-								player.PP[x] = player.PP[x+1];
-								player.moves[x+1] = Moves.NULL;
-								player.PP[x+1] = 0;
+								player.moves[x+1] = null;
 							}
 						}
 						reply(message, "Cleared move in slot "+(slot+1));
@@ -451,14 +449,14 @@ public class EventHandler{
 							reply(message, "That slot is empty");
 							return;
 						}
-						if(attacker.PP[slot] < 1){
+						if(attacker.moves[slot].getPP() < 1){
 							reply(message, "You have no PP left for that move!");
 							return;
 						}
-						Moves move = attacker.moves[slot];
+						MoveSet moveSet = attacker.moves[slot];
 						Player defender;
 						//If this is a status move, then usually we are targeting ourselves
-						if(move.has(Moves.Flags.UNTARGETABLE)){
+						if(moveSet.getMove().has(Move.Flags.UNTARGETABLE)){
 							defender = PlayerHandler.getPlayer(author);
 						} else {
 							defender = PlayerHandler.getPlayer(message.getMentions().get(0));
@@ -483,7 +481,7 @@ public class EventHandler{
 						if(attacker.inBattle()){
 							if(defender.inBattle()){
 								if(attacker.battle == defender.battle){
-									attacker.battle.onAttack(channel, attacker, move, defender);
+									attacker.battle.onAttack(channel, attacker, moveSet, defender);
 									return; //We don't want the standard logic to run
 								}
 								reply(message, "you two are in different battles!");
@@ -498,7 +496,7 @@ public class EventHandler{
 							return;
 						}
 						//This is the normal neither-in-battle mess around attack
-						Moves.attack(channel, attacker, move, defender, slot);
+						Move.attack(channel, attacker, moveSet, defender);
 						if(StatHandler.getStatPoints(defender) <= 10){
 							Pokebot.sendMessage(channel, defender.mention()+", it looks like you haven't set any stats!"
 									+" Set some with setstats");
@@ -525,7 +523,7 @@ public class EventHandler{
 					}
 					player.HP = player.getMaxHP();
 					for(int x = 0; x < player.numOfAttacks; x++){
-						player.PP[x] = player.moves[x].getPP();
+						player.moves[x].resetPP();
 					}
 					player.cureNV();
 					for(int x = 0; x < player.modifiers.length; x++){
@@ -684,6 +682,37 @@ public class EventHandler{
 				case "webinterface":
 				case "wi":{
 					reply(message, "My web interface can be found here: "+Pokebot.config.REDIRECT_URL);
+					return;
+				}
+				case "switchslot":{
+					if(args.length < 2){
+						reply(message, "Usage: switchSlot <slot>");
+						return;
+					}
+					byte slot;
+					try{
+						slot = (byte) (Byte.parseByte(args[1])-1);
+						if(slot < 0 || slot >= PlayerHandler.MAX_SLOTS) throw new NumberFormatException();
+						//reply(message, PlayerHandler.switchSlot(author, slot));
+						if(PlayerHandler.getPlayer(author).inBattle()){
+							reply(message, "You are in a battle!");
+							return;
+						}
+						PlayerHandler.switchSlot(author, slot);
+						reply(message,  "Switched slot to "+(slot+1));
+					} catch(NumberFormatException e){
+						reply(message, "Invalid slot, slots are 1-"+PlayerHandler.MAX_SLOTS);
+						return;
+					}
+					break;
+				}
+				case "getslot":{
+					reply(message, "your slot is "+(PlayerHandler.getMainFile(author).lastSlot+1));
+					return;
+				}
+				case "guilds":{
+					if(!author.getID().equals(Pokebot.config.OWNERID)) break;
+					reply(message, "I am in "+Pokebot.client.getGuilds().size()+" guilds.");
 					return;
 				}
 				default:

@@ -2,7 +2,7 @@ package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -30,8 +30,11 @@ public class StatHandler{
 	public static final int MAX_SINGLE_IV_POINTS = 31;
 	public static final int MAX_TOTAL_EV_POINTS = 127; //Got by dividing 510 by 4 then rounding
 	public static final int MAX_SINGLE_EV_POINTS = 63; //Got by dividing 252 by 4
-	
-	private static final int[] MAX_SINGLE_SUBSTATS = new int[]{
+
+	/**
+	 * An array for convinence
+	 */
+	public static final int[] MAX_SINGLE_SUBSTATS = new int[]{
 			MAX_SINGLE_STAT_POINTS,
 			MAX_SINGLE_IV_POINTS,
 			MAX_SINGLE_EV_POINTS
@@ -96,7 +99,7 @@ public class StatHandler{
 	public static int getMovePoints(Player player){
 		int total = 0;
 		for(int x = 0; x < player.numOfAttacks; x++){
-			total += player.moves[x].getCost();
+			total += player.moves[x].getMove().getCost();
 		}
 		return total;
 	}
@@ -173,17 +176,23 @@ public class StatHandler{
 		StringBuilder b = new StringBuilder(player.mention()).append("'s ").append(stat).append(" was ");
 		switch(amount){
 			case 1:
-			b.append("raised!");
-			break;
+				b.append("raised!");
+				break;
 			case -1:
-			b.append("lowered!");
-			break;
+				b.append("lowered!");
+				break;
 			case 2:
-			b.append("raised sharply!");
-			break;
+				b.append("raised sharply!");
+				break;
 			case -2:
-			b.append("lowered harshly");
-			break;
+				b.append("lowered harshly");
+				break;
+			case 12:
+				b.append("was maxed out");
+				break;
+			case -12:
+				b.append("was minimized");
+				break;
 			default:{
 				if(amount < 0){
 					b.append("lowered severely!");
@@ -200,7 +209,7 @@ public class StatHandler{
 		return wouldExceed(getTotalPoints(player), oldAmount, newAmount, MAX_TOTAL_POINTS);
 	}
 
-	public static boolean wouldExceedTotalPoints(Player player, Moves oldMove, Moves newMove){
+	public static boolean wouldExceedTotalPoints(Player player, Move oldMove, Move newMove){
 		return wouldExceedTotalPoints(player, oldMove.getCost(), newMove.getCost());
 	}
 

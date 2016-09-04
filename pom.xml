@@ -6,7 +6,7 @@
 	<artifactId>discordpokebot</artifactId>
 	<name>Discord Pokemon Battle Bot</name>
 	<description>A bot for discord adding better pokemon battles</description>
-	<version>1.0.0</version>
+	<version>1.2.0</version>
 	<url>https://github.com/Coolway99/Discord-Pokebot</url>
 	<repositories>
 		<repository>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4j</artifactId>
-			<version>2.5.3</version>
+			<version>2.5.4</version>
 			<classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies 
 				bundled into one jar) -->
 		</dependency>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>org.watertemplate</groupId>
 			<artifactId>watertemplate-engine</artifactId>
-			<version>1.2.1</version>
+			<version>1.2.2</version>
 		</dependency>
 		<!-- For authenticating via OAuth -->
 		<dependency>
@@ -62,10 +62,42 @@
 			<artifactId>gson</artifactId>
 			<version>2.7</version>
 		</dependency>
+		<!-- For annotations regarding code -->
+		<dependency>
+			<groupId>com.intellij</groupId>
+			<artifactId>annotations</artifactId>
+			<version>12.0</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	<build>
+		<plugins>
+			<!-- For building the jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.4.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>coolway99.discordpokebot.Pokebot</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
