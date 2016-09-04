@@ -9,12 +9,18 @@ import coolway99.discordpokebot.storage.PlayerHandler;
 import org.watertemplate.Template;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.Random;
+
 public class FormHandler extends Template{
 
-	public FormHandler(IUser user, String token){
+	public FormHandler(IUser user, String token, String code, String ran, byte slot){
+		PlayerHandler.switchSlot(user, slot);
 		Player player = PlayerHandler.getPlayer(user);
 		this.add("maxPoints", Integer.toString(StatHandler.MAX_TOTAL_POINTS));
 		this.add("maxLevel", Integer.toString(StatHandler.MAX_LEVEL));
+		this.add("maxSlot", Byte.toString(PlayerHandler.MAX_SLOTS));
+		this.add("slot", Integer.toString(slot+1));
+		this.add("code", code);
 		this.add("user", user.getName());
 		this.add("id", user.getID());
 		this.add("level", Integer.toString(player.level));
@@ -39,6 +45,7 @@ public class FormHandler extends Template{
 				this.add("move"+(x+1), move.getCost()+"|"+move.toString());
 			}
 		}
+		this.add("ran", ran);
 		Abilities ability = player.getAbility();
 		this.add("ability", ability.getCost()+"|"+ability.toString());
 	}

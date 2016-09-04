@@ -686,6 +686,26 @@ public class EventHandler{
 					reply(message, "My web interface can be found here: "+Pokebot.config.REDIRECT_URL);
 					return;
 				}
+				case "switchslot":{
+					if(args.length < 2){
+						reply(message, "Usage: switchSlot <slot>");
+						return;
+					}
+					byte slot;
+					try{
+						slot = (byte) (Byte.parseByte(args[1])-1);
+						if(slot < 0 || slot >= PlayerHandler.MAX_SLOTS) throw new NumberFormatException();
+						reply(message, PlayerHandler.switchSlot(author, slot));
+					} catch(NumberFormatException e){
+						reply(message, "Invalid slot, slots are 1-"+PlayerHandler.MAX_SLOTS);
+						return;
+					}
+					break;
+				}
+				case "getslot":{
+					reply(message, "your slot is "+(PlayerHandler.getMainFile(author).lastSlot+1));
+					return;
+				}
 				default:
 					break;
 			}

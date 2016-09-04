@@ -5,7 +5,8 @@ Add more moves
 Add balancing of moves
 Add permissions
 The different "get x" commands should have one "get it all" command... Maybe
-Add player slots
 Add more battle types
 Add more gui stuff
 Add logging
+There's a race condition between saving players/main files and if something is accessing them at the same time. Because it's using
+hashmaps, it might actually throw a concurrent modification exception

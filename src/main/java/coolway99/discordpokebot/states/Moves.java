@@ -143,7 +143,7 @@ public enum Moves{
 			this.flags = EnumSet.copyOf(Arrays.asList(flags));
 		}
 
-		switch(moveType){
+		/*switch(moveType){
 			case PHYSICAL:{
 				if(!this.flags.contains(Flags.NO_CONTACT)) this.flags.add(Flags.CONTACT);
 				break;
@@ -153,7 +153,7 @@ public enum Moves{
 					if(!this.flags.contains(Flags.CONTACT)) this.flags.add(Flags.NO_CONTACT);
 				break;
 			}
-		}
+		}*/
 	}
 
 	Moves(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Flags... flags){
