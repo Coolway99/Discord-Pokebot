@@ -10,3 +10,9 @@ Add more gui stuff
 Add logging
 There's a race condition between saving players/main files and if something is accessing them at the same time. Because it's using
 hashmaps, it might actually throw a concurrent modification exception
+Fix saving/loading system
+Implement unimplemented abilities
+Implement items
+Make commands more user-friendly
+Make dialog a bit more conditional
+Add more stuff to config files

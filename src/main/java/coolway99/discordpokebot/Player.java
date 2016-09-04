@@ -1,9 +1,10 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
-import coolway99.discordpokebot.states.Moves;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -72,12 +73,12 @@ public class Player{
 	private final EnumSet<Effects.VBattle> battleEffects;
 	
 	public int numOfAttacks = 0;
-	//This array is manually done out as to make sure they are "null" type moves, to prevent errors
-	public final Moves[] moves = new Moves[]{Moves.NULL, Moves.NULL, Moves.NULL, Moves.NULL};
-	public final int[] PP = new int[4];
-	
+
+	//public final Move[] moves = new Move[]{Move.NULL, Move.NULL, Move.NULL, Move.NULL};
+	public final MoveSet[] moves;
+
 	public Battle battle = null;
-	public Moves lastMove = Moves.NULL; //Isn't set outside of a battle
+	public MoveSet lastMove = null; //Isn't set outside of a battle
 	public int lastMoveData = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
@@ -90,11 +91,9 @@ public class Player{
 	public Player(IUser user, byte slot){
 		this.user = user;
 		this.slot = slot;
+		this.moves = new MoveSet[4];
 		this.loadData();
 		this.HP = this.getMaxHP();
-		for(int x = 0; x < this.numOfAttacks; x++){
-			this.PP[x] = this.moves[x].getPP();
-		}
 		this.vEffects = EnumSet.noneOf(Effects.Volatile.class);
 		this.battleEffects = EnumSet.noneOf(Effects.VBattle.class);
 
@@ -296,7 +295,12 @@ public class Player{
 			this.numOfAttacks = in.nextInt();
 			in.nextLine(); //nextInt tends to leave over the \n, it seems
 			for(int x = 0; x < this.moves.length; x++){
-				this.moves[x] = Moves.valueOf(in.nextLine());
+				Move move = Move.REGISTRY.get(in.nextLine());
+				if(move == null){
+					this.moves[x] = null;
+					continue;
+				}
+				this.moves[x] = new MoveSet(move);
 			}
 			this.level = in.nextInt();
 			in.nextLine();
@@ -304,14 +308,15 @@ public class Player{
 			this.ability = Abilities.valueOf(in.nextLine());
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
-		}catch(NoSuchElementException e){
+		}catch(NoSuchElementException | NullPointerException e){
 			System.err.println("We read from an incomplete or invalid file");
 		}
 	}
 	
-	public boolean hasMove(Moves move){
-		for(Moves hasMove : this.moves){
-			if(hasMove == move) return true;
+	public boolean hasMove(Move move){
+		for(MoveSet set : this.moves){
+			if(set == null) continue;
+			if(set.getMove() == move) return true;
 		}
 		return false;
 	}
@@ -337,8 +342,12 @@ public class Player{
 			}
 
 			out.println(this.numOfAttacks);
-			for(Moves move : this.moves){
-				out.println(move.toString());
+			for(MoveSet set : this.moves){
+				if(set == null){
+					out.println("null");
+					continue;
+				}
+				out.println(set.getMove().getName());
 			}
 			out.println(this.level);
 			out.println(this.nature);
