@@ -58,8 +58,12 @@ public class Pokebot{
 				, GAME_DELAY, GAME_DELAY, TimeUnit.MINUTES);
 	}
 
-	public static File getSaveFile(IUser user){
-		return new File(config.SAVEDIR+'/'+user.getID());
+	public static File getSaveFile(IUser user, byte slot){
+		return new File(config.SAVEDIR+'/'+user.getID()+"/"+slot);
+	}
+
+	public static File getMainFile(IUser user){
+		return new File(config.SAVEDIR+'/'+user.getID()+"/main");
 	}
 
 	public static void sendMessage(IChannel channel, String message){

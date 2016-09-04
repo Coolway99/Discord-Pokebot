@@ -5,3 +5,5 @@ Add more moves
 Add balancing of moves
 Add permissions
 The different "get x" commands should have one "get it all" command... Maybe
+There's a race condition between saving players/main files and if something is accessing them at the same time. Because it's using
+hashmaps, it might actually throw a concurrent modification exception

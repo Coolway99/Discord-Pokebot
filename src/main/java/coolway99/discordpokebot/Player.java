@@ -8,6 +8,7 @@ import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
+import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.File;
@@ -20,6 +21,8 @@ import java.util.Scanner;
 //TODO stuff
 //The variables all contain the default states
 public class Player{
+
+	public final byte slot;
 	
 	public final IUser user;
 	public Types primary = Types.NORMAL;
@@ -79,9 +82,14 @@ public class Player{
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
 	public int counter = 0; //Used for Toxic, Sleep and Freeze
-	
+
 	public Player(IUser user){
+		this(user, (byte) 0);
+	}
+	
+	public Player(IUser user, byte slot){
 		this.user = user;
+		this.slot = slot;
 		this.loadData();
 		this.HP = this.getMaxHP();
 		for(int x = 0; x < this.numOfAttacks; x++){
@@ -89,6 +97,8 @@ public class Player{
 		}
 		this.vEffects = EnumSet.noneOf(Effects.Volatile.class);
 		this.battleEffects = EnumSet.noneOf(Effects.VBattle.class);
+
+		PlayerHandler.getMainFile(this.user).lastSlot = this.slot;
 	}
 	
 	public boolean hasSecondaryType(){
@@ -271,8 +281,7 @@ public class Player{
 		//If the file is "incomplete", which should only result when the save format is updated
 		//with more info, then this will error out and close the file, with the default values
 		//being intact for the values not found
-		System.out.println("Loading");
-		File file = Pokebot.getSaveFile(this.user);
+		File file = Pokebot.getSaveFile(this.user, this.slot);
 		if(!file.exists()) return; //Use defaults
 		try(Scanner in = new Scanner(file)){
 			this.primary = Types.valueOf(in.nextLine());
@@ -313,7 +322,7 @@ public class Player{
 	
 	public void saveData(){
 		System.out.println("Beginning to save");
-		File file = Pokebot.getSaveFile(this.user);
+		File file = Pokebot.getSaveFile(this.user, this.slot);
 		if(!file.exists() && file.getParentFile() != null){
 			file.getParentFile().mkdirs();
 		}
@@ -336,7 +345,7 @@ public class Player{
 			out.println(this.ability);
 			out.flush();
 			out.close();
-			System.out.println(Pokebot.getSaveFile(this.user).getAbsolutePath());
+			System.out.println(Pokebot.getSaveFile(this.user, this.slot).getAbsolutePath());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
