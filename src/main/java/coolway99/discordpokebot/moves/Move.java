@@ -311,7 +311,7 @@ public abstract class Move{
 		REGISTRY.put("ABSORB", new HPStealingMove(Types.GRASS, MoveType.SPECIAL, 25, 20, 100, 40, 50));
 
 		REGISTRY.put("FLY", new SemiInvulChargeMove(Types.FLYING, MoveType.PHYSICAL, 15, 90, 95, 120, "%s flew up high!",
-				Flags.FLIGHT));
+				Flags.FLIGHT, Flags.GUST_VULNURABLE));
 		REGISTRY.put("RAZOR_WIND", new ChargeMove(Types.NORMAL, MoveType.SPECIAL, 10, 80, 100, 70, "%s whipped up a whirlwind!"));
 		REGISTRY.put("SKY_ATTACK", new ChargeMove(Types.FLYING, MoveType.PHYSICAL, 5, 140, 90, 150, "%s is glowing!"){
 			@Override
@@ -537,6 +537,7 @@ public abstract class Move{
 						damage = getDamage(attacker, move, defender);
 					}
 					defender.HP = Math.max(0, defender.HP-damage);
+					damageMessage(channel, attacker, damage);
 					if(attacker.inBattle()) move.runAfter(channel, attacker, defender, damage);
 					//attackMessage(channel, attacker, move, defender, damage);
 				} else { //we check here again to make sure cont wasn't what made it not run
@@ -575,6 +576,10 @@ public abstract class Move{
 
 	private static void attackMessage(IChannel channel, Player attacker, Move move){
 		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+'!');
+	}
+
+	private static void damageMessage(IChannel channel, Player attacker, int damage){
+		Pokebot.sendMessage(channel, attacker.mention()+" dealt "+damage+" damage!");
 	}
 
 	private static void recoilMessage(IChannel channel, Player attacker){
@@ -741,8 +746,8 @@ public abstract class Move{
 		double modifier =
 				getStab(attacker, move) //STAB
 						*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
-						*getOtherModifiers(move, defender)
-						*((Pokebot.ran.nextInt(100-85)+85)/100D) //Random chance
+						*getOtherModifiers(attacker, move, defender)
+						*((Pokebot.ran.nextInt(100-85+1)+85)/100D) //Random chance, it would be 85-99 if there wasn't the +1
 				;
 		switch(attacker.getModifiedAbility()){
 			case ANALYTIC:{
@@ -793,7 +798,7 @@ public abstract class Move{
 	}
 
 	//TODO perhaps this isn't necessary?
-	public static int getOtherModifiers(Move move, Player defender){
+	public static float getOtherModifiers(Player attacker, Move move, Player defender){
 		/* TODO switch(move){
 			case GUST:{
 				switch(defender.lastMove){
@@ -809,13 +814,17 @@ public abstract class Move{
 			default:
 				break;
 		} */
-		return 1;
+		float ret = 1;
+		if(move == REGISTRY.get("GUST") && defender.lastMoveHas(Flags.GUST_VULNURABLE) && defender.lastMoveData != 0) ret *= 2;
+		if(attacker.heldItem.getPoweredUpType() == move.getType(attacker)) ret *= 1.2; //20% boost
+		return ret;
 	}
 
 	//Dice rolls for a hit, if not factoring in changes to accuracy and evasion, you can safely
 	//pass in null for Attacker and Defender
 	@SuppressWarnings("BooleanParameter")
 	public static boolean willHit(Move move, Player attacker, Player defender, boolean factorChanges){
+		if(move == null) return false;
 		if(checkParalysis(attacker)) return false;
 		if(defender.inBattle()){
 			if(defender.has(Effects.VBattle.SEMI_INVULNERABLE)){
@@ -837,15 +846,20 @@ public abstract class Move{
 					default:
 						return false;
 				}*/
+				if(move == REGISTRY.get("GUST")&& defender.lastMoveHas(Flags.GUST_VULNURABLE)){
+					return true;
+				}
+				Pokebot.sendMessage(defender.battle.channel, "But there was no target!");
+				return false;
 			}
 			if(defender.has(Effects.VBattle.PROTECTION)){
-				/* TODO switch(move){
+				switch(move.getName()){
 					//TODO Shadow Force and Fient remove protection for the rest of the turn
 					//TODO
 					default:
 						Pokebot.sendMessage(defender.battle.channel, "But "+defender.mention()+" protected itself!");
 						return false;
-				} */
+				}
 			}
 			switch(defender.getModifiedAbility()){
 				case BULLETPROOF:{
@@ -922,6 +936,7 @@ public abstract class Move{
 		CONTACT, //Overrides the default setting
 		NO_CONTACT, //Overrides the default setting
 		BALLBASED, //The move is based on balls or bombs
+		GUST_VULNURABLE
 	}
 
 	public enum Battle_Priority{

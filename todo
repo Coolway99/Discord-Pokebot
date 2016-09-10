@@ -16,3 +16,7 @@ Implement items
 Make commands more user-friendly
 Make dialog a bit more conditional
 Add more stuff to config files
+Perhaps ordered config file? https://github.com/etiennestuder/java-ordered-properties
+
+
+Idea for bind: moves like rapid spin only remove the status of partially trapped, and the players who used bind check their targets

@@ -5,6 +5,7 @@ import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.states.Items;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -83,6 +84,8 @@ public class Player{
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
 	public int counter = 0; //Used for Toxic, Sleep and Freeze
+
+	public Items heldItem = Items.NULL;
 
 	public Player(IUser user){
 		this(user, (byte) 0);
@@ -358,6 +361,14 @@ public class Player{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	public boolean hasType(Types type){
+		return this.primary == type || this.secondary == type;
+	}
+
+	public boolean lastMoveHas(Move.Flags flag){
+		return this.lastMove != null && this.lastMove.getMove().has(flag);
 	}
 
 	@Override
