@@ -5,6 +5,7 @@ import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
@@ -43,11 +44,13 @@ public class Item{
 	private final Types naturalGiftType;
 
 	private final MoveMethod onMove;
+	private final DamageModMethod onAttack;
 	private final DamageMethod onAfterDamage;
+	private final TriMethod onPostTurn;
 
 	protected Item(ItemTypes itemType, int cost, String name, String displayName,
 				   int flingPower, int naturalGiftPower, Types naturalGiftType,
-				   MoveMethod onMove, DamageMethod onAfterDamage){
+				   MoveMethod onMove, DamageModMethod onAttack, DamageMethod onAfterDamage, TriMethod onPostTurn){
 		this.itemType = itemType;
 		this.cost = cost;
 		this.name = name;
@@ -56,7 +59,9 @@ public class Item{
 		this.naturalGiftPower = naturalGiftPower;
 		this.naturalGiftType = naturalGiftType;
 		this.onMove = onMove;
+		this.onAttack = onAttack;
 		this.onAfterDamage = onAfterDamage;
+		this.onPostTurn = onPostTurn;
 	}
 
 	public ItemTypes getItemType(){
@@ -75,8 +80,16 @@ public class Item{
 		return this.onMove.run(channel, attacker, move, defender, this);
 	}
 
+	public int onAttack(IChannel channel, Player attacker, Move move, Player defender, int damage){
+		return this.onAttack.run(channel, attacker, move, defender, damage, this);
+	}
+
 	public void onAfterDamage(IChannel channel, Player attacker, Move move, Player defender, int damage){
 		this.onAfterDamage.run(channel, attacker, move, defender, damage, this);
+	}
+
+	public void onPostTurn(IChannel channel, Player player){
+		this.onPostTurn.run(channel, player, this);
 	}
 
 	public int getFlingPower(){
@@ -100,18 +113,8 @@ public class Item{
 	}
 
 	@FunctionalInterface
-	public interface VoidMethod{
-		void run(IChannel channel, Player attacker, Move move, Player defender, Item item);
-	}
-
-	@FunctionalInterface
 	public interface MoveMethod{
 		MoveSet run(IChannel channel, Player attacker, MoveSet move, Player defender, Item item);
-	}
-
-	@FunctionalInterface
-	public interface Method<T>{
-		T run(IChannel channel, Player attacker, Move move, Player defender, Item item);
 	}
 
 	@FunctionalInterface
@@ -119,7 +122,18 @@ public class Item{
 		void run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
 	}
 
+	@FunctionalInterface
+	public interface DamageModMethod{
+		int run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
+	}
+
+	@FunctionalInterface
+	public interface TriMethod{
+		void run(IChannel channel, Player player, Item item);
+	}
+
 	public static void registerItems(){
+		System.out.println("Registering items");
 		ItemBuilder.newItem(30, "ABSORB_BULB", "Absorb Bulb")
 				.onAfterDamage((channel, attacker, move, defender, damage, item) -> {
 					if(move.getType(attacker) == Types.WATER){
@@ -137,8 +151,25 @@ public class Item{
 
 			}
 		});*/
-		//Abomasite is a mega stone (not applicable)
-		//Absolite is a mega stone (not applicable)
+		ItemBuilder.newItem(60, "APICOT_BERRY", "Apicot Berry")
+				.isStatusBerry(Stats.SPECIAL_DEFENSE, 100, Types.GROUND)
+				.register();
+		//I'm not doing items that have no purpose inside of battle/their only purpose is fling
+		ItemBuilder.newItem(50, "ASPEAR_BERRY", "Aspear Berry")
+				.isCureBerry(Effects.NonVolatile.FROZEN, 80, Types.ICE)
+				.register();
+		ItemBuilder.newItem(100, "ASSAULT_VEST", "Assault Vest")
+				.fling(80)
+				.onMove((channel, attacker, move, defender, item) -> {
+					if(move.getMove().getMoveType() == Move.MoveType.STATUS) return null;
+					return move;
+				})
+				//TODO mod special defence
+				.register();
+		//TODO ItemBuilder.newItem(50, "BABIRI_BERRY", "Babiri Berry")
+				//.
+		//Mega stones are not applicatable
+		System.out.println("Done registering items");
 	}
 
 	public enum ItemTypes{

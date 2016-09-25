@@ -2,6 +2,7 @@ package coolway99.discordpokebot.items;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
@@ -20,7 +21,8 @@ public class ItemBuilder{
 	private Types naturalGiftType = Types.NULL;
 
 	private Item.MoveMethod onMove = (a, b, moveSet, d, e) -> moveSet;
-	private Item.DamageMethod afterDamage = (a, b, c, d, e, f) -> {};
+	private Item.DamageMethod onAfterDamage = (a, b, c, d, e, f) -> {};
+	private Item.TriMethod onPostTurn = (a, b, c) -> {};
 
 
 	//public static ItemBuilder newItem(int cost, String name){
@@ -58,8 +60,19 @@ public class ItemBuilder{
 		return this;
 	}
 
-	public ItemBuilder onAfterDamage(Item.DamageMethod afterDamage){
-		this.afterDamage = afterDamage;
+	public ItemBuilder onAfterDamage(Item.DamageMethod onAfterDamage){
+		this.onAfterDamage = onAfterDamage;
+		return this;
+	}
+
+	public ItemBuilder onPostTurn(Item.TriMethod onPostTurn){
+		this.onPostTurn = onPostTurn;
+		return this;
+	}
+
+	public ItemBuilder isBerry(int naturalGiftPower, Types naturalGiftType){
+		this.naturalGift(naturalGiftPower, naturalGiftType);
+		this.setItemType(Item.ItemTypes.BERRY);
 		return this;
 	}
 
@@ -68,16 +81,27 @@ public class ItemBuilder{
 			this.name += "_BERRY";
 			this.displayName += " Berry";
 		}*/
-		this.naturalGift(naturalGiftPower, naturalGiftType);
+		this.isBerry(naturalGiftPower, naturalGiftType);
 		this.onAfterDamage(new HealingBerry(stat));
-		this.setItemType(Item.ItemTypes.BERRY);
+		return this;
+	}
+
+	public ItemBuilder isStatusBerry(Stats stat, int naturalGiftPower, Types naturalGiftType){
+		this.isBerry(naturalGiftPower, naturalGiftType);
+		this.onPostTurn(new StatusBerry(stat));
+		return this;
+	}
+
+	public ItemBuilder isCureBerry(Effects.NonVolatile effect, int naturalGiftPower, Types naturalGiftType){
+		this.isBerry(naturalGiftPower, naturalGiftType);
+		this.onPostTurn(new CureBerry(effect));
 		return this;
 	}
 
 	public Item register(){
 		Item item = new Item(this.itemType, this.cost, this.name, this.displayName,
 				this.flingPower, this.naturalGiftPower, this.naturalGiftType,
-				this.onMove, this.afterDamage);
+				this.onMove, this.onAfterDamage, this.onPostTurn);
 		Item.REGISTRY.put(this.name, item);
 		return item;
 	}
@@ -92,11 +116,44 @@ public class ItemBuilder{
 
 		@Override
 		public void run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item){
-			if(attacker.HP < attacker.getMaxHP()/2 && !attacker.has(Effects.Volatile.HEAL_BLOCK) && item.canConsume(attacker)){
-				int heal = attacker.getMaxHP()/8;
-				attacker.HP = Math.min(heal, attacker.getMaxHP());
-				Pokebot.sendMessage(channel, attacker.mention()+" recovered "+heal+" using their "+item.getDisplayName()+"!");
-				//TODO if(this.negative == attacker.nature.decrease) Move.confuse(attacker);
+			if(defender.HP < defender.getMaxHP()/2 && !defender.has(Effects.Volatile.HEAL_BLOCK) && item.canConsume(defender)){
+				int heal = defender.getMaxHP()/8;
+				defender.HP = Math.min(heal, defender.getMaxHP());
+				Pokebot.sendMessage(channel, defender.mention()+" recovered "+heal+" using their "+item.getDisplayName()+"!");
+				//TODO if(this.negative == defender.nature.decrease) Move.confuse(defender);
+			}
+		}
+	}
+
+	private static class StatusBerry implements Item.TriMethod{
+
+		public final Stats raisedStat;
+
+		private StatusBerry(Stats raisedStat){
+			this.raisedStat = raisedStat;
+		}
+
+		@Override
+		public void run(IChannel channel, Player player, Item item){
+			if(player.HP < player.getMaxHP()/4 /*TODO GLUTTONY*/ && item.canConsume(player)){
+				StatHandler.changeStat(channel, player, this.raisedStat, 1);
+			}
+		}
+	}
+
+	private static class CureBerry implements Item.TriMethod{
+
+		private Effects.NonVolatile effect;
+
+		private CureBerry(Effects.NonVolatile effect){
+			this.effect = effect;
+		}
+
+		@Override
+		public void run(IChannel channel, Player player, Item item){
+			if(player.has(this.effect) && item.canConsume(player)){
+				player.cureNV();
+				Pokebot.sendMessage(channel, player.mention()+" got cured of "+this.effect+" using their "+item.getDisplayName());
 			}
 		}
 	}
