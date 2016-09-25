@@ -816,7 +816,7 @@ public abstract class Move{
 		} */
 		float ret = 1;
 		if(move == REGISTRY.get("GUST") && defender.lastMoveHas(Flags.GUST_VULNURABLE) && defender.lastMoveData != 0) ret *= 2;
-		if(attacker.heldItem.getPoweredUpType() == move.getType(attacker)) ret *= 1.2; //20% boost
+		//if(attacker.heldItem.getPoweredUpType() == move.getType(attacker)) ret *= 1.2; //20% boost
 		return ret;
 	}
 

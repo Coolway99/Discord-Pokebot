@@ -5,7 +5,7 @@ import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.states.Items;
+import coolway99.discordpokebot.items.Item;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -77,15 +77,16 @@ public class Player{
 
 	//public final Move[] moves = new Move[]{Move.NULL, Move.NULL, Move.NULL, Move.NULL};
 	public final MoveSet[] moves;
+	public Item heldItem = null;
 
 	public Battle battle = null;
 	public MoveSet lastMove = null; //Isn't set outside of a battle
 	public int lastMoveData = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
-	public int counter = 0; //Used for Toxic, Sleep and Freeze
+	public Item modifiedItem = null; //This is instantiated during battle-time
 
-	public Items heldItem = Items.NULL;
+	public int counter = 0; //Used for Toxic, Sleep and Freeze
 
 	public Player(IUser user){
 		this(user, (byte) 0);
@@ -184,6 +185,22 @@ public class Player{
 	
 	public void setAbility(Abilities ability){
 		this.ability = ability;
+	}
+
+	public Item getItem(){
+		return this.heldItem;
+	}
+
+	public Item getModifiedItem(){
+		return this.modifiedItem;
+	}
+
+	public boolean hasItem(Item item){
+		return this.getModifiedItem() == item; //This can be done because "items" are singleton
+	}
+
+	public void setItem(Item item){
+		this.heldItem = item;
 	}
 
 	public int getMaxHP(){
@@ -367,6 +384,7 @@ public class Player{
 		return this.primary == type || this.secondary == type;
 	}
 
+	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion") //It ends with one, get over it
 	public boolean lastMoveHas(Move.Flags flag){
 		return this.lastMove != null && this.lastMove.getMove().has(flag);
 	}

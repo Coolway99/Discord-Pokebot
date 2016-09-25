@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4j</artifactId>
-			<version>2.5.4</version>
+			<version>2.6.0</version>
 			<classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies 
 				bundled into one jar) -->
 		</dependency>
