@@ -24,21 +24,68 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * This is the main class. It holds the entry point as well as a few convenience methods
+ * @author Coolway99
+ */
 public class Pokebot{
+	/**
+	 * The current version of Pokebot
+	 */
 	public static final String VERSION = "1.2.0";
-	//TODO make the rest of these configs
-	private static final byte SAVE_DELAY = 1; //In minutes
-	private static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
-	private static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
 
+	//TODO make the rest of these configs
+	/**
+	 * The delay between autosaving, in minutes
+	 * @see PlayerHandler#saveAll()
+	 */
+	private static final byte SAVE_DELAY = 1;
+	/**
+	 * The delay between sending messages, in miliseconds
+	 * @see #sendMessage(IChannel, String)
+	 */
+	private static final short MESSAGE_DELAY = 250;
+	/**
+	 * The delay between switching the "Currently Playing" game
+	 * @see GameList
+	 * @see #getRandomGame()
+	 */
+	private static final byte GAME_DELAY = 1;
+
+	/**
+	 * This represents the client on discord, and is the main interaction with it.
+	 * It can also be thought of as "our user"
+	 */
 	public static IDiscordClient client;
+	/**
+	 * A main external configuration file, this allows the owner to change critical info about the bot
+	 */
 	public static final ConfigHandler config = new ConfigHandler();
+	/**
+	 * A global random, used for generating random numbers
+	 */
 	public static final Random ran = new Random();
-	//public static final Timer timer = new Timer("Pokebot Timer Thread", true);
+	/**
+	 * A global timer thread, this processes things like updating saving players or sending messages
+	 */
 	public static final ScheduledExecutorService timer = Executors.newScheduledThreadPool(4);
+
+	/**
+	 * This HashMap contains a list of all {@link StringBuilder StringBuilders} used in message sending
+	 * @see #sendAllMessages()
+	 * @see #sendMessage(IChannel, String)
+	 * @see #locks
+	 */
 	private static final ConcurrentHashMap<IChannel, StringBuilder> buffers = new ConcurrentHashMap<>();
-	//The hope with channel-locking is that we don't send messages the at the same time we are adding new ones
-	//Channel objects, while not equal to each other directly, are equal if they belong to the same channel
+	/**
+	 * This HashMap contains a list of all {@link ReentrantLock Locks} used in message sending
+	 * <br /><br />
+	 * The hope with channel-locking is that we don't send messages at the same time we are adding new ones.
+	 * Channel objects, while not equal to each other directly, are equal if they belong to the same channel
+	 * @see #sendMessage(IChannel, String)
+	 * @see #sendAllMessages()
+	 * @see #buffers
+	 */
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
 
 	public static void main(String... args) throws Exception{
@@ -63,14 +110,32 @@ public class Pokebot{
 		Move.registerMoves();
 	}
 
+	/**
+	 * This helper method gets the save file path from the current configuration, the user's ID, and the slot number
+	 * @param user The user to get the save file for
+	 * @param slot The slot to get the file for
+	 * @return A file leading to &lt;{@link ConfigHandler#SAVEDIR}&gt;/&lt;{@link IUser#getID()}&gt;/&lt;slot&gt;
+	 */
 	public static File getSaveFile(IUser user, byte slot){
 		return new File(config.SAVEDIR+'/'+user.getID()+"/"+slot);
 	}
 
+	/**
+	 * This helper method gets the main file path from the current configuration and the user's id
+	 * @param user The user to get the main file for
+	 * @return A file leading to &lt;{@link ConfigHandler#SAVEDIR}&gt;/&lt;{@link IUser#getID()}&gt;/main
+	 */
 	public static File getMainFile(IUser user){
 		return new File(config.SAVEDIR+'/'+user.getID()+"/main");
 	}
 
+	/**
+	 * A helper method to queue messages for to be sent in bulk
+	 * @param channel The channel to send the message too
+	 * @param message The message to send
+	 * @see #sendAllMessages()
+	 * @see #sendPrivateMessage(IUser, String)
+	 */
 	public static void sendMessage(IChannel channel, String message){
 		locks.putIfAbsent(channel, new ReentrantLock()); //Thread Safe "create if doesn't exist"
 		locks.get(channel).lock();
@@ -85,6 +150,11 @@ public class Pokebot{
 		}
 	}
 
+	/**
+	 * A helper method to send a PM to a user, uses the same system as {@link #sendMessage(IChannel, String)}
+	 * @param user The user to send the message too
+	 * @param message The message to send to the user
+	 */
 	public static void sendPrivateMessage(IUser user, String message){
 		try{
 			sendMessage(client.getOrCreatePMChannel(user), message);
@@ -96,11 +166,20 @@ public class Pokebot{
 		}
 	}
 
+	/**
+	 * Gets a random game from {@link GameList}
+	 * @return A string representing a random pokemon game or joke
+	 */
 	public static String getRandomGame(){
 		GameList[] vals = GameList.values();
 		return vals[ran.nextInt(vals.length)].getName();
 	}
 
+	/**
+	 * Sends all the messages in the buffer. This works by first locking down the list of buffers, then locking down each
+	 * buffer individually. This makes all the messages for the channel appear as one big message, and helps a lot
+	 * with ratelimits
+	 */
 	public static void sendAllMessages(){
 		synchronized(buffers){ //This lock is for the buffers, adding/removing channel buffers
 			Iterator<IChannel> i = buffers.keySet().iterator();
@@ -119,8 +198,8 @@ public class Pokebot{
 						} else {
 							String remainder = builder.substring(k+1);
 							builder.setLength(k);
-							requestHelper(channel, '\u200B'+builder.toString()); //We add a 0-width character to the
-							// front, prevents triggering other bot's commands
+							//We add a 0-width character to the front, prevents triggering other bot's commands
+							requestHelper(channel, '\u200B'+builder.toString());
 							builder.setLength(0);
 							builder.append(remainder);
 						}
@@ -138,6 +217,11 @@ public class Pokebot{
 		}
 	}
 
+	/**
+	 * A helper for using the request buffer. Can be used to send a message directly
+	 * @param channel The channel to send a message too
+	 * @param message The message to send
+	 */
 	public static void requestHelper(final IChannel channel, final String message){
 		RequestBuffer.request(() -> {
 			try{

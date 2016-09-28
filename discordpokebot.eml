@@ -7,8 +7,8 @@
 		<excludeFolder url="file://$MODULE_DIR$/target"/>
 	</contentEntry>
 	<levels>
-		<level name="Maven: com.github.austinv11:Discord4j:shaded:2.5.4" value="project"/>
 		<level name="Maven: org.slf4j:slf4j-api:1.7.12" value="project"/>
+		<level name="Maven: com.github.austinv11:Discord4j:shaded:2.5.4" value="project"/>
 		<level name="Maven: org.apache.httpcomponents:httpcore:4.4.4" value="project"/>
 		<level name="Maven: org.apache.httpcomponents:httpmime:4.5.1" value="project"/>
 		<level name="Maven: commons-io:commons-io:2.4" value="project"/>
