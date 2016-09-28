@@ -1,5 +1,7 @@
 package coolway99.discordpokebot.storage;
 
+import coolway99.discordpokebot.Pokebot;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,8 +58,7 @@ public class ConfigHandler{
 			try(FileInputStream in = new FileInputStream(file)){
 				config.load(in);
 			}catch(IOException e){
-				e.printStackTrace();
-				System.out.println("\nThere was an error reading the config file...");
+				Pokebot.LOGGER.error("There was an error reading the config file...", e);
 			}
 		}
 		this.BOTNAME = config.getProperty(NAMEKEY, NAMEDEFAULT);
@@ -68,26 +69,25 @@ public class ConfigHandler{
 		this.TOKEN = config.getProperty(TOKENKEY, TOKENDEFAULT);
 		this.WEBENABLED = Boolean.parseBoolean(config.getProperty(WEBENABLEDKEY, WEBENABLEDEFAULT));
 		if(this.WEBENABLED){
-			int port;
+			int port = -1;
 			try{
 				port = Integer.parseInt(config.getProperty(PORTKEY, PORTDEFAULT));
 				if(port < 0 || port > 65535 /*PORT MAX NUMBER*/){
 					throw new NumberFormatException();
 				}
 			} catch(NumberFormatException e){
-				port = 0;
-				System.err.println("Error with config, not a valid port number");
+				Pokebot.LOGGER.error("Error with config, not a valid port number. Expected 0-65535, got {}.", port);
 				System.exit(1);
 			}
 			this.PORT = port;
 			this.CLIENT_ID = config.getProperty(CLIENTIDKEY);
 			if(this.CLIENT_ID == null){
-				System.err.println("CLIENT_ID NOT SPECIFIED, NEEDED FOR WEB FUNCTIONALITY");
+				Pokebot.LOGGER.error("CLIENT_ID NOT SPECIFIED, NEEDED FOR WEB FUNCTIONALITY");
 				System.exit(1);
 			}
 			this.CLIENT_SECRET = config.getProperty(CLIENTSECRETKEY);
 			if(this.CLIENT_SECRET == null){
-				System.err.println("CLIENT_SECRET NOT SPECIFIED, NEEDED FOR WEB FUNCTIONALITY");
+				Pokebot.LOGGER.error("CLIENT_SECRET NOT SPECIFIED, NEEDED FOR WEB FUNCTIONALITY");
 				System.exit(1);
 			}
 			this.REDIRECT_URL = config.getProperty(REDIRECTURLKEY);
@@ -100,14 +100,15 @@ public class ConfigHandler{
 		this.prop = config;
 		
 		if(!file.exists()){
-			System.out.println("Detected first time run, saving config and stopping");
+			Pokebot.LOGGER.info("Detected first time run, saving config and stopping");
 			this.saveDefaultConfig();
-			System.out.println("Saved config file to "+file.getAbsolutePath());
+			Pokebot.LOGGER.info("Saved config file to "+file.getAbsolutePath());
 			System.exit(0);
 		}
 	}
 	
 	private void saveDefaultConfig(){
+		Pokebot.LOGGER.debug("Creating default config file...");
 		this.prop.setProperty(NAMEKEY, NAMEDEFAULT);
 		this.prop.setProperty(COMMANDKEY, COMMANDDEFAULT);
 		this.prop.setProperty(OWNERIDKEY, OWNERIDDEFAULT);
@@ -126,8 +127,7 @@ public class ConfigHandler{
 					+ "\nComment out lines with #"
 					+ "\nCommented out lines will return to default");
 		}catch(IOException e){
-			e.printStackTrace();
-			System.err.println("\nThere was an error writing the config file...");
+			Pokebot.LOGGER.error("There was an error writing the config file...", e);
 		}
 	}
 }

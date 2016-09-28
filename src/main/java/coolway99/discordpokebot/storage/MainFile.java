@@ -24,8 +24,7 @@ public class MainFile{
 		try(Scanner scanner = new Scanner(file)){
 			this.lastSlot = scanner.nextByte();
 		} catch(Exception e){
-			e.printStackTrace();
-			System.err.println("\nUnable to load main file for "+this.user.getID());
+			Pokebot.LOGGER.error("Unable to load main file for {}", this.user.getID(), e);
 		}
 	}
 
@@ -33,15 +32,14 @@ public class MainFile{
 		File file = Pokebot.getMainFile(this.user);
 		if(!file.exists()){
 			if(!file.getParentFile().exists() && !file.getParentFile().mkdirs()){
-				System.err.println("There was an error creating a directory structure for "+this.user.getID());
+				Pokebot.LOGGER.error("There was an error creating a directory structure for {}", this.user.getID());
 				return;
 			}
 		}
 		try(PrintStream out = new PrintStream(file)){
 			out.println(this.lastSlot);
 		} catch(Exception e){
-			e.printStackTrace();
-			System.err.println("\nUnable to save main file for "+this.user.getID());
+			Pokebot.LOGGER.error("Unable to save main file for {}", this.user.getID(), e);
 		}
 	}
 }

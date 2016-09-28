@@ -20,14 +20,14 @@ public class BotReadyHandler{
 	@EventSubscriber
 	public void handle(ReadyEvent event){
 		try{
+			if(this.mainThread.isAlive()) Pokebot.LOGGER.debug("Waiting for mainThread to halt");
 			this.mainThread.join();
 		} catch(InterruptedException e){
-			System.err.println("Error in ready thread, Interrupt received");
-			e.printStackTrace();
+			Pokebot.LOGGER.error("Error in ready thread, Interrupt received", e);
 			System.exit(-1);
 			return;
 		}
-		System.out.println("The bot is ready");//reggie");
+		Pokebot.LOGGER.info("The bot is ready");
 		Pokebot.client.getDispatcher().registerListener(new EventHandler());
 		Pokebot.client.getDispatcher().unregisterListener(this);
 		Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()));
@@ -35,8 +35,7 @@ public class BotReadyHandler{
 		try {
 			Pokebot.client.changeUsername(Pokebot.config.BOTNAME);
 		} catch(DiscordException | RateLimitException e) {
-			e.printStackTrace();
-			System.err.println("\nError changing username");
+			Pokebot.LOGGER.error("Error changing username, it might contain invalid symbols", e);
 		}
 	}
 

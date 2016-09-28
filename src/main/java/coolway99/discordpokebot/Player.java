@@ -354,7 +354,7 @@ public class Player{
 			out.println(this.ability);
 			out.flush();
 			out.close();
-			System.out.println(Pokebot.getSaveFile(this.user, this.slot).getAbsolutePath());
+			Pokebot.LOGGER.debug("Saved user to \"{}\"", Pokebot.getSaveFile(this.user, this.slot).getAbsolutePath());
 		}catch(Exception e){
 			e.printStackTrace();
 		}

@@ -5,6 +5,8 @@ import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import coolway99.discordpokebot.web.WebInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -30,6 +32,7 @@ public class Pokebot{
 	private static final byte SAVE_DELAY = 1; //In minutes
 	private static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
 	private static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
+	public static final Logger LOGGER = LoggerFactory.getLogger("Pokebot");
 
 	public static IDiscordClient client;
 	public static final ConfigHandler config = new ConfigHandler();
@@ -42,25 +45,30 @@ public class Pokebot{
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
 
 	public static void main(String... args) throws Exception{
-		System.out.println("Pokebot version "+VERSION);
+		LOGGER.info("Pokebot version {}", VERSION);
 		if(config.TOKEN.isEmpty()){
-			System.out.println("Error: No token found in pokebot.conf file");
-			System.exit(0);
+			LOGGER.error("Error: No token found in pokebot.conf file");
+			System.exit(-1);
 		}
 		if(config.WEBENABLED){
-			System.out.println("Web interface enabled on port "+config.PORT);
+			LOGGER.info("Web interface enabled on port {}", config.PORT);
 			WebInterface.initWebInterface(config.REDIRECT_URL, config.PORT);
 		}
 		client = new ClientBuilder().withToken(config.TOKEN).login();
-		System.out.println("Logging in");
+		LOGGER.info("Logging in");
+		LOGGER.debug("Creating new BotReadyHandler and dispatching it");
 		client.getDispatcher().registerListener(new BotReadyHandler(Thread.currentThread()));
+		LOGGER.debug("Scheduling Player Save Handler");
 		timer.scheduleAtFixedRate(PlayerHandler::saveAll, SAVE_DELAY, SAVE_DELAY, TimeUnit.MINUTES);
+		LOGGER.debug("Scheduling message sender");
 		timer.scheduleAtFixedRate(Pokebot::sendAllMessages, MESSAGE_DELAY, MESSAGE_DELAY,
 				TimeUnit.MILLISECONDS);
+		LOGGER.debug("Scheduling game changer");
 		timer.scheduleAtFixedRate(() -> Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()))
 				, GAME_DELAY, GAME_DELAY, TimeUnit.MINUTES);
 		//Now that the main thread is done doing it's business and the bot is busy logging in...
 		Move.registerMoves();
+		LOGGER.debug("Finished bot setup");
 	}
 
 	public static File getSaveFile(IUser user, byte slot){
@@ -89,19 +97,20 @@ public class Pokebot{
 		try{
 			sendMessage(client.getOrCreatePMChannel(user), message);
 		} catch(RateLimitException e){
-			System.err.println("Unable to send PM, hit rate limit");
+			LOGGER.error("Unable to send PM, hit rate limit");
 		} catch(DiscordException e){
-			e.printStackTrace();
-			System.err.println("\nUnable to send PM");
+			LOGGER.error("Unable to send PM\n", e);
 		}
 	}
 
 	public static String getRandomGame(){
+		LOGGER.debug("Getting a random game");
 		GameList[] vals = GameList.values();
 		return vals[ran.nextInt(vals.length)].getName();
 	}
 
 	public static void sendAllMessages(){
+		LOGGER.debug("Sending all messages");
 		synchronized(buffers){ //This lock is for the buffers, adding/removing channel buffers
 			Iterator<IChannel> i = buffers.keySet().iterator();
 			while(i.hasNext()){
@@ -112,8 +121,7 @@ public class Pokebot{
 					if(builder.length() > 1999){ //This is the character limit TODO make it not hardcoded
 						int k = builder.lastIndexOf("\n", 1999);
 						if(k == -1){
-							System.err.println(builder);
-							System.err.println("2000+ characters, not a single line break");
+							LOGGER.error("{}, 2000+ characters, not a single line break", builder);
 							requestHelper(channel, "Exceeded max characters per message");
 							i.remove();
 						} else {
@@ -143,16 +151,12 @@ public class Pokebot{
 			try{
 				channel.sendMessage(message);
 			}catch(RateLimitException e){
-				System.err.println("We are being rate limited in channel "
-						+channel.getGuild().getID()+'/'+channel.getID());
+				LOGGER.info("We are being rate limited in channel {}/{}", channel.getGuild().getID(), channel.getID());
 				throw e;
 			}catch(MissingPermissionsException e){
-				System.err.println("We do not have permission to send messages in channel "
-						+channel.getGuild().getID()+'/'+channel.getID());
+				LOGGER.error("We do not have permission to send messages in channel {}/{}", channel.getGuild().getID(), channel.getID());
 			}catch(DiscordException e){
-				e.printStackTrace();
-				System.err.println("\nWe were unable to send messages in channel "
-						+channel.getGuild().getID()+'/'+channel.getID());
+				LOGGER.error("We were unable to send messages in channel {}/{}", channel.getGuild().getID(), channel.getID(), e);
 			}
 		});
 	}

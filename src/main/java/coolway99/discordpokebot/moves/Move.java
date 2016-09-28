@@ -202,7 +202,7 @@ public abstract class Move{
 	}
 
 	public static void registerMoves(){
-		System.out.println("Registering moves...");
+		Pokebot.LOGGER.debug("Registering moves...");
 
 		REGISTRY.put("ARM_THRUST", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50));
 		REGISTRY.put("BARRAGE", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.NO_CONTACT,
@@ -484,7 +484,7 @@ public abstract class Move{
 			}
 		});
 
-		System.out.println("Done registering moves");
+		Pokebot.LOGGER.debug("Done registering moves");
 	}
 
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")

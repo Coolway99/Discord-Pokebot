@@ -610,7 +610,7 @@ public class EventHandler{
 					if(author.getID().equals(Pokebot.config.OWNERID)){
 						try{
 							reply(message, "shutting down");
-							System.out.println("Shutting down by owner request");
+							Pokebot.LOGGER.info("Shutting down by owner request");
 							Pokebot.client.changeStatus(Status.game("Currently Offline"));
 							Pokebot.client.changePresence(true);
 							Pokebot.timer.shutdownNow();
@@ -619,10 +619,9 @@ public class EventHandler{
 							PlayerHandler.saveAll();
 							Pokebot.client.logout();
 						} catch(Exception e){
-							e.printStackTrace();
-							System.err.println("Error while shutting down");
+							Pokebot.LOGGER.error("Error while shutting down", e);
 						}
-						System.out.println("Terminated");
+						Pokebot.LOGGER.info("Terminated");
 						System.exit(0);
 					}
 					reply(message, "you aren't the owner, shoo!");

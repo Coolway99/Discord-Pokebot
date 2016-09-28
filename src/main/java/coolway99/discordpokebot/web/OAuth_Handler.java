@@ -25,13 +25,12 @@ public class OAuth_Handler{
 					request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 			TokenResponse tokenResponse = gson.fromJson(request.execute().returnContent().asString(), TokenResponse.class);
 			if(tokenResponse.access_token == null){
-				System.err.println(tokenResponse.error);
+				Pokebot.LOGGER.error("Unable to get token: {}", tokenResponse.error);
 				return null;
 			}
 			return tokenResponse.access_token;
 		} catch(IOException e){
-			e.printStackTrace();
-			System.err.println("\nUnable to get token");
+			Pokebot.LOGGER.error("Unable to get token", e);
 		}
 		return null;
 	}
