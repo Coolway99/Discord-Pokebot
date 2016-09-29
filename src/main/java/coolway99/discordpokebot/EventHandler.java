@@ -22,8 +22,15 @@ import sx.blah.discord.util.MessageBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The main class where all commands are processed. Subscribes to the {@link MessageReceivedEvent}
+ */
 public class EventHandler{
 
+	/**
+	 * The big method that handles every input the bot gets
+	 * @param event The event to process
+	 */
 	//TODO: Not all commands have outputs, this needs to be fixed
 	//TODO: Perhaps make this neater somehow
 	//TODO: Perhaps split some sections off into different classes
@@ -725,10 +732,19 @@ public class EventHandler{
 		}
 	}
 
+	/**
+	 * A helper method to tell a user they are in the a battle
+	 * @param message The {@link IMessage} object used for getting the channel and author
+	 */
 	private static void inBattleMessage(IMessage message){
 		reply(message, "you can't use this because you're in a battle!");
 	}
 
+	/**
+	 * A helper method for replying
+	 * @param message The message object used for getting the channel and author
+	 * @param reply The reply to send to the user
+	 */
 	private static void reply(IMessage message, String reply){
 		Pokebot.sendMessage(message.getChannel(), message.getAuthor().mention()+", "+reply);
 	}

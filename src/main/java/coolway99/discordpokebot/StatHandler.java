@@ -22,6 +22,8 @@ import sx.blah.discord.handle.obj.IChannel;
 
 /**
  * The class that handles anything to do with stats or points. It has several helper functions for dealing with stats or points
+ *
+ * @author Coolway99
  */
 @SuppressWarnings("SpellCheckingInspection")
 public class StatHandler{

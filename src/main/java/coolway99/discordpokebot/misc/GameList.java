@@ -1,5 +1,10 @@
 package coolway99.discordpokebot.misc;
 
+/**
+ * A enum containing a list which Pokebot will randomly pick from and display
+ *
+ * @author Coolway99
+ */
 @SuppressWarnings("SpellCheckingInspection")
 public enum GameList{
 	POKEMON("Pokémon"),
