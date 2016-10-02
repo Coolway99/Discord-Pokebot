@@ -7,24 +7,24 @@
 		<excludeFolder url="file://$MODULE_DIR$/target"/>
 	</contentEntry>
 	<levels>
-		<level name="Maven: com.github.austinv11:Discord4j:shaded:2.5.4" value="project"/>
-		<level name="Maven: org.slf4j:slf4j-api:1.7.12" value="project"/>
-		<level name="Maven: org.apache.httpcomponents:httpcore:4.4.4" value="project"/>
-		<level name="Maven: org.apache.httpcomponents:httpmime:4.5.1" value="project"/>
-		<level name="Maven: commons-io:commons-io:2.4" value="project"/>
-		<level name="Maven: org.eclipse.jetty.websocket:websocket-client:9.3.8.v20160314" value="project"/>
-		<level name="Maven: org.eclipse.jetty:jetty-util:9.3.8.v20160314" value="project"/>
-		<level name="Maven: org.eclipse.jetty:jetty-io:9.3.8.v20160314" value="project"/>
-		<level name="Maven: org.eclipse.jetty.websocket:websocket-common:9.3.8.v20160314" value="project"/>
-		<level name="Maven: net.jodah:typetools:0.4.6" value="project"/>
+		<level name="Maven: com.github.austinv11:Discord4j:shaded:2.6.1" value="project"/>
+		<level name="Maven: org.slf4j:slf4j-api:1.7.21" value="project"/>
+		<level name="Maven: org.apache.httpcomponents:httpcore:4.4.5" value="project"/>
+		<level name="Maven: org.apache.httpcomponents:httpmime:4.5.2" value="project"/>
+		<level name="Maven: commons-io:commons-io:2.5" value="project"/>
+		<level name="Maven: org.eclipse.jetty.websocket:websocket-client:9.3.11.v20160721" value="project"/>
+		<level name="Maven: org.eclipse.jetty:jetty-util:9.3.11.v20160721" value="project"/>
+		<level name="Maven: org.eclipse.jetty:jetty-io:9.3.11.v20160721" value="project"/>
+		<level name="Maven: org.eclipse.jetty.websocket:websocket-common:9.3.11.v20160721" value="project"/>
+		<level name="Maven: net.jodah:typetools:0.4.7" value="project"/>
 		<level name="Maven: org.apache.commons:commons-lang3:3.4" value="project"/>
-		<level name="Maven: net.java.dev.jna:jna:4.2.1" value="project"/>
-		<level name="Maven: com.googlecode.soundlibs:mp3spi:1.9.5-1" value="project"/>
-		<level name="Maven: com.googlecode.soundlibs:jlayer:1.0.1-1" value="project"/>
+		<level name="Maven: net.java.dev.jna:jna:4.2.2" value="project"/>
+		<level name="Maven: com.googlecode.soundlibs:mp3spi:1.9.5-2" value="project"/>
+		<level name="Maven: com.googlecode.soundlibs:jlayer:1.0.1-2" value="project"/>
 		<level name="Maven: junit:junit:3.8.2" value="project"/>
 		<level name="Maven: org.jcraft:jorbis:0.0.17" value="project"/>
 		<level name="Maven: jflac:jflac:1.3" value="project"/>
-		<level name="Maven: com.googlecode.soundlibs:tritonus-share:0.3.7-2" value="project"/>
+		<level name="Maven: com.googlecode.soundlibs:tritonus-share:0.3.7-3" value="project"/>
 		<level name="Maven: org.tritonus:tritonus-dsp:0.3.6" value="project"/>
 		<level name="Maven: com.sparkjava:spark-core:2.5" value="project"/>
 		<level name="Maven: org.eclipse.jetty:jetty-server:9.3.6.v20151106" value="project"/>
