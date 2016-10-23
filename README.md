@@ -7,7 +7,7 @@ This bot was built using:
 * [Spark Java][2]
 * [Water Template][3]
 * [Apache HTTP Components][4]
-* and [Google's GSON][5]
+* [Google's GSON][5]
 
 [1]: http://austinv11.github.io/Discord4J/
 [2]: http://sparkjava.com/

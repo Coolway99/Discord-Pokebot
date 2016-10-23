@@ -384,11 +384,11 @@ public class EventHandler{
 							return;
 						}
 						player.numOfAttacks--;
-						player.moves[slot] = null;
+						player.moves[slot] = new MoveSet();
 						for(int x = 0; x < player.moves.length-1; x++){
 							if(player.moves[x] == null){
 								player.moves[x] = player.moves[x+1];
-								player.moves[x+1] = null;
+								player.moves[x+1] = new MoveSet();
 							}
 						}
 						reply(message, "Cleared move in slot "+(slot+1));

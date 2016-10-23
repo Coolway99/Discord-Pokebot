@@ -145,7 +145,7 @@ public class WebInterface{
 					int cost = Integer.parseInt(moveSelector.substring(0, moveSelector.indexOf('|')));
 					String moveName = moveSelector.substring(moveSelector.indexOf('|')+1);
 					if(moveName.equals("NONE")){
-						moves[x] = null;
+						moves[x] = Move.NULLMOVE;
 					} else {
 						Move move = Move.REGISTRY.get(moveName);
 						if(move == null) return "Move Checksum Error (did you try setting a move manually?)";
@@ -219,8 +219,8 @@ public class WebInterface{
 				player.numOfAttacks = 0;
 				for(int x = 0; x < player.moves.length; x++){
 					Move move = moves[x];
-					if(move == null){
-						player.moves[x] = null;
+					if(move == null || move == Move.NULLMOVE){
+						player.moves[x] = new MoveSet();
 						continue;
 					} else {
 						player.moves[x] = new MoveSet(moves[x]);

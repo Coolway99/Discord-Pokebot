@@ -1,10 +1,10 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
-import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -24,7 +24,7 @@ import java.util.Scanner;
 public class Player{
 
 	public final byte slot;
-	
+
 	public final IUser user;
 	public Types primary = Types.NORMAL;
 	public Types secondary = Types.NULL;
@@ -87,11 +87,12 @@ public class Player{
 	public Player(IUser user){
 		this(user, (byte) 0);
 	}
-	
+
 	public Player(IUser user, byte slot){
 		this.user = user;
 		this.slot = slot;
-		this.moves = new MoveSet[4];
+		//Use 4 default constructors to make sure they're initialized
+		this.moves = new MoveSet[]{new MoveSet(), new MoveSet(), new MoveSet(), new MoveSet()};
 		this.loadData();
 		this.HP = this.getMaxHP();
 		this.vEffects = EnumSet.noneOf(Effects.Volatile.class);
@@ -275,7 +276,7 @@ public class Player{
 				return 0;
 		}
 	}
-	
+
 	private void loadData(){
 		//If the file is "incomplete", which should only result when the save format is updated
 		//with more info, then this will error out and close the file, with the default values
@@ -297,7 +298,7 @@ public class Player{
 			for(int x = 0; x < this.moves.length; x++){
 				Move move = Move.REGISTRY.get(in.nextLine());
 				if(move == null){
-					this.moves[x] = null;
+					this.moves[x] = new MoveSet();
 					continue;
 				}
 				this.moves[x] = new MoveSet(move);

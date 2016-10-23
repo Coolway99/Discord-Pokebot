@@ -1,10 +1,16 @@
 package coolway99.discordpokebot.moves;
 
+import org.jetbrains.annotations.NotNull;
+
 public class MoveSet{
 	private final Move move;
 	private int PP;
 
-	public MoveSet(Move move){
+	public MoveSet(){
+		this(Move.NULLMOVE);
+	}
+
+	public MoveSet(@NotNull Move move){
 		this.move = move;
 		this.PP = move.getPP();
 	}

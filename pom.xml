@@ -6,7 +6,7 @@
 	<artifactId>discordpokebot</artifactId>
 	<name>Discord Pokemon Battle Bot</name>
 	<description>A bot for discord adding better pokemon battles</description>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<url>https://github.com/Coolway99/Discord-Pokebot</url>
 	<repositories>
 		<repository>
@@ -64,9 +64,9 @@
 		</dependency>
 		<!-- For annotations regarding code -->
 		<dependency>
-			<groupId>com.intellij</groupId>
+			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
-			<version>12.0</version>
+			<version>15.0</version>
 		</dependency>
 	</dependencies>
 	<properties>

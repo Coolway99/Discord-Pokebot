@@ -24,6 +24,24 @@ import java.util.TreeMap;
 public abstract class Move{
 
 	public static final TreeMap<String, Move> REGISTRY = new MoveMap();
+	public static final Move NULLMOVE = new Move(
+					Types.NULL,
+					MoveType.STATUS,
+					0, //PP
+					0, //POWER
+					-1, //ACCURACY
+					0, //COST
+					Battle_Priority.N7){
+		@Override
+		public String getName(){
+			return "NONE";
+		}
+
+		@Override
+		public String getDisplayName(){
+			return "NONE";
+		}
+	};
 
 	/*
 	TODO Ally Switch can't be used here
@@ -859,6 +877,8 @@ public abstract class Move{
 					break;
 			}
 		}
+
+		if(move.has(Flags.ALWAYS_HIT)) return true;
 
 		double accuracy = move.getAccuracy();
 		if(factorChanges){
