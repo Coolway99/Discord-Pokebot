@@ -256,7 +256,7 @@ public class Player{
 
 	/**
 	 * Do we have the given {@link Effects.Volatile} effect?
-	 * @param nvEffect The effect to compare
+	 * @param vEffect The effect to compare
 	 * @return Do we have the Volatile effect?
 	 */
 	public boolean has(Effects.Volatile vEffect){

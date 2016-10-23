@@ -5,6 +5,8 @@ import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import coolway99.discordpokebot.web.WebInterface;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -116,7 +118,8 @@ public class Pokebot{
 	 * @param slot The slot to get the file for
 	 * @return A file leading to &lt;{@link ConfigHandler#SAVEDIR}&gt;/&lt;{@link IUser#getID()}&gt;/&lt;slot&gt;
 	 */
-	public static File getSaveFile(IUser user, byte slot){
+	@Contract(value = "_, _ -> !null; null, _ -> fail", pure = true)
+	public static File getSaveFile(@NotNull IUser user, byte slot){
 		return new File(config.SAVEDIR+'/'+user.getID()+"/"+slot);
 	}
 
@@ -125,7 +128,8 @@ public class Pokebot{
 	 * @param user The user to get the main file for
 	 * @return A file leading to &lt;{@link ConfigHandler#SAVEDIR}&gt;/&lt;{@link IUser#getID()}&gt;/main
 	 */
-	public static File getMainFile(IUser user){
+	@Contract(value = "_ -> !null", pure = true)
+	public static File getMainFile(@NotNull IUser user){
 		return new File(config.SAVEDIR+'/'+user.getID()+"/main");
 	}
 
@@ -136,7 +140,7 @@ public class Pokebot{
 	 * @see #sendAllMessages()
 	 * @see #sendPrivateMessage(IUser, String)
 	 */
-	public static void sendMessage(IChannel channel, String message){
+	public static void sendMessage(@NotNull IChannel channel, @NotNull String message){
 		locks.putIfAbsent(channel, new ReentrantLock()); //Thread Safe "create if doesn't exist"
 		locks.get(channel).lock();
 		try{
@@ -170,6 +174,7 @@ public class Pokebot{
 	 * Gets a random game from {@link GameList}
 	 * @return A string representing a random pokemon game or joke
 	 */
+	@Contract(value = " -> !null", pure = true)
 	public static String getRandomGame(){
 		GameList[] vals = GameList.values();
 		return vals[ran.nextInt(vals.length)].getName();
@@ -222,7 +227,7 @@ public class Pokebot{
 	 * @param channel The channel to send a message too
 	 * @param message The message to send
 	 */
-	public static void requestHelper(final IChannel channel, final String message){
+	public static void requestHelper(@NotNull final IChannel channel, @NotNull final String message){
 		RequestBuffer.request(() -> {
 			try{
 				channel.sendMessage(message);

@@ -6,6 +6,9 @@ import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -97,7 +100,7 @@ public class StatHandler{
 	 * @see Player#getSpeedStat()
 	 */
 	public static int calcStatValue(int statpoints, int ivpoints, int evpoints, int level,
-			Stats type, byte modifier, Effects.NonVolatile effect, Natures nature){
+			@NotNull Stats type, byte modifier, @NotNull Effects.NonVolatile effect, @NotNull Natures nature){
 		//First stage
 		//double ret =  Math.floor(((2*statpoints+ivpoints+evpoints)*level)/100D);
 		//Really shouldn't be making changes to code in documentation, but it makes it 10x more readable
@@ -132,7 +135,8 @@ public class StatHandler{
 	 * @param player The player to calculate the points for
 	 * @return The points the player is using
 	 */
-	public static int getTotalPoints(Player player){
+	@Contract(pure = true)
+	public static int getTotalPoints(@NotNull Player player){
 		return getStatPoints(player)
 				+ player.level
 				+ getMovePoints(player)
@@ -145,7 +149,8 @@ public class StatHandler{
 	 * @param sub The substat to calculate
 	 * @return The total points in that substat category
 	 */
-	public static int getCombinedPoints(Player player, SubStats sub){
+	@Contract(pure = true)
+	public static int getCombinedPoints(@NotNull Player player, @NotNull SubStats sub){
 		int total = 0;
 		for(int x = 0; x < player.stats.length; x++){
 			total += player.stats[x][sub.getIndex()];
@@ -158,7 +163,8 @@ public class StatHandler{
 	 * @param player The player to calculate points for
 	 * @return The amount of points the player is using on stats
 	 */
-	public static int getStatPoints(Player player){
+	@Contract(value = "null -> fail", pure = true)
+	public static int getStatPoints(@NotNull Player player){
 		int total = 0;
 		for(int x = 0; x < player.stats.length; x++){
 			for(int y = 0; y < player.stats[0].length; y++){
@@ -173,7 +179,8 @@ public class StatHandler{
 	 * @param player The player to calculate points for
 	 * @return The amount of points the player is using on moves 
 	 */
-	public static int getMovePoints(Player player){
+	@Contract(value = "null -> fail", pure = true)
+	public static int getMovePoints(@NotNull Player player){
 		int total = 0;
 		for(int x = 0; x < player.numOfAttacks; x++){
 			total += player.moves[x].getMove().getCost();
@@ -189,7 +196,8 @@ public class StatHandler{
 	 * @param newStat The new value of the stat
 	 * @param subStat The optional substat to set it to
 	 */
-	public static void setStats(IChannel channel, Player player, String stat, int newStat, String subStat){
+	public static void setStats(@NotNull IChannel channel, @NotNull Player player, @Nullable String stat,
+								int newStat, @Nullable String subStat){
 		if(newStat < 0){
 			Pokebot.sendMessage(channel, "The new value must be greater than 0");
 			return;
@@ -229,6 +237,7 @@ public class StatHandler{
 	 * @param mod a given modification ranging from -6 to 6
 	 * @return The percent to multiply the stat by
 	 */
+	@Contract(pure = true)
 	public static double getModifierChange(byte mod){
 		if(mod == 0 || mod > 6 || mod < -6) return 1D;
 		double res = Math.abs(mod+2D)/2D;
@@ -242,6 +251,7 @@ public class StatHandler{
 	 * @return The percent to multiply the stat by
 	 */
 	//This is used for accuracy and evasion
+	@Contract(pure = true)
 	public static double getHitModifierChange(byte mod){
 		if(mod == 0 || mod > 6 || mod < -6) return 1D;
 		double res = Math.abs(mod+3D)/3D;
@@ -256,7 +266,7 @@ public class StatHandler{
 	 * @param stat The stat to modify
 	 * @param amount The amount to modify it by
 	 */
-	public static void changeStat(IChannel channel, Player player, Stats stat, int amount){
+	public static void changeStat(@NotNull IChannel channel, @NotNull Player player, @NotNull Stats stat, int amount){
 		if(amount == 0){
 			Pokebot.sendMessage(channel, player.mention()+"'s "+stat+" remained unchanged!");
 			return;
@@ -314,7 +324,8 @@ public class StatHandler{
 	 * @param newAmount The new amount of points
 	 * @return Would the given change exceed {@link StatHandler#MAX_TOTAL_POINTS} or not
 	 */
-	public static boolean wouldExceedTotalPoints(Player player, int oldAmount, int newAmount){
+	@Contract(pure = true)
+	public static boolean wouldExceedTotalPoints(@NotNull Player player, int oldAmount, int newAmount){
 		return wouldExceed(getTotalPoints(player), oldAmount, newAmount, MAX_TOTAL_POINTS);
 	}
 
@@ -325,7 +336,8 @@ public class StatHandler{
 	 * @param newMove The new move to switch with
 	 * @return Would it exceed {@link StatHandler#MAX_TOTAL_POINTS}
 	 */
-	public static boolean wouldExceedTotalPoints(Player player, Move oldMove, Move newMove){
+	@Contract(pure = true)
+	public static boolean wouldExceedTotalPoints(@NotNull Player player, @NotNull Move oldMove, @NotNull Move newMove){
 		return wouldExceedTotalPoints(player, oldMove.getCost(), newMove.getCost());
 	}
 
@@ -336,7 +348,8 @@ public class StatHandler{
 	 * @param newAbility The new ability to switch with
 	 * @return Would it exceed {@link StatHandler#MAX_TOTAL_POINTS}
 	 */
-	public static boolean wouldExceedTotalPoints(Player player, Abilities oldAbility, Abilities newAbility){
+	@Contract(pure = true)
+	public static boolean wouldExceedTotalPoints(@NotNull Player player, @NotNull Abilities oldAbility, @NotNull Abilities newAbility){
 		return wouldExceedTotalPoints(player, oldAbility.getCost(), newAbility.getCost());
 	}
 
@@ -346,7 +359,8 @@ public class StatHandler{
 	 * @param newAbility The new ability
 	 * @return Would it exceed {@link StatHandler#MAX_TOTAL_POINTS}
 	 */
-	public static boolean wouldExceedTotalPoints(Player player, Abilities newAbility){
+	@Contract(pure = true)
+	public static boolean wouldExceedTotalPoints(@NotNull Player player, @NotNull Abilities newAbility){
 		return wouldExceedTotalPoints(player, player.getAbility(), newAbility);
 	}
 
@@ -358,6 +372,7 @@ public class StatHandler{
 	 * @param max The maximum not to exceed
 	 * @return Would current-oldAmount+newAmount be greater than max?
 	 */
+	@Contract(pure = true)
 	public static boolean wouldExceed(int current, int oldAmount, int newAmount, int max){
 		return current-oldAmount+newAmount > max;
 	}
@@ -367,7 +382,7 @@ public class StatHandler{
 	 * @param channel The channel to send the warning in
 	 * @param player The player to address it too
 	 */
-	public static void exceedWarning(IChannel channel, Player player){
+	public static void exceedWarning(@NotNull IChannel channel, @NotNull Player player){
 		Pokebot.sendMessage(channel, player.mention()+" warning! You have exceeded the maximum total points. You will" +
 				" not be able to attack or battle until this is resolved");
 	}
