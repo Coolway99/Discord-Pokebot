@@ -1,3 +1,5 @@
+[![Dependency Status](https://www.versioneye.com/user/projects/58531d6081ffdc00433a2362/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/58531d6081ffdc00433a2362)
+--------
 # Discord Pokébot
 A pokémon bot for discord, featuring battles and the like
 You can find information about the bot and how to use it [here](https://github.com/Coolway99/Discord-Pokebot/wiki).
