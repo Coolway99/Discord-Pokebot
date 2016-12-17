@@ -3,6 +3,7 @@ package coolway99.discordpokebot.battle;
 import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.moves.Flags;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
@@ -87,8 +88,8 @@ public class Battle{
 			}
 			Move move = moveSet.getMove();
 			attacker.lastMove = moveSet;
-			attacker.lastTarget = move.has(Move.Flags.UNTARGETABLE) ? null : defender;
-			if(!move.has(Move.Flags.UNTARGETABLE))
+			attacker.lastTarget = move.has(Flags.UNTARGETABLE) ? null : defender;
+			if(!move.has(Flags.UNTARGETABLE))
 				defender.lastAttacker = attacker; //free-for-all may make it weird, but it's intentional
 			if(this.attacks.size() == this.participants.size()){
 				this.timer.cancel();
@@ -139,6 +140,7 @@ public class Battle{
 			});
 			//Doing various checks for damage and other things
 			for(Player player : this.participants){
+				player.getModifiedItem().onPostTurn(this.channel, player);
 				switch(player.getNV()){
 					case BURN:{
 						//TODO Check for ability heatproof

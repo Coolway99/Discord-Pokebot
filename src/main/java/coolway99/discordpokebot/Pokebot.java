@@ -4,40 +4,40 @@ import coolway99.discordpokebot.items.Item;
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.storage.ConfigHandler;
-import coolway99.discordpokebot.storage.PlayerHandler;
 import coolway99.discordpokebot.web.WebInterface;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
-	public static final String VERSION = "dev-1.3.0";
+	public static final String VERSION = "dev-2.0.0";
 	//TODO make the rest of these configs
-	private static final byte SAVE_DELAY = 1; //In minutes
-	private static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
-	private static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
+	public static final byte SAVE_DELAY = 1; //In minutes
+	public static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
+	public static final byte GAME_DELAY = 1;//minutesToMiliseconds(1);
 
 	public static IDiscordClient client;
 	public static final ConfigHandler config = new ConfigHandler();
 	public static final Random ran = new Random();
-	//public static final Timer timer = new Timer("Pokebot Timer Thread", true);
 	public static final ScheduledExecutorService timer = Executors.newScheduledThreadPool(4);
 	private static final ConcurrentHashMap<IChannel, StringBuilder> buffers = new ConcurrentHashMap<>();
+	//The JS engine, for running showdown's code
+	public static final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 	//The hope with channel-locking is that we don't send messages the at the same time we are adding new ones
 	//Channel objects, while not equal to each other directly, are equal if they belong to the same channel
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
@@ -52,15 +52,15 @@ public class Pokebot{
 			System.out.println("Web interface enabled on port "+config.PORT);
 			WebInterface.initWebInterface(config.REDIRECT_URL, config.PORT);
 		}
-		client = new ClientBuilder().withToken(config.TOKEN).login(true);
-		System.out.println("Logging in");
+		client = new ClientBuilder().withToken(config.TOKEN).build();
+		System.out.println("Built Client");
+		client.getDispatcher().registerListener(new GuildCreateHandler());
 		client.getDispatcher().registerListener(new BotReadyHandler(Thread.currentThread()));
-		timer.scheduleAtFixedRate(PlayerHandler::saveAll, SAVE_DELAY, SAVE_DELAY, TimeUnit.MINUTES);
-		timer.scheduleAtFixedRate(Pokebot::sendAllMessages, MESSAGE_DELAY, MESSAGE_DELAY,
-				TimeUnit.MILLISECONDS);
-		timer.scheduleAtFixedRate(() -> Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()))
-				, GAME_DELAY, GAME_DELAY, TimeUnit.MINUTES);
-		//Now that the main thread is done doing it's business and the bot is busy logging in...
+		System.out.println("Created Listeners");
+		client.login();
+		System.out.println("Logging in");
+		//Timers moved to BotReadyHandler
+		//Now that the main thread is done doing its business and the bot is busy logging in...
 		Move.registerMoves();
 		Item.registerItems();
 	}
@@ -104,6 +104,10 @@ public class Pokebot{
 	}
 
 	public static void sendAllMessages(){
+		if(!client.isReady()){
+			System.err.println("Skipping send messages, bot isn't ready");
+			return;
+		}
 		synchronized(buffers){ //This lock is for the buffers, adding/removing channel buffers
 			Iterator<IChannel> i = buffers.keySet().iterator();
 			while(i.hasNext()){

@@ -1,15 +1,17 @@
 package coolway99.discordpokebot;
 
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.GuildCreateEvent;
+import coolway99.discordpokebot.storage.PlayerHandler;
+import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.RateLimitException;
 
-public class BotReadyHandler{
+import java.util.concurrent.TimeUnit;
+
+import static coolway99.discordpokebot.Pokebot.client;
+
+public class BotReadyHandler implements IListener<ReadyEvent>{
 
 	private final Thread mainThread;
 
@@ -17,7 +19,7 @@ public class BotReadyHandler{
 		this.mainThread = mainThread;
 	}
 
-	@EventSubscriber
+	@Override
 	public void handle(ReadyEvent event){
 		try{
 			this.mainThread.join();
@@ -27,23 +29,27 @@ public class BotReadyHandler{
 			System.exit(-1);
 			return;
 		}
+		Pokebot.timer.scheduleAtFixedRate(PlayerHandler::saveAll, Pokebot.SAVE_DELAY, Pokebot.SAVE_DELAY, TimeUnit.MINUTES);
+		Pokebot.timer.scheduleAtFixedRate(Pokebot::sendAllMessages, Pokebot.MESSAGE_DELAY, Pokebot.MESSAGE_DELAY,
+				TimeUnit.MILLISECONDS);
+		Pokebot.timer.scheduleAtFixedRate(() -> {
+					if(!client.isReady()){
+						System.err.println("Skipping game status update, bot isn't ready");
+						return;
+					}
+					client.changeStatus(Status.game(Pokebot.getRandomGame()));
+				}
+				, Pokebot.GAME_DELAY, Pokebot.GAME_DELAY, TimeUnit.MINUTES);
 		System.out.println("The bot is ready");//reggie");
-		Pokebot.client.getDispatcher().registerListener(new EventHandler());
-		Pokebot.client.getDispatcher().unregisterListener(this);
-		Pokebot.client.changeStatus(Status.game(Pokebot.getRandomGame()));
-		Pokebot.client.changePresence(false);
+		client.getDispatcher().registerListener(new EventHandler());
+		client.getDispatcher().unregisterListener(this);
+		client.changeStatus(Status.game(Pokebot.getRandomGame()));
+		client.changePresence(false);
 		try {
-			Pokebot.client.changeUsername(Pokebot.config.BOTNAME);
+			client.changeUsername(Pokebot.config.BOTNAME);
 		} catch(DiscordException | RateLimitException e) {
 			e.printStackTrace();
 			System.err.println("\nError changing username");
-		}
-	}
-
-	@EventSubscriber
-	public void guild(GuildCreateEvent event){
-		for(IChannel channel : event.getGuild().getChannels()){
-			channel.getMessages().setCacheCapacity(1);
 		}
 	}
 }

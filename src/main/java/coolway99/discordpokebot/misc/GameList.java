@@ -5,7 +5,7 @@ public enum GameList{
 	POKEMON("Pokémon"),
 	PKMN("Pkmn"),
 	GO("Pokémon Go"),
-	GO2("our servers are down"),
+	//GO2("our servers are down"),
 	//GO3("Pokémon Go Fuck Yourself"),
 	POKERMON("some poker, mon"),
 	POKE_A_MON("poke a mon"),
@@ -20,13 +20,15 @@ public enum GameList{
 	XY("the ones we don't mention"),
 	ORAS("Omega Ruby/Alpha Saphire"),
 	//TODO DPPt remakes
-	SM("Sun/Moon")
+	SM("Sun/Moon"),
+
+	DEV("with 10% more unstable code!"),
 	;
 	
 	private final String name;
 	
 	GameList(String name){
-		this.name= name;
+		this.name = name;
 	}
 	
 	public String getName(){

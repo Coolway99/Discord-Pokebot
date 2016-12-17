@@ -5,6 +5,7 @@ import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.MoveType;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
@@ -43,14 +44,8 @@ public class Item{
 	private final int naturalGiftPower;
 	private final Types naturalGiftType;
 
-	private final MoveMethod onMove;
-	private final DamageModMethod onAttack;
-	private final DamageMethod onAfterDamage;
-	private final TriMethod onPostTurn;
-
 	protected Item(ItemTypes itemType, int cost, String name, String displayName,
-				   int flingPower, int naturalGiftPower, Types naturalGiftType,
-				   MoveMethod onMove, DamageModMethod onAttack, DamageMethod onAfterDamage, TriMethod onPostTurn){
+				   int flingPower, int naturalGiftPower, Types naturalGiftType){
 		this.itemType = itemType;
 		this.cost = cost;
 		this.name = name;
@@ -58,10 +53,6 @@ public class Item{
 		this.flingPower = flingPower;
 		this.naturalGiftPower = naturalGiftPower;
 		this.naturalGiftType = naturalGiftType;
-		this.onMove = onMove;
-		this.onAttack = onAttack;
-		this.onAfterDamage = onAfterDamage;
-		this.onPostTurn = onPostTurn;
 	}
 
 	public ItemTypes getItemType(){
@@ -77,19 +68,19 @@ public class Item{
 	}
 
 	public MoveSet onMove(IChannel channel, Player attacker, MoveSet move, Player defender){
-		return this.onMove.run(channel, attacker, move, defender, this);
+		return null;
 	}
 
 	public int onAttack(IChannel channel, Player attacker, Move move, Player defender, int damage){
-		return this.onAttack.run(channel, attacker, move, defender, damage, this);
+		return 0;
 	}
 
 	public void onAfterDamage(IChannel channel, Player attacker, Move move, Player defender, int damage){
-		this.onAfterDamage.run(channel, attacker, move, defender, damage, this);
+
 	}
 
 	public void onPostTurn(IChannel channel, Player player){
-		this.onPostTurn.run(channel, player, this);
+
 	}
 
 	public int getFlingPower(){
@@ -110,26 +101,6 @@ public class Item{
 			return true;
 		}
 		return false;
-	}
-
-	@FunctionalInterface
-	public interface MoveMethod{
-		MoveSet run(IChannel channel, Player attacker, MoveSet move, Player defender, Item item);
-	}
-
-	@FunctionalInterface
-	public interface DamageMethod{
-		void run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
-	}
-
-	@FunctionalInterface
-	public interface DamageModMethod{
-		int run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
-	}
-
-	@FunctionalInterface
-	public interface TriMethod{
-		void run(IChannel channel, Player player, Item item);
 	}
 
 	public static void registerItems(){
@@ -161,57 +132,15 @@ public class Item{
 		ItemBuilder.newItem(100, "ASSAULT_VEST", "Assault Vest")
 				.fling(80)
 				.onMove((channel, attacker, move, defender, item) -> {
-					if(move.getMove().getMoveType() == Move.MoveType.STATUS) return null;
+					if(move.getMove().getMoveType() == MoveType.STATUS) return null;
 					return move;
 				})
 				//TODO mod special defence
 				.register();
+
 		//TODO ItemBuilder.newItem(50, "BABIRI_BERRY", "Babiri Berry")
 				//.
 		//Mega stones are not applicatable
 		System.out.println("Done registering items");
 	}
-
-	public enum ItemTypes{
-		ITEM,
-		BERRY
-	}
 }
-	/*NULL(),
-	BLACK_BELT(Types.FIGHTING),
-	BLACK_GLASSES(Types.DARK),
-	CHARCOAL(Types.FIRE),
-	DRAGON_FANG(Types.DRAGON),
-	HARD_STONE(Types.ROCK),
-	MAGNET(Types.ELECTRIC),
-	METAL_COAT(Types.STEEL),
-	MIRACLE_SEED(Types.GRASS),
-	MYSTIC_WATER(Types.WATER),
-	//Had to change it's name slightly because java
-	@SuppressWarnings("SpellCheckingInspection")
-	NEVERMELT_ICE(Types.ICE),
-	// Only 10% PINK_BOW(Types.NORMAL),
-	POISON_BARB(Types.POISON),
-	// Only 12.5% Polkadot Bow(Types.NORMAL),
-	SHARP_BEAK(Types.FLYING),
-	SILK_SCARF(Types.NORMAL),
-	SILVER_POWDER(Types.BUG),
-	SOFT_SAND(Types.GROUND),
-	SPELL_TAG(Types.GHOST),
-	TWISTED_SPOON(Types.PSYCHIC),
-
-	;
-
-	private final Types type;
-
-	Items(){
-		this.type = null;
-	}
-
-	Items(Types type){
-		this.type = type;
-	}
-
-	public Types getPoweredUpType(){
-		return this.type;
-	}*/

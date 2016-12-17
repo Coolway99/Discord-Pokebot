@@ -2,6 +2,7 @@ package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
+import coolway99.discordpokebot.moves.Flags;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.moves.Move;
@@ -456,7 +457,7 @@ public class EventHandler{
 						MoveSet moveSet = attacker.moves[slot];
 						Player defender;
 						//If this is a status move, then usually we are targeting ourselves
-						if(moveSet.getMove().has(Move.Flags.UNTARGETABLE)){
+						if(moveSet.getMove().has(Flags.UNTARGETABLE)){
 							defender = PlayerHandler.getPlayer(author);
 						} else {
 							defender = PlayerHandler.getPlayer(message.getMentions().get(0));

@@ -4,6 +4,7 @@ import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
@@ -11,7 +12,7 @@ import sx.blah.discord.handle.obj.IChannel;
 
 public class ItemBuilder{
 
-	private Item.ItemTypes itemType = Item.ItemTypes.ITEM;
+	private ItemTypes itemType = ItemTypes.ITEM;
 	private final int cost;
 	private String name;
 	private String displayName;
@@ -20,9 +21,10 @@ public class ItemBuilder{
 	private int naturalGiftPower = 0;
 	private Types naturalGiftType = Types.NULL;
 
-	private Item.MoveMethod onMove = (a, b, moveSet, d, e) -> moveSet;
-	private Item.DamageMethod onAfterDamage = (a, b, c, d, e, f) -> {};
-	private Item.TriMethod onPostTurn = (a, b, c) -> {};
+	private ModifyMoveMethod onMove = (a, b, moveSet, d, e) -> moveSet;
+	private ModifyDamageMethod onAttack = (a, b, c, d, damage, f) -> damage;
+	private DamageMethod onAfterDamage = (a, b, c, d, e, f) -> {};
+	private PostTurnMethod onPostTurn = (a, b, c) -> {};
 
 
 	//public static ItemBuilder newItem(int cost, String name){
@@ -39,7 +41,7 @@ public class ItemBuilder{
 		this.displayName = displayName;
 	}
 
-	public ItemBuilder setItemType(Item.ItemTypes itemType){
+	public ItemBuilder setItemType(ItemTypes itemType){
 		this.itemType = itemType;
 		return this;
 	}
@@ -55,24 +57,29 @@ public class ItemBuilder{
 		return this;
 	}
 
-	public ItemBuilder onMove(Item.MoveMethod onMove){
+	public ItemBuilder onMove(ModifyMoveMethod onMove){
 		this.onMove = onMove;
 		return this;
 	}
 
-	public ItemBuilder onAfterDamage(Item.DamageMethod onAfterDamage){
+	public ItemBuilder onAttack(ModifyDamageMethod onAttack){
+		this.onAttack = onAttack;
+		return this;
+	}
+
+	public ItemBuilder onAfterDamage(DamageMethod onAfterDamage){
 		this.onAfterDamage = onAfterDamage;
 		return this;
 	}
 
-	public ItemBuilder onPostTurn(Item.TriMethod onPostTurn){
+	public ItemBuilder onPostTurn(PostTurnMethod onPostTurn){
 		this.onPostTurn = onPostTurn;
 		return this;
 	}
 
 	public ItemBuilder isBerry(int naturalGiftPower, Types naturalGiftType){
 		this.naturalGift(naturalGiftPower, naturalGiftType);
-		this.setItemType(Item.ItemTypes.BERRY);
+		this.setItemType(ItemTypes.BERRY);
 		return this;
 	}
 
@@ -100,13 +107,53 @@ public class ItemBuilder{
 
 	public Item register(){
 		Item item = new Item(this.itemType, this.cost, this.name, this.displayName,
-				this.flingPower, this.naturalGiftPower, this.naturalGiftType,
-				this.onMove, this.onAfterDamage, this.onPostTurn);
+				this.flingPower, this.naturalGiftPower, this.naturalGiftType){
+			@Override
+			public MoveSet onMove(IChannel channel, Player attacker, MoveSet move, Player defender){
+				return ItemBuilder.this.onMove.run(channel, attacker, move, defender, this);
+			}
+
+			@Override
+			public int onAttack(IChannel channel, Player attacker, Move move, Player defender, int damage){
+				return ItemBuilder.this.onAttack.run(channel, attacker, move, defender, damage, this);
+			}
+
+			@Override
+			public void onAfterDamage(IChannel channel, Player attacker, Move move, Player defender, int damage){
+				ItemBuilder.this.onAfterDamage.run(channel, attacker, move, defender, damage, this);
+			}
+
+			@Override
+			public void onPostTurn(IChannel channel, Player player){
+				ItemBuilder.this.onPostTurn.run(channel, player, this);
+			}
+		};
+				//this.onMove, this.onAttack, this.onAfterDamage, this.onPostTurn);
 		Item.REGISTRY.put(this.name, item);
 		return item;
 	}
 
-	private static class HealingBerry implements Item.DamageMethod{
+	@FunctionalInterface
+	public interface ModifyMoveMethod{
+		MoveSet run(IChannel channel, Player attacker, MoveSet move, Player defender, Item item);
+	}
+
+	@FunctionalInterface
+	public interface DamageMethod{
+		void run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
+	}
+
+	@FunctionalInterface
+	public interface ModifyDamageMethod{
+		int run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
+	}
+
+	@FunctionalInterface
+	public interface PostTurnMethod{
+		void run(IChannel channel, Player player, Item item);
+	}
+
+	private static class HealingBerry implements DamageMethod{
 
 		public final Stats negative;
 
@@ -125,7 +172,7 @@ public class ItemBuilder{
 		}
 	}
 
-	private static class StatusBerry implements Item.TriMethod{
+	private static class StatusBerry implements PostTurnMethod{
 
 		public final Stats raisedStat;
 
@@ -141,7 +188,7 @@ public class ItemBuilder{
 		}
 	}
 
-	private static class CureBerry implements Item.TriMethod{
+	private static class CureBerry implements PostTurnMethod{
 
 		private Effects.NonVolatile effect;
 

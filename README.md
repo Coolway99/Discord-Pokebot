@@ -1,13 +1,18 @@
+[![Dependency Status](https://www.versioneye.com/user/projects/58531d6081ffdc00433a2362/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/58531d6081ffdc00433a2362)
+
 # Discord Pokébot
 A pokémon bot for discord, featuring battles and the like
 You can find information about the bot and how to use it [here](https://github.com/Coolway99/Discord-Pokebot/wiki).
 
-This bot was built using:
+This bot could not of been made possible without using some of Pokemon Showdown's code. Please do give credit to them.
+The places where Showdown's code has been used directly or indirectly will be noted at the top of the file
+
+In addition, this bot was built using the following libraries:
 * [Discord4J][1]
 * [Spark Java][2]
 * [Water Template][3]
 * [Apache HTTP Components][4]
-* and [Google's GSON][5]
+* [Google's GSON][5]
 
 [1]: http://austinv11.github.io/Discord4J/
 [2]: http://sparkjava.com/

@@ -13,7 +13,6 @@ import sx.blah.discord.handle.obj.IChannel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.TreeMap;
 
@@ -539,6 +538,11 @@ public abstract class Move{
 					defender.HP = Math.max(0, defender.HP-damage);
 					damageMessage(channel, attacker, damage);
 					if(attacker.inBattle()) move.runAfter(channel, attacker, defender, damage);
+					//"After Damage"
+					if(defender.inBattle()){
+						defender.getModifiedItem().onAfterDamage(channel, attacker, move, defender, damage);
+
+					}
 					//attackMessage(channel, attacker, move, defender, damage);
 				} else { //we check here again to make sure cont wasn't what made it not run
 					missMessage(channel, attacker);
@@ -747,7 +751,7 @@ public abstract class Move{
 				getStab(attacker, move) //STAB
 						*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
 						*getOtherModifiers(attacker, move, defender)
-						*((Pokebot.ran.nextInt(100-85+1)+85)/100D) //Random chance, it would be 85-99 if there wasn't the +1
+						*((Pokebot.ran.nextInt(100-85)+85+1)/100D) //Random chance, it would be 85-99 if there wasn't the +1
 				;
 		switch(attacker.getModifiedAbility()){
 			case ANALYTIC:{
@@ -773,7 +777,8 @@ public abstract class Move{
 			b /= defender.getDefenseStat();
 		}
 		power = (int) getPowerChange(attacker, move, defender, power);
-		return (int) (((a*b*power)+2)*modifier);
+		double ret = ((a*b*power)+2)*modifier;
+		return (int) ret; //implicit math.floor
 	}
 
 	public static double getStab(Player attacker, Move move){
@@ -925,56 +930,10 @@ public abstract class Move{
 		}
 	}
 
-	public enum Flags{
-		ALWAYS_HIT,
-		HIT_THROUGH_SEMIINVUL,
-		HIT_THROUGH_PROTECTION,
-		UNTARGETABLE,
-		BYPASSES_IMMUNITIES,
-		MULTITURN, //If a move takes more than one turn
-		FLIGHT, //If a move requires the use of flying
-		CONTACT, //Overrides the default setting
-		NO_CONTACT, //Overrides the default setting
-		BALLBASED, //The move is based on balls or bombs
-		GUST_VULNURABLE
-	}
-
-	public enum Battle_Priority{
-		P5(+5),
-		P4(+4),
-		P3(+3),
-		P2(+2),
-		P1(+1),
-		P0(0),
-		N1(-1),
-		N2(-2),
-		N3(-3),
-		N4(-4),
-		N5(-5),
-		N6(-6),
-		N7(-7);
-
-		private final int priority;
-
-		Battle_Priority(int priority){
-			this.priority = priority;
-		}
-
-		public int getPriority(){
-			return this.priority;
-		}
-	}
-
-	public enum MoveType{
-		PHYSICAL,
-		SPECIAL,
-		STATUS
-	}
-
 	private static final class MoveMap extends TreeMap<String, Move>{
 
 		private MoveMap(){
-			super(new StringComparator());
+			super(String::compareToIgnoreCase);
 		}
 
 		@Override
@@ -986,26 +945,6 @@ public abstract class Move{
 
 		public MoveMap clone(){
 			return (MoveMap) super.clone();
-		}
-
-		@SuppressWarnings("InnerClassTooDeeplyNested")
-		private static class StringComparator implements Comparator<String>{
-			@Override
-			public int compare(String o1, String o2){
-				try{
-					char c1, c2;
-					for(int x = 0; x < o2.length(); x++){
-						c1 = o1.charAt(x);
-						c2 = o2.charAt(x);
-						if(c1 == c2) continue;
-						return c1 - c2;
-					}
-					return 0;
-				} catch(IndexOutOfBoundsException e){
-					return -1;
-				}
-			}
-
 		}
 	}
 }

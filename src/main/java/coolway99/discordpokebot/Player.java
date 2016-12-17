@@ -1,6 +1,7 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.moves.Flags;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
@@ -189,6 +190,16 @@ public class Player{
 
 	public Item getItem(){
 		return this.heldItem;
+	}
+
+	/**
+	 * A helper method to consume the item
+	 * @return The item that was consumed, or null if there was no item to consume
+	 */
+	public Item consumeItem(){
+		Item item = this.modifiedItem;
+		this.modifiedItem = null;
+		return item;
 	}
 
 	public Item getModifiedItem(){
@@ -385,7 +396,7 @@ public class Player{
 	}
 
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion") //It ends with one, get over it
-	public boolean lastMoveHas(Move.Flags flag){
+	public boolean lastMoveHas(Flags flag){
 		return this.lastMove != null && this.lastMove.getMove().has(flag);
 	}
 
