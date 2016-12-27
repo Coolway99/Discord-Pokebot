@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4j</artifactId>
-			<version>f6f90c4</version> <!-- Websocket Rewrite -->
+			<version>2.7.0</version>
 			<classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies
 				bundled into one jar) -->
 		</dependency>
@@ -68,6 +68,12 @@
 			<artifactId>annotations</artifactId>
 			<version>15.0</version>
 		</dependency>
+		<!-- For deep cloning --> <!--
+		<dependency>
+			<groupId>uk.com.robust-it</groupId>
+			<artifactId>cloning</artifactId>
+			<version>1.9.3</version>
+		</dependency> -->
 	</dependencies>
 	<properties>
 		<java.version>1.8</java.version>
@@ -77,6 +83,12 @@
 	</properties>
 	<build>
 		<plugins>
+			<!-- For checking dependancies -->
+			<plugin>
+				<groupId>com.versioneye</groupId>
+				<artifactId>versioneye-maven-plugin</artifactId>
+				<version>3.11.0</version>
+			</plugin>
 			<!-- For building the jar -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

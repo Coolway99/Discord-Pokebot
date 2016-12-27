@@ -1,7 +1,8 @@
 package coolway99.discordpokebot.moves.rewrite;
 
-import com.google.gson.annotations.Expose;
 import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.jsonUtils.Context;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
 import coolway99.discordpokebot.moves.Battle_Priority;
 import coolway99.discordpokebot.moves.MoveType;
@@ -35,20 +36,22 @@ public class MoveWrapper{
 
 	@SuppressWarnings("FeatureEnvy")
 	public MoveWrapper(JSONObject move){
-		this.type = (Types) move.getObject("type");
+		this.type = move.getObject("type", Types.NORMAL);
 		this.power = move.getInt("power", 0);
-		this.category = (MoveType) move.getObject("category");
-		this.PP = move.getInt("pp");
-		this.accuracy = move.getInt("accuracy");
-		this.priority = Battle_Priority.getPriority(move.getString("priority"));
-		this.cost = move.getInt("cost");
-		this.flags = EnumSet.copyOf(Arrays.asList((MoveFlags[]) move.getObject("flags")));
+		this.category = move.getObject("category", MoveType.PHYSICAL);
+		this.PP = move.getInt("pp", 0);
+		this.accuracy = move.getInt("accuracy", 0);
+		this.priority = Battle_Priority.getPriority(move.getInt("priority", 0));
+		this.cost = move.getInt("cost", 0);
 
-		this.onBeforeFunction = (ScriptObjectMirror) move.getRoot().get("onBeforeAttack");
-		this.onAttackFunction = (ScriptObjectMirror) move.getRoot().get("onAttack");
-		this.onSecondaryFunction = (ScriptObjectMirror) move.getRoot().get("OnSecondary");
+		this.flags = EnumSet.noneOf(MoveFlags.class);
+		this.flags.addAll(Arrays.asList(move.getArray("flags", MoveFlags.class, new MoveFlags[0])));
 
-		this.name = move.getString("id");
+		this.onBeforeFunction = move.getFunction("onBeforeAttack");
+		this.onAttackFunction = move.getFunction("onAttack");
+		this.onSecondaryFunction = move.getFunction("OnSecondary");
+
+		this.name = move.getString("id", "default");
 		String displayName = move.getString("name");
 		if(displayName == null){
 			this.displayName = this.name;
@@ -96,9 +99,9 @@ public class MoveWrapper{
 	 * @return If to continue or not
 	 * Can be null or a function
 	 */
-	public boolean onBeforeAttack(Player attacker, Player defender){
+	public boolean onBeforeAttack(Context context, Player attacker, Player defender){
 		if(this.onBeforeFunction == null) return true;
-		return (boolean) this.onBeforeFunction.call(NewMoves.API, attacker, defender);
+		return (boolean) this.onBeforeFunction.call(this, context, attacker, defender);
 	}
 
 	/**
@@ -106,20 +109,19 @@ public class MoveWrapper{
 	 * @param attacker
 	 * @param defender
 	 */
-	public void onAttack(Player attacker, Player defender){
-		this.onAttackFunction.call(NewMoves.API, attacker, defender);
+	public void onAttack(Context context, Player attacker, Player defender, @Nullable Battle battle){
+		this.onAttackFunction.call(this, context, attacker, defender, battle);
 	}
 
 	/**
-	 * OnSecondary, ran after attacking
+	 * OnSecondary, ran after attacking. Only called in battles
 	 * @param attacker The one running the attack
 	 * @param defender The one defending from the attack
 	 * If null or false, then it is skipped, otherwise it must be a function
 	 */
-	public void onSecondary(Player attacker, Player defender, int damageDealt){
-		if(this.onSecondaryFunction == null) return;
-		if(!this.onSecondaryFunction.isFunction()) return;
-		this.onSecondaryFunction.call(NewMoves.API, attacker, defender, damageDealt);
+	public void onSecondary(Context context, Player attacker, Player defender, int damageDealt){
+		if(this.onSecondaryFunction == null || !this.onSecondaryFunction.isFunction()) return;
+		this.onSecondaryFunction.call(this, context, attacker, defender, damageDealt);
 	}
 
 	public String getName(){
@@ -129,4 +131,5 @@ public class MoveWrapper{
 	public String getDisplayName(){
 		return this.displayName;
 	}
+
 }

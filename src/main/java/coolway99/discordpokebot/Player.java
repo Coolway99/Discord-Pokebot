@@ -12,6 +12,7 @@ import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.File;
@@ -306,7 +307,11 @@ public class Player{
 				return 0;
 		}
 	}
-	
+
+	public void modifyStat(IChannel channel, Stats stat, int amount){
+		StatHandler.changeStat(channel, this, stat, amount);
+	}
+
 	private void loadData(){
 		//If the file is "incomplete", which should only result when the save format is updated
 		//with more info, then this will error out and close the file, with the default values

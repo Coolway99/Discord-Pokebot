@@ -5,8 +5,6 @@ import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
-import java.util.Arrays;
-
 /**
  * The main object of typical multi-hit moves, used for convenience.
  */
@@ -20,12 +18,12 @@ public class MultiHitMove extends Move{
 	/**
 	 * Used for a multi-hit move that always uses the same number of hits
 	 * @param type The {@link Types Type} of the move
-	 * @param moveType The {@link coolway99.discordpokebot.moves.Move.MoveType} of the move (Physical, Status, etc.)
+	 * @param moveType The {@link coolway99.discordpokebot.moves.MoveType} of the move (Physical, Status, etc.)
 	 * @param PP The max PP of the move
 	 * @param singleHitPower How much each hit does
 	 * @param accuracy The initial accuracy of the move
 	 * @param cost The cost of this move
-	 * @param flags The {@link coolway99.discordpokebot.moves.Move.Flags} of the move
+	 * @param flags The {@link coolway99.discordpokebot.moves.Flags} of the move
 	 */
 	public MultiHitMove(Types type, MoveType moveType, int PP, int singleHitPower, int accuracy, int cost, Flags... flags){
 		super(type, moveType, PP, singleHitPower, accuracy, cost, flags);

@@ -6,15 +6,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class JSONObject{
 
-	protected final ScriptObjectMirror root;
+	protected final Map<String, Object> root;
 
-	public JSONObject(@NotNull ScriptObjectMirror o){
-		this.root = o;
-	}
+	public JSONObject(@NotNull Map<String, Object> o){ this.root = o; }
 
 	public Set<String> keySet(){
 		return this.root.keySet();
@@ -27,6 +28,18 @@ public class JSONObject{
 	@Contract("null -> null")
 	public Object getObject(String key){
 		return this.root.get(key);
+	}
+
+	@Contract("_, !null -> !null; null, null -> null")
+	public <T> T getObject(String key, T def){
+		Object o = this.getObject(key);
+		try{
+			//Yes IntelliJ, I know it's an unchecked cast >.>
+			//noinspection unchecked
+			return (o != null) ? (T) o : def;
+		} catch(ClassCastException e){
+			return def;
+		}
 	}
 
 	public int getInt(String key){ return this.getInt(key, 0); }
@@ -62,14 +75,62 @@ public class JSONObject{
 	@Contract("null, null -> null; _, !null -> !null")
 	public JSONObject getJSONObject(String key, @Nullable JSONObject def){
 		Object o = this.getObject(key);
-		return (o instanceof ScriptObjectMirror) ? new JSONObject((ScriptObjectMirror) o) : def;
+		return (o instanceof Map) ? new JSONObject((Map<String, Object>) o) : def;
 	}
 
-	public Object call(@NotNull String functionName, Object... args){
-		return this.root.callMember(functionName, args);
+	@Contract("null -> null")
+	public Object[] getArray(String key){
+		return this.getArray(key, (Object[]) null);
 	}
 
-	public ScriptObjectMirror getRoot(){
+	@Contract("null, null -> null; _, !null -> !null")
+	public Object[] getArray(String key, Object[] def){
+		Object o = this.getObject(key);
+		if(!(o instanceof ScriptObjectMirror) || !((ScriptObjectMirror) o).isArray()) return def;
+		return ((ScriptObjectMirror) o).to(Object[].class);
+	}
+
+	@Contract("null, _ -> null")
+	public <T> T[] getArray(String key, @NotNull Class<T> type){
+		return this.getArray(key, type, null);
+	}
+
+	@Contract("null, _, null -> null; _, _, !null -> !null")
+	public <T> T[] getArray(String key, @NotNull Class<T> type, T[] def){
+		Object[] o = this.getArray(key);
+		//noinspection unchecked
+		return type.isInstance(o) ? (T[]) o : def;
+	}
+
+	@Nullable
+	public Object call(@NotNull String functionName, Object thiz, Object... args){
+		//return this.root.callMember(functionName, args);
+		Object o = this.root.get(functionName);
+		if(o instanceof ScriptObjectMirror && ((ScriptObjectMirror) o).isFunction()){
+			return ((ScriptObjectMirror) o).call(thiz, args);
+		} else {
+			return null;
+		}
+	}
+
+	@Nullable
+	public ScriptObjectMirror getFunction(@NotNull String functionName){
+		return (ScriptObjectMirror) this.getObject(functionName);
+	}
+
+	@Nullable
+	public <T> T getFunction(@NotNull String functionName, @NotNull Class<T> type){
+		return this.getFunction(functionName, type, null);
+	}
+
+	@Nullable
+	public <T> T getFunction(@NotNull String functionName, @NotNull Class<T> type, T def){
+		ScriptObjectMirror o = (ScriptObjectMirror) this.root.get("functionName");
+		if(o == null || !o.isFunction()) return def;
+		return o.to(type);
+	}
+
+	public Map<String, Object> getRoot(){
 		return this.root;
 	}
 

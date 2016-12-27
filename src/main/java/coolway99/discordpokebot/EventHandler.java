@@ -4,6 +4,7 @@ import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
 import coolway99.discordpokebot.moves.Flags;
 import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.rewrite.NewMoves;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
@@ -20,6 +21,8 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.MessageBuilder;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -714,6 +717,16 @@ public class EventHandler{
 				case "guilds":{
 					if(!author.getID().equals(Pokebot.config.OWNERID)) break;
 					reply(message, "I am in "+Pokebot.client.getGuilds().size()+" guilds.");
+					return;
+				}
+				case "run":{
+					if(!author.getID().equals(Pokebot.config.OWNERID)) break;
+					StringBuilder msg = new StringBuilder();
+					for(int x = 1; x < args.length; x++){
+						msg.append(args[x]).append(" ");
+					}
+					Pokebot.sendMessage(channel, "Running \""+msg.toString().trim()+"\"");
+					Pokebot.sendMessage(channel, "Result: \""+Pokebot.engine.eval(msg.toString().trim())+"\"");
 					return;
 				}
 				default:

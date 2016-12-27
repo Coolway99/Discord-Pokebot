@@ -3,8 +3,11 @@ package coolway99.discordpokebot;
 import coolway99.discordpokebot.items.Item;
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.rewrite.NewMoves;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.web.WebInterface;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -14,9 +17,12 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
-	public static final String VERSION = "dev-2.0.0";
+	public static final String VERSION = "dev-2.0.0 Move-Scripting.Pre_-1";
 	//TODO make the rest of these configs
 	public static final byte SAVE_DELAY = 1; //In minutes
 	public static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
@@ -38,6 +44,7 @@ public class Pokebot{
 	private static final ConcurrentHashMap<IChannel, StringBuilder> buffers = new ConcurrentHashMap<>();
 	//The JS engine, for running showdown's code
 	public static final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+	public static final Invocable js = (Invocable) engine;
 	//The hope with channel-locking is that we don't send messages the at the same time we are adding new ones
 	//Channel objects, while not equal to each other directly, are equal if they belong to the same channel
 	private static final ConcurrentHashMap<IChannel, ReentrantLock> locks = new ConcurrentHashMap<>();
@@ -62,6 +69,7 @@ public class Pokebot{
 		//Timers moved to BotReadyHandler
 		//Now that the main thread is done doing its business and the bot is busy logging in...
 		Move.registerMoves();
+		NewMoves.registerMoves();
 		Item.registerItems();
 	}
 
@@ -161,5 +169,29 @@ public class Pokebot{
 						+channel.getGuild().getID()+'/'+channel.getID());
 			}
 		});
+	}
+
+	public static void setupEngine(){
+
+	}
+
+	@Nullable
+	public static File getResource(@NotNull String path){
+		try{
+			URL url = Pokebot.class.getResource("../../"+path);
+			if(url == null){
+				System.err.println("File not found: "+path);
+				System.err.print("Full path: ");
+				System.err.println(url);
+				return null;
+			}
+			File file = new File(url.toURI());
+			if(file.exists()) return file;
+			return null;
+		} catch(URISyntaxException e){
+			e.printStackTrace();
+			System.err.println("File not found: "+path);
+		}
+		return null;
 	}
 }
