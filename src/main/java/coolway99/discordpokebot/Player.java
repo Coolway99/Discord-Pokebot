@@ -310,7 +310,7 @@ public class Player{
 		if(before == max && this.HP == 0){
 			Messages.oneHitKO(channel, this);
 		} else {
-			Messages.tookDamage(channel, this, dam);
+			Messages.tookDamage(channel, this, amount);
 		}
 		if(this.HP == 0){
 			Messages.fainted(channel, this);

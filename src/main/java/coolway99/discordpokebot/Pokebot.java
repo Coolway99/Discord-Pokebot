@@ -1,6 +1,5 @@
 package coolway99.discordpokebot;
 
-import coolway99.discordpokebot.items.Item;
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.moves.rewrite.NewMoves;
@@ -70,7 +69,7 @@ public class Pokebot{
 		//Now that the main thread is done doing its business and the bot is busy logging in...
 		Move.registerMoves();
 		NewMoves.registerMoves();
-		Item.registerItems();
+		//Item.registerItems();
 	}
 
 	public static File getSaveFile(IUser user, byte slot){

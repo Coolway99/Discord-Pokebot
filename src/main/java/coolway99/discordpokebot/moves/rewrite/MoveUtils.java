@@ -58,6 +58,16 @@ public class MoveUtils{
 		return (int) ret; //implicit math.floor
 	}
 
+	//A helper method to combine the two
+	public static int dealDamage(IChannel channel, Player attacker, MoveWrapper move, Player defender){
+		return defender.damage(channel, getDamage(attacker, move, defender));
+	}
+
+	//A helper method to combine the two
+	public static int dealDamage(Player attacker, MoveWrapper move, Player defender){
+		return defender.damage(getDamage(attacker, move, defender));
+	}
+
 	public static int getTimesHit(int offset, float... chances){
 		float ran = Pokebot.ran.nextFloat()*100;
 		float i = 0;

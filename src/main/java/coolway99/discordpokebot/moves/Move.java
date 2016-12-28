@@ -202,8 +202,8 @@ public abstract class Move{
 		REGISTRY.put("ARM_THRUST", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50));
 		REGISTRY.put("BARRAGE", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.NO_CONTACT,
 				Flags.BALLBASED));
-		REGISTRY.put("COMET_PUNCH", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60));
-		REGISTRY.put("DOUBLE_SLAP", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50));
+		//REGISTRY.put("COMET_PUNCH", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60));
+		//REGISTRY.put("DOUBLE_SLAP", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50));
 
 		//REGISTRY.put("DOUBLE_KICK", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
 		REGISTRY.put("DOUBLE_KICK", new Move(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 60){
@@ -214,9 +214,8 @@ public abstract class Move{
 					for(int x = 0; x < 2; x++){
 						damage += getDamage(attacker, this, defender);
 					}
-					Pokebot.sendMessage(channel, attacker.mention()+" attacked "+defender.mention()
-							+" 2 times for a total of "+damage+"HP of damage!");
-					defender.HP = Math.max(0, defender.HP-damage);
+					Messages.multiHit(channel, defender, 2, damage);
+					defender.damage(damage);
 				} else {
 					Messages.miss(channel, attacker);
 				}
@@ -257,10 +256,12 @@ public abstract class Move{
 
 		REGISTRY.put("BLAZE_KICK", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 10, 85, 90, 90, 10, MoveUtils::burn));
 
-		REGISTRY.put("FIRE_PUNCH", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, 10, MoveUtils::burn));
-		REGISTRY.put("ICE_PUNCH", new AilmentDamageMove(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, 80, 10, MoveUtils::freeze));
-		REGISTRY.put("THUNDER_PUNCH", new AilmentDamageMove(Types.ELECTRIC, MoveType.PHYSICAL, 15, 75, 100, 80, 10,
-				MoveUtils::paralyze));
+		//REGISTRY.put("FIRE_PUNCH", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, 10,
+		// MoveUtils::burn));
+		//REGISTRY.put("ICE_PUNCH", new AilmentDamageMove(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, 80, 10,
+		// MoveUtils::freeze));
+		//REGISTRY.put("THUNDER_PUNCH", new AilmentDamageMove(Types.ELECTRIC, MoveType.PHYSICAL, 15, 75, 100, 80, 10,
+		// MoveUtils::paralyze));
 		//TODO CONFUSION REGISTRY.put("SIGNAL_BEAM", new AilmentDamageMove(Types.BUG, MoveType.SPECIAL, 15, 75, 100, 80, 10, ));
 		REGISTRY.put("RELIC_SONG", new AilmentDamageMove(Types.NORMAL, MoveType.SPECIAL, 10, 75, 100, 80, 10, MoveUtils::sleep));
 
@@ -288,8 +289,8 @@ public abstract class Move{
 		REGISTRY.put("VICE_GRIP", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 30, 55, 100));
 		REGISTRY.put("VINE_WHIP", new DamageMove(Types.GRASS, MoveType.PHYSICAL, 25, 45, 100));
 
-		REGISTRY.put("POUND", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 35, 40, 100));
-		REGISTRY.put("SCRATCH", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 35, 40, 100));
+		//REGISTRY.put("POUND", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 35, 40, 100));
+		//REGISTRY.put("SCRATCH", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 35, 40, 100));
 		//Affects fly and other moves like that, dealing double damage. +10 cost because of that
 		REGISTRY.put("GUST", new DamageMove(Types.FLYING, MoveType.SPECIAL, 35, 40, 100, 50));
 
@@ -437,7 +438,7 @@ public abstract class Move{
 				}
 				Pokebot.sendMessage(channel, attacker.mention()
 						+" missed and took crash damage instead!");
-				attacker.HP = Math.max(0, attacker.HP-(attacker.getMaxHP()/2));
+				attacker.damage(attacker.getMaxHP()/2);
 				return BeforeResult.STOP;
 			}
 		});
@@ -531,7 +532,7 @@ public abstract class Move{
 					} else {
 						damage = getDamage(attacker, move, defender);
 					}
-					defender.HP = Math.max(0, defender.HP-damage);
+					defender.damage(damage);
 					Messages.dealtDamage(channel, attacker, damage);
 					if(attacker.inBattle()) move.runAfter(channel, attacker, defender, damage);
 					//"After Damage"
@@ -591,7 +592,7 @@ public abstract class Move{
 			Pokebot.sendMessage(channel, "But it had no effect!");
 			return;
 		}
-		defender.HP = Math.max(0, defender.HP-damage);
+		defender.damage(damage);
 		Pokebot.sendMessage(channel, defender.mention()+" hurt themselves for "+damage+" damage!");
 	}
 
