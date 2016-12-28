@@ -13,9 +13,9 @@ public class IAttack{
 	public final MoveSet move;
 	private boolean canceled;
 
-	public IAttack(Player attacker, int slot, Player defender){
+	/*public IAttack(Player attacker, int slot, Player defender){
 		this(attacker, attacker.moves[slot], defender);
-	}
+	}*/
 
 	//Why do I do it like this? I like to imagine it like
 	//"Attacker uses move on Defender"

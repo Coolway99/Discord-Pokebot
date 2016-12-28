@@ -88,7 +88,7 @@ public class Battle{
 				this.sendMessage(attacker.mention()+" submitted their attack");
 			}
 			Move move = moveSet.getMove();
-			attacker.lastMove = moveSet;
+			//attacker.lastMove = moveSet;
 			attacker.lastTarget = move.has(Flags.UNTARGETABLE) ? null : defender;
 			if(!move.has(Flags.UNTARGETABLE))
 				defender.lastAttacker = attacker; //free-for-all may make it weird, but it's intentional
@@ -217,12 +217,12 @@ public class Battle{
 			return false;
 		}
 		if(Move.attack(this.channel, attack)){
-			if(attack.defender.lastMove.getMove() == Move.REGISTRY.get("DESTINY_BOND")){
+			//if(attack.defender.lastMove.getMove() == Move.REGISTRY.get("DESTINY_BOND")){
 				this.sendMessage(attack.attacker.mention()
 						+" was taken down with "+attack.defender.mention());
 				attack.attacker.HP = 0;
-			}
-			if(attack.attacker.lastMove.getMove() == Move.REGISTRY.get("AFTER_YOU")){
+			//}
+			//if(attack.attacker.lastMove.getMove() == Move.REGISTRY.get("AFTER_YOU")){
 				IAttack defenderAttack = this.attacks.get(attack.defender);
 				if(defenderAttack != null && !defenderAttack.isCanceled()){
 					this.sendMessage(attack.attacker.mention()+" made "+attack.defender.mention()+" go next!");
@@ -231,7 +231,7 @@ public class Battle{
 				} else {
 					this.sendMessage("But there wasn't anything to do!"); //TODO better message
 				}
-			}
+			//}
 			if(this.playerFainted(attack.defender)){
 				return true;
 			}
@@ -320,7 +320,7 @@ public class Battle{
 	 * Used to run things like post-turn damage.
 	 */
 	private void onPostTurn(Player player){
-		if(player.lastMoveData != MoveConstants.NOTHING) this.onAutoAttack(player, player.lastMove, player.lastTarget);
+		//if(player.lastMoveData != MoveConstants.NOTHING) this.onAutoAttack(player, player.lastMove, player.lastTarget);
 		for(Effects.VBattle effect : player.getVB()){
 			switch(effect){
 				case RECHARGING:{

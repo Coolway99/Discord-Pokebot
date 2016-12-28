@@ -296,12 +296,12 @@ public class EventHandler{
 						}
 						slot--;
 
-						if(StatHandler.wouldExceedTotalPoints(player, player.moves[slot].getMove(), move)){
+						/*if(StatHandler.wouldExceedTotalPoints(player, player.moves[slot].getMove(), move)){
 							/*reply(message, "You don't have enough points left for that move!");
-							return;*/
+							return;*//*
 							StatHandler.exceedWarning(channel, player);
-						}
-						player.moves[slot] = new MoveSet(move);
+						}*/
+						//player.moves[slot] = new MoveSet(move);
 						reply(message, "Set move "+(slot+1)+" to "+move.getName());
 					} catch(NumberFormatException e){
 						reply(message, "That is not a valid number!");
@@ -343,10 +343,10 @@ public class EventHandler{
 					}
 					StringBuilder builder = new StringBuilder("The moves for ").append(player.mention()).append(" are:\n");
 					for(int x = 0; x < player.numOfAttacks; x++){
-						MoveSet set = player.moves[x];
-						builder.append(x+1).append(": ").append(set.getMove().getDisplayName());
-						builder.append(" [").append(set.getPP()).append('/')
-								.append(player.moves[x].getMaxPP()).append("]\n");
+						//MoveSet set = player.moves[x];
+						//builder.append(x+1).append(": ").append(set.getMove().getDisplayName());
+						//builder.append(" [").append(set.getPP()).append('/')
+						//		.append(player.moves[x].getMaxPP()).append("]\n");
 					}
 					Pokebot.sendMessage(channel, builder.toString());
 					return;
@@ -457,25 +457,25 @@ public class EventHandler{
 							reply(message, "You have no PP left for that move!");
 							return;
 						}
-						MoveSet moveSet = attacker.moves[slot];
+						//MoveSet moveSet = attacker.moves[slot];
 						Player defender;
 						//If this is a status move, then usually we are targeting ourselves
-						if(moveSet.getMove().has(Flags.UNTARGETABLE)){
+						/*if(moveSet.getMove().has(Flags.UNTARGETABLE)){
 							defender = PlayerHandler.getPlayer(author);
 						} else {
 							defender = PlayerHandler.getPlayer(message.getMentions().get(0));
-						}
-						if(attacker.HP < 1 || defender.HP < 1){
+						}*/
+						/*if(attacker.HP < 1 || defender.HP < 1){
 							reply(message, attacker.HP < 1 ? "You have fainted and are unable to move!"
 									: defender.mention()+" has already fainted!");
 							return;
-						}
+						}*/
 						//At this point, we know there's a valid move in the slot and neither party has fainted
 						//Before anything else, lets see if the target is the bot
-						if(defender.user.getID().equals(Pokebot.client.getOurUser().getID()) && !attacker.inBattle()){
+						/*if(defender.user.getID().equals(Pokebot.client.getOurUser().getID()) && !attacker.inBattle()){
 							Pokebot.sendMessage(channel, author.mention()+" tried hurting me!");
 							return;
-						}
+						}*/
 						//Sanity check for points, due to prevent "errors" between versions and balancing
 						if(StatHandler.getTotalPoints(attacker) > StatHandler.MAX_TOTAL_POINTS){
 							reply(message, "you have used too many points! You need to reduce them before attacking");
@@ -483,28 +483,28 @@ public class EventHandler{
 						}
 						//If the player is in a battle, we want to pass on the message
 						if(attacker.inBattle()){
-							if(defender.inBattle()){
+							/*if(defender.inBattle()){
 								if(attacker.battle == defender.battle){
-									attacker.battle.onAttack(channel, attacker, moveSet, defender);
+									//attacker.battle.onAttack(channel, attacker, moveSet, defender);
 									return; //We don't want the standard logic to run
 								}
 								reply(message, "you two are in different battles!");
 								return;
-							}
+							}*/
 							reply(message, "you can only attack those in your battle!");
 							return;
 						}
 						//at this point, we know the attacker is not in battle
-						if(defender.inBattle()){
+						/*if(defender.inBattle()){
 							reply(message, "you unable to hit them because they are in a battle!");
 							return;
-						}
+						}*/
 						//This is the normal neither-in-battle mess around attack
-						Move.attack(channel, attacker, moveSet, defender);
-						if(StatHandler.getStatPoints(defender) <= 10){
+						//Move.attack(channel, attacker, moveSet, defender);
+						/*if(StatHandler.getStatPoints(defender) <= 10){
 							Pokebot.sendMessage(channel, defender.mention()+", it looks like you haven't set any stats!"
 									+" Set some with setstats");
-						}
+						}*/
 					} catch(NumberFormatException e){
 						reply(message, "That's not a number!");
 					} catch(IndexOutOfBoundsException e){

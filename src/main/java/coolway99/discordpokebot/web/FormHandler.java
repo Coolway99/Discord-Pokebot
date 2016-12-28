@@ -39,7 +39,7 @@ public class FormHandler extends Template{
 			this.add("secondary", player.secondary.toString());
 		}
 		for(int x = 0; x < 4; x++){
-			MoveSet moveSet = player.moves[x];
+			MoveSet moveSet = null;// player.moves[x];
 			if(moveSet == null){
 				this.add("move"+(x+1), "0|NONE");
 			} else {

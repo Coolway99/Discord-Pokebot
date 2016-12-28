@@ -679,7 +679,7 @@ public abstract class Move{
 				break;
 		} */
 		float ret = 1;
-		if(move == REGISTRY.get("GUST") && defender.lastMoveHas(Flags.GUST_VULNURABLE) && defender.lastMoveData != 0) ret *= 2;
+		//if(move == REGISTRY.get("GUST") && defender.lastMoveHas(Flags.GUST_VULNURABLE) && defender.lastMoveData != 0) ret *= 2;
 		//if(attacker.heldItem.getPoweredUpType() == move.getType(attacker)) ret *= 1.2; //20% boost
 		return ret;
 	}
@@ -710,9 +710,9 @@ public abstract class Move{
 					default:
 						return false;
 				}*/
-				if(move == REGISTRY.get("GUST")&& defender.lastMoveHas(Flags.GUST_VULNURABLE)){
+				/*if(move == REGISTRY.get("GUST")&& defender.lastMoveHas(Flags.GUST_VULNURABLE)){
 					return true;
-				}
+				}*/
 				Pokebot.sendMessage(defender.battle.channel, "But there was no target!");
 				return false;
 			}

@@ -223,7 +223,7 @@ public class WebInterface{
 						player.moves[x] = null;
 						continue;
 					} else {
-						player.moves[x] = new MoveSet(moves[x]);
+						//player.moves[x] = new MoveSet(moves[x]);
 						player.numOfAttacks++;
 					}
 				}

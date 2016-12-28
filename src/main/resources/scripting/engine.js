@@ -70,7 +70,7 @@ Object.freeze(API);
 	//How the move hits other pokemon, defaults to adjacent (the normal configuration)
 	target: API.MOVE.TARGET.ADJACENT,
 
-	//Is ran before the attack hits, can be null
+	//Is ran before the attack hits, can be null. Returns a boolean
 	onBefore: null,
 	//Is ran as the attack hits, aka how the attack is processed. If null, defaults to a standard damage attack
 	onAttack: null,
