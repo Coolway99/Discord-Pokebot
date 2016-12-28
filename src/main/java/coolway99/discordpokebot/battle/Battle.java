@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.battle;
 
+import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
@@ -140,7 +141,7 @@ public class Battle{
 			});
 			//Doing various checks for damage and other things
 			for(Player player : this.participants){
-				player.getModifiedItem().onPostTurn(this.channel, player);
+				//player.getModifiedItem().onPostTurn(this.channel, player);
 				switch(player.getNV()){
 					case BURN:{
 						//TODO Check for ability heatproof
@@ -172,7 +173,7 @@ public class Battle{
 						break;
 				}
 				if(player.HP <= 0){
-					Move.faintMessage(this.channel, player);
+					Messages.fainted(this.channel, player);
 					if(this.playerFainted(player)){return;}
 				}
 				if(player.has(Effects.Volatile.FLINCH)){

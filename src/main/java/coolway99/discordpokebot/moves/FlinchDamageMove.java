@@ -1,6 +1,8 @@
 package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.moves.rewrite.MoveUtils;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -21,6 +23,6 @@ public class FlinchDamageMove extends DamageMove{
 
 	@Override
 	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
-		if(diceRoll(this.chance)) flinch(channel, defender);
+		if(Pokebot.diceRoll(this.chance)) MoveUtils.flinch(channel, defender);
 	}
 }

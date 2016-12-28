@@ -2,6 +2,7 @@ package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.moves.rewrite.MoveUtils;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -42,7 +43,7 @@ public class ChargeMove extends Move{
 
 	protected BeforeResult charging(IChannel channel, Player attacker, Player defender){
 		if(!attacker.inBattle()) return BeforeResult.CONTINUE;
-		if(checkParalysis(attacker)) return BeforeResult.STOP;
+		if(MoveUtils.checkParalysis(attacker)) return BeforeResult.STOP;
 		Pokebot.sendMessage(channel, String.format(this.chargeText, attacker.mention()));
 		attacker.lastMoveData = ATTACKING;
 		return BeforeResult.STOP;

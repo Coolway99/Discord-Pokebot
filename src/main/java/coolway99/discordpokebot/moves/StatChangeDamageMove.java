@@ -35,7 +35,7 @@ public class StatChangeDamageMove extends DamageMove{
 
 	@Override
 	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
-		if(diceRoll(this.chance)){
+		if(Pokebot.diceRoll(this.chance)){
 			switch(this.who){
 				case ATTACKER:{
 					StatHandler.changeStat(channel, attacker, this.stat, this.change);

@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.moves;
 
+import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
@@ -55,7 +56,7 @@ public class StatusChange extends Move{
 			}
 			StatHandler.changeStat(channel, defender, this.stat, this.change);
 		} else {
-			missMessage(channel, attacker);
+			Messages.miss(channel, attacker);
 		}
 		return BeforeResult.STOP;
 	}

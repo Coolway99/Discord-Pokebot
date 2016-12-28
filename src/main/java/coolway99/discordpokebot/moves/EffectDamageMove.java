@@ -1,6 +1,7 @@
 package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -23,7 +24,7 @@ public class EffectDamageMove extends DamageMove{
 
 	@Override
 	public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
-		if(diceRoll(this.chance)) this.effect.runEffect(channel, attacker, defender, damage);
+		if(Pokebot.diceRoll(this.chance)) this.effect.runEffect(channel, attacker, defender, damage);
 	}
 
 	@FunctionalInterface

@@ -1,10 +1,12 @@
 package coolway99.discordpokebot.moves;
 
+import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.IAttack;
+import coolway99.discordpokebot.moves.rewrite.MoveUtils;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
@@ -22,7 +24,7 @@ import java.util.TreeMap;
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
 public abstract class Move{
 
-	public static final TreeMap<String, Move> REGISTRY = new MoveMap();
+	public static final TreeMap<String, Move> REGISTRY = new TreeMap<>(String::compareToIgnoreCase);
 
 	/*
 	TODO Ally Switch can't be used here
@@ -89,12 +91,6 @@ public abstract class Move{
 
 	public Move(Types type, MoveType moveType, int PP, int power, int accuracy, Flags... flags){
 		this(type, moveType, PP, power, accuracy, power, flags);
-	}
-
-	@Override
-	@Deprecated
-	public String toString(){
-		return this.getName();
 	}
 
 	public String getName(){
@@ -222,7 +218,7 @@ public abstract class Move{
 							+" 2 times for a total of "+damage+"HP of damage!");
 					defender.HP = Math.max(0, defender.HP-damage);
 				} else {
-					missMessage(channel, attacker);
+					Messages.miss(channel, attacker);
 				}
 				return BeforeResult.STOP;
 			}
@@ -239,7 +235,7 @@ public abstract class Move{
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(attacker.HP <= Math.floor(attacker.getMaxHP()/2F)){
-					failMessage(channel, attacker);
+					Messages.fail(channel, attacker);
 					return BeforeResult.STOP;
 				}
 				attacker.HP -= (int) Math.floor(attacker.getMaxHP()/2F);
@@ -259,22 +255,22 @@ public abstract class Move{
 		REGISTRY.put("BITE", new FlinchDamageMove(Types.DARK, MoveType.PHYSICAL, 25, 60, 100, 75, 30));
 		REGISTRY.put("BONE_CLUB", new FlinchDamageMove(Types.GROUND, MoveType.PHYSICAL, 20, 65, 85, 75, 10, Flags.NO_CONTACT));
 
-		REGISTRY.put("BLAZE_KICK", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 10, 85, 90, 90, 10, Move::burn));
+		REGISTRY.put("BLAZE_KICK", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 10, 85, 90, 90, 10, MoveUtils::burn));
 
-		REGISTRY.put("FIRE_PUNCH", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, 10, Move::burn));
-		REGISTRY.put("ICE_PUNCH", new AilmentDamageMove(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, 80, 10, Move::freeze));
+		REGISTRY.put("FIRE_PUNCH", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, 10, MoveUtils::burn));
+		REGISTRY.put("ICE_PUNCH", new AilmentDamageMove(Types.ICE, MoveType.PHYSICAL, 15, 75, 100, 80, 10, MoveUtils::freeze));
 		REGISTRY.put("THUNDER_PUNCH", new AilmentDamageMove(Types.ELECTRIC, MoveType.PHYSICAL, 15, 75, 100, 80, 10,
-				Move::paralyze));
+				MoveUtils::paralyze));
 		//TODO CONFUSION REGISTRY.put("SIGNAL_BEAM", new AilmentDamageMove(Types.BUG, MoveType.SPECIAL, 15, 75, 100, 80, 10, ));
-		REGISTRY.put("RELIC_SONG", new AilmentDamageMove(Types.NORMAL, MoveType.SPECIAL, 10, 75, 100, 80, 10, Move::sleep));
+		REGISTRY.put("RELIC_SONG", new AilmentDamageMove(Types.NORMAL, MoveType.SPECIAL, 10, 75, 100, 80, 10, MoveUtils::sleep));
 
 		REGISTRY.put("KARATE_CHOP", new DamageMove(Types.FIGHTING, MoveType.PHYSICAL, 25, 50, 100));
-		REGISTRY.put("POISON_TAIL", new AilmentDamageMove(Types.POISON, MoveType.PHYSICAL, 25, 50, 100, 55, 10, Move::poison));
+		REGISTRY.put("POISON_TAIL", new AilmentDamageMove(Types.POISON, MoveType.PHYSICAL, 25, 50, 100, 55, 10, MoveUtils::poison));
 
 		//One of the signature moves of Reshiram, boosts fusion bolt
-		REGISTRY.put("BLUE_FLARE", new AilmentDamageMove(Types.FIRE, MoveType.SPECIAL, 5, 130, 85, 140, 20, Move::burn));
+		REGISTRY.put("BLUE_FLARE", new AilmentDamageMove(Types.FIRE, MoveType.SPECIAL, 5, 130, 85, 140, 20, MoveUtils::burn));
 		//One of the signature moves of Zekrom, boosts fusion flare
-		REGISTRY.put("BOLT_STRIKE", new AilmentDamageMove(Types.ELECTRIC, MoveType.PHYSICAL, 5, 130, 85, 95, 20, Move::paralyze));
+		REGISTRY.put("BOLT_STRIKE", new AilmentDamageMove(Types.ELECTRIC, MoveType.PHYSICAL, 5, 130, 85, 95, 20, MoveUtils::paralyze));
 
 		//Lugia's signature move, only benefit is higher critical
 		REGISTRY.put("AEROBLAST", new DamageMove(Types.FLYING, MoveType.SPECIAL, 5, 100, 95));
@@ -303,9 +299,9 @@ public abstract class Move{
 
 		REGISTRY.put("BLAST_BURN", new HarshRechargeMove(Types.FIRE, MoveType.SPECIAL, 4, 150, 90));
 
-		REGISTRY.put("BODY_SLAM", new AilmentMinimizeMove(Types.NORMAL, MoveType.PHYSICAL, 15, 85, 100, 100, 30, Move::paralyze));
-		REGISTRY.put("STEAMROLLER", new AilmentMinimizeMove(Types.BUG, MoveType.PHYSICAL, 20, 65, 100, 80, 30, Move::flinch));
-		REGISTRY.put("STOMP", new AilmentMinimizeMove(Types.NORMAL, MoveType.PHYSICAL, 20, 65, 100, 80, 30, Move::flinch));
+		REGISTRY.put("BODY_SLAM", new AilmentMinimizeMove(Types.NORMAL, MoveType.PHYSICAL, 15, 85, 100, 100, 30, MoveUtils::paralyze));
+		REGISTRY.put("STEAMROLLER", new AilmentMinimizeMove(Types.BUG, MoveType.PHYSICAL, 20, 65, 100, 80, 30, MoveUtils::flinch));
+		REGISTRY.put("STOMP", new AilmentMinimizeMove(Types.NORMAL, MoveType.PHYSICAL, 20, 65, 100, 80, 30, MoveUtils::flinch));
 
 		REGISTRY.put("ABSORB", new HPStealingMove(Types.GRASS, MoveType.SPECIAL, 25, 20, 100, 40, 50));
 
@@ -316,7 +312,7 @@ public abstract class Move{
 			@Override
 			public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
 				super.runAfter(channel, attacker, defender, damage);
-				if(diceRoll(30)) flinch(channel, defender);
+				if(Pokebot.diceRoll(30)) MoveUtils.flinch(channel, defender);
 			}
 		});
 
@@ -343,15 +339,15 @@ public abstract class Move{
 		REGISTRY.put("ACUPRESSURE", new Move(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 60){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
-				if(attacker != defender && defender.has(Effects.VBattle.SUBSITUTE)){
-					failMessage(channel, attacker);
+				if(attacker != defender && defender.has(Effects.VBattle.SUBSTITUTE)){
+					Messages.fail(channel, attacker);
 					return BeforeResult.STOP;
 				}
 				ArrayList<Stats> stats = new ArrayList<>(Arrays.asList(Stats.values()));
 				stats.remove(Stats.HEALTH);
 				stats.removeIf(stat -> defender.modifiers[stat.getIndex()] == 6);
 				if(stats.isEmpty()){
-					failMessage(channel, attacker);
+					Messages.fail(channel, attacker);
 					return BeforeResult.STOP;
 				}
 				StatHandler.changeStat(channel, defender, stats.get(Pokebot.ran.nextInt(stats.size())), 2);
@@ -362,7 +358,7 @@ public abstract class Move{
 		REGISTRY.put("ANCIENT_POWER", new DamageMove(Types.ROCK, MoveType.SPECIAL, 5, 60, 100, 150){
 			@Override
 			public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
-				if(diceRoll(10)){
+				if(Pokebot.diceRoll(10)){
 					for(int x = 1; x < 6; x++){
 						StatHandler.changeStat(channel, attacker, Stats.getStatFromIndex(x), 1);
 					}
@@ -411,7 +407,7 @@ public abstract class Move{
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				attacker.battle.set(Battle.BattleEffects.GRAVITY, 1);
-				attackMessage(channel, attacker, this);
+				Messages.attackMessage(channel, attacker, this);
 				Pokebot.sendMessage(channel, "Gravity Intensified!");
 				return BeforeResult.STOP;
 			}
@@ -450,11 +446,11 @@ public abstract class Move{
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(willHit(this, attacker, defender, true)){ //Implicit battle check, because it's a status move
-					attackMessage(channel, attacker, this, defender);
+					Messages.attackMessage(channel, attacker, this);
 					defender.set(Effects.VBattle.ABILITY_BLOCK);
 					Pokebot.sendMessage(channel, defender.mention()+" 's ability was suppressed!");
 				} else {
-					missMessage(channel, attacker);
+					Messages.miss(channel, attacker);
 				}
 				return BeforeResult.STOP;
 			}
@@ -468,7 +464,7 @@ public abstract class Move{
 					defender.HP = 0;
 					Pokebot.sendMessage(channel, defender.mention()+" was OHKO'd!");
 				} else {
-					missMessage(channel, attacker);
+					Messages.miss(channel, attacker);
 				}
 				return BeforeResult.STOP;
 			}
@@ -502,20 +498,20 @@ public abstract class Move{
 		if(attacker.has(Effects.NonVolatile.FROZEN)){
 			//TODO if the attacker uses Fusion Flare, Flame Wheel, Sacred Fire, Flare Blitz
 			//TODO or Scald, it will thaw them and/or the opponent out
-			if(diceRoll(20)){
+			if(Pokebot.diceRoll(20)){
 				attacker.cureNV();
-				Pokebot.sendMessage(channel, attacker.mention()+" thawed out!");
+				Messages.unfreeze(channel, attacker);
 			} else {
-				Pokebot.sendMessage(channel, attacker.mention()+" is frozen solid!");
+				Messages.isFrozen(channel, attacker);
 				return false;
 			}
 		}
 		if(attacker.has(Effects.NonVolatile.SLEEP)){
 			//TODO if the move is snore or sleep talk, then it will work
 			if(attacker.counter-- <= 0){
-				Pokebot.sendMessage(channel, attacker.mention()+" woke up!");
+				Messages.wokeUp(channel, attacker);
 			} else {
-				Pokebot.sendMessage(channel, attacker.mention()+" is fast asleep!");
+				Messages.isAsleep(channel, attacker);
 				return false;
 			}
 		}
@@ -536,16 +532,16 @@ public abstract class Move{
 						damage = getDamage(attacker, move, defender);
 					}
 					defender.HP = Math.max(0, defender.HP-damage);
-					damageMessage(channel, attacker, damage);
+					Messages.dealtDamage(channel, attacker, damage);
 					if(attacker.inBattle()) move.runAfter(channel, attacker, defender, damage);
 					//"After Damage"
-					if(defender.inBattle()){
+					/*if(defender.inBattle()){
 						defender.getModifiedItem().onAfterDamage(channel, attacker, move, defender, damage);
 
-					}
+					}*/
 					//attackMessage(channel, attacker, move, defender, damage);
 				} else { //we check here again to make sure cont wasn't what made it not run
-					missMessage(channel, attacker);
+					Messages.miss(channel, attacker);
 				}
 				break;
 			}
@@ -558,48 +554,14 @@ public abstract class Move{
 		}
 		if(attacker.HP == 0 && !attacker.inBattle()){
 			//Checking for things like recoil
-			faintMessage(channel, attacker);
+			Messages.fainted(channel, attacker);
 		}
 		if(defender.HP == 0){
-			faintMessage(channel, defender);
+			Messages.fainted(channel, defender);
 			return true;
 		}
 		Pokebot.sendMessage(channel, defender.mention()+" has "+defender.HP+"HP left!");
 		return false;
-	}
-
-	private static void attackMessage(IChannel channel, Player attacker, Move move, Player defender, int damage){
-		Pokebot.sendMessage(channel, attacker.mention()
-				+" attacked "+defender.mention()+" with "+move.getName()
-				+" for "+damage+" damage!");
-	}
-
-	private static void attackMessage(IChannel channel, Player attacker, Move move, Player defender){
-		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+" on "+defender.mention()+'!');
-	}
-
-	private static void attackMessage(IChannel channel, Player attacker, Move move){
-		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+'!');
-	}
-
-	private static void damageMessage(IChannel channel, Player attacker, int damage){
-		Pokebot.sendMessage(channel, attacker.mention()+" dealt "+damage+" damage!");
-	}
-
-	private static void recoilMessage(IChannel channel, Player attacker){
-		Pokebot.sendMessage(channel, attacker.mention()+" took damage from recoil!");
-	}
-
-	public static void faintMessage(IChannel channel, Player defender){
-		Pokebot.sendMessage(channel, defender.mention()+" has fainted!");
-	}
-
-	protected static void missMessage(IChannel channel, Player attacker){
-		Pokebot.sendMessage(channel, "But "+attacker.mention()+" missed!");
-	}
-
-	protected static void failMessage(IChannel channel, Player attacker){
-		Pokebot.sendMessage(channel, "But "+attacker.mention()+"'s move failed!");
 	}
 
 	//Call AFTER you heal
@@ -631,110 +593,6 @@ public abstract class Move{
 		}
 		defender.HP = Math.max(0, defender.HP-damage);
 		Pokebot.sendMessage(channel, defender.mention()+" hurt themselves for "+damage+" damage!");
-	}
-
-	private static void burn(IChannel channel, Player defender){
-		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
-			return;
-		}
-		boolean isImmune = isType(defender, Types.FIRE);
-		if(!isImmune){
-			defender.set(Effects.NonVolatile.BURN);
-		}
-		effectMessage(channel, defender, isImmune, "burns", "burned");
-	}
-
-	private static void freeze(IChannel channel, Player defender){
-		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
-			return;
-		}
-		boolean isImmune = isType(defender, Types.ICE);
-		if(!isImmune){
-			defender.set(Effects.NonVolatile.FROZEN);
-		}
-		effectMessage(channel, defender, isImmune, "freezing", "frozen");
-	}
-
-	private static void paralyze(IChannel channel, Player defender){
-		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
-			return;
-		}
-		boolean isImmune = isType(defender, Types.ELECTRIC);
-		if(!isImmune){
-			defender.set(Effects.NonVolatile.PARALYSIS);
-		}
-		effectMessage(channel, defender, isImmune, "paralysis", "paralyzed");
-	}
-
-	private static void paralysisMessage(IChannel channel, Player attacker){
-		Pokebot.sendMessage(channel, attacker.mention()+" is paralyzed! They can't move!");
-	}
-
-	private static void poison(IChannel channel, Player defender){
-		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
-			return;
-		}
-		boolean isImmune = isType(defender, Types.POISON) || isType(defender, Types.STEEL);
-		if(!isImmune){
-			defender.set(Effects.NonVolatile.POISON);
-		}
-		effectMessage(channel, defender, isImmune, "poison", "poisoned");
-	}
-
-	private static void toxic(IChannel channel, Player defender){
-		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
-			return;
-		}
-		boolean isImmune = isType(defender, Types.POISON) || isType(defender, Types.STEEL);
-		if(!isImmune){
-			defender.set(Effects.NonVolatile.TOXIC);
-			defender.counter = 0;
-		}
-		effectMessage(channel, defender, isImmune, "poison", "badly poisoned");
-	}
-
-	private static void sleep(IChannel channel, Player defender){
-		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
-			return;
-		}
-		defender.set(Effects.NonVolatile.SLEEP);
-		defender.counter = Pokebot.ran.nextInt(3)+1;
-
-	}
-
-	protected static void flinch(IChannel channel, Player defender){
-		if(defender.has(Effects.VBattle.SUBSITUTE)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s subsitute blocked it!");
-			return;
-		}
-		defender.set(Effects.Volatile.FLINCH); //TODO Check for abilities
-		Pokebot.sendMessage(channel, defender.mention()+" flinched!");
-		//We assume this is only called within-battle
-	}
-
-	private static void effectMessage(IChannel channel, Player defender, boolean isImmune, String immune, String
-			afflicted){
-		if(isImmune){
-			Pokebot.sendMessage(channel, defender.mention()+"'s type is immune to "+immune+"!");
-		} else {
-			Pokebot.sendMessage(channel, defender.mention()+" was "+afflicted+"!");
-		}
-	}
-
-	protected static boolean checkParalysis(Player attacker){
-		if(!attacker.has(Effects.NonVolatile.PARALYSIS)) return false;
-		if(diceRoll(25)){
-			//We assume paralysis only takes place in a battle
-			paralysisMessage(attacker.battle.channel, attacker);
-			return false;
-		}
-		return true;
 	}
 
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
@@ -782,7 +640,7 @@ public abstract class Move{
 	}
 
 	public static double getStab(Player attacker, Move move){
-		if(isType(attacker, move.getType(attacker))){
+		if(attacker.hasType(move.getType(attacker))){
 			if(attacker.hasAbility(Abilities.ADAPTABILITY)) return 2;
 			return 1.5;
 		}
@@ -830,7 +688,7 @@ public abstract class Move{
 	@SuppressWarnings("BooleanParameter")
 	public static boolean willHit(Move move, Player attacker, Player defender, boolean factorChanges){
 		if(move == null) return false;
-		if(checkParalysis(attacker)) return false;
+		if(MoveUtils.checkParalysis(attacker)) return false;
 		if(defender.inBattle()){
 			if(defender.has(Effects.VBattle.SEMI_INVULNERABLE)){
 				/* TODO switch(move){
@@ -886,15 +744,6 @@ public abstract class Move{
 		return Pokebot.ran.nextDouble() <= accuracy;
 	}
 
-	public static boolean isType(Player player, Types type){
-		return player.primary == type || player.secondary == type;
-	}
-
-	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
-	public static boolean diceRoll(double chance){
-		return Pokebot.ran.nextDouble()*100D <= chance;
-	}
-
 	protected enum BeforeResult{
 		CONTINUE,
 		HAS_ADJUSTED_DAMAGE(false, true),
@@ -927,24 +776,6 @@ public abstract class Move{
 
 		public boolean hasAdjustedDamage(){
 			return this.hasAdjustedDamage;
-		}
-	}
-
-	private static final class MoveMap extends TreeMap<String, Move>{
-
-		private MoveMap(){
-			super(String::compareToIgnoreCase);
-		}
-
-		@Override
-		public Move put(String name, Move move){
-			move.setName(name);
-			move.setDisplayName(name.replaceAll("_", " "));
-			return super.put(name, move);
-		}
-
-		public MoveMap clone(){
-			return (MoveMap) super.clone();
 		}
 	}
 }

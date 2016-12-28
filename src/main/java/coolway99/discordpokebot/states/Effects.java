@@ -11,7 +11,8 @@ public class Effects{
 		PARALYSIS, //Prevents attacking 1/4th of the time. Also 1/4th's speed
 		POISON, //Does 1/8th MAXHP damage unless other special conditions apply
 		TOXIC, //Starts at 1/16th MAXHP damage, then goes up by +1/16th every turn
-		SLEEP
+		SLEEP,
+		FAINTED, //Used to signify a player has fainted
 	}
 	
 	//A pokemon can be affected by any combination of these at a time
@@ -54,7 +55,7 @@ public class Effects{
 		PROTECTION, //Is immune to attacks and negative status moves, but if it's hit then it's removed. Lasts 1 turn
 		RECHARGING, //Cannot attack next turn
 		SEMI_INVULNERABLE, //Cannot be attacked except by certain moves and status's.
-		SUBSITUTE, //Uses up to 1/4th of it's total HP and will create a subsitute that will absorb the damage until it breaks
+		SUBSTITUTE, //Uses up to 1/4th of it's total HP and will create a substitute that will absorb the damage until it breaks
 		TAKING_AIM, //negates Semi_Invul, makes the next damage move always hit
 		TAKING_IN_SUNLIGHT, //Unless a power herb is used or it's harsh sunlight, this is turn 1 of Solar Beam
 		WITHDRAWING, //Unless a power herb is used, this is turn one of skull bash. Also boosts defence

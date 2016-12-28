@@ -7,7 +7,6 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import javax.script.ScriptException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.List;
 import java.util.TreeMap;
 
 //Static objects should face inwards to Pokebot
@@ -31,9 +30,16 @@ public class NewMoves{
 		}
 	}
 
-	public void register(ScriptObjectMirror moveObject){
+	public void registerMove(ScriptObjectMirror moveObject){
 		MoveWrapper move = new MoveWrapper(new JSONObject(moveObject));
 		if(move.getName() == null) return;
 		REGISTRY.put(move.getName(), move);
+	}
+
+	public void registerMoves(ScriptObjectMirror moveObject){
+		ScriptObjectMirror[] moves = moveObject.to(ScriptObjectMirror[].class);
+		for(ScriptObjectMirror move : moves){
+			this.registerMove(move);
+		}
 	}
 }

@@ -19,8 +19,8 @@ public enum GameList{
 	B2W2("Black2/White2"),
 	XY("the ones we don't mention"),
 	ORAS("Omega Ruby/Alpha Saphire"),
-	//TODO DPPt remakes
 	SM("Sun/Moon"),
+	//TODO DPPt remakes
 
 	DEV("with 10% more unstable code!"),
 	;

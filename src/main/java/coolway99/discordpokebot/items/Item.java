@@ -95,13 +95,13 @@ public class Item{
 		return this.naturalGiftType;
 	}
 
-	public boolean canConsume(Player player){
+	/*public boolean canConsume(Player player){
 		if(player.getModifiedItem() == this){
 			player.modifiedItem = null;
 			return true;
 		}
 		return false;
-	}
+	}*/
 
 	public static void registerItems(){
 		System.out.println("Registering items");

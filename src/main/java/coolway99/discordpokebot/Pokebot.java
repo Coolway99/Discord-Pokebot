@@ -194,4 +194,9 @@ public class Pokebot{
 		}
 		return null;
 	}
+
+	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
+	public static boolean diceRoll(double chance){
+		return ran.nextDouble()*100D <= chance;
+	}
 }

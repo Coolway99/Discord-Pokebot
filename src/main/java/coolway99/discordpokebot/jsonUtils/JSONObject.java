@@ -106,11 +106,8 @@ public class JSONObject{
 	public Object call(@NotNull String functionName, Object thiz, Object... args){
 		//return this.root.callMember(functionName, args);
 		Object o = this.root.get(functionName);
-		if(o instanceof ScriptObjectMirror && ((ScriptObjectMirror) o).isFunction()){
-			return ((ScriptObjectMirror) o).call(thiz, args);
-		} else {
-			return null;
-		}
+		if(!(o instanceof ScriptObjectMirror) || !((ScriptObjectMirror) o).isFunction()) return null;
+		return ((ScriptObjectMirror) o).call(thiz, args);
 	}
 
 	@Nullable

@@ -1,7 +1,9 @@
 package coolway99.discordpokebot.moves;
 
+import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.moves.rewrite.MoveUtils;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -12,7 +14,7 @@ public class MultiHitMove extends Move{
 	/*(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
 	Flags... flags){*/
 
-	private static final float[] chances = {33.3F, 33.3F, 16.7F, 16.7F}; //They sum to 100
+	private static final float[] chances = {1/3F, 1/3F, 1/6F, 1/6F}; //They sum to 100
 	private static final byte offset = 1; //Because it's 2-5
 
 	/**
@@ -32,29 +34,17 @@ public class MultiHitMove extends Move{
 	@Override
 	public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 		if(willHit(this, attacker, defender, true)){
-			int timesHit = getTimesHit();
+			int timesHit = MoveUtils.getTimesHit(MultiHitMove.offset, MultiHitMove.chances);
 			int damage = 0;
 			for(int x = 0; x < timesHit; x++){
 				damage += getDamage(attacker, this, defender);
 			}
-			Pokebot.sendMessage(channel, attacker.mention()+" attacked "+defender.mention()
-					+" "+timesHit+" times for a total of "+damage+"HP of damage!");
+			Messages.multiHit(channel, defender, timesHit, damage);
 			defender.HP = Math.max(0, defender.HP-damage);
 		} else {
-			missMessage(channel, attacker);
+			Messages.miss(channel, attacker);
 		}
 		return BeforeResult.STOP;
 	}
 
-	private static int getTimesHit(){
-		float ran = Pokebot.ran.nextFloat()*100;
-		float i = 0;
-		int times = offset;
-		for(int x = 0; x < chances.length; x++){
-			times++;
-			i += chances[x];
-			if(ran <= i) return times;
-		}
-		return chances.length+offset;
-	}
 }

@@ -40,12 +40,13 @@ public class MoveWrapper{
 		this.power = move.getInt("power", 0);
 		this.category = move.getObject("category", MoveType.PHYSICAL);
 		this.PP = move.getInt("pp", 0);
-		this.accuracy = move.getInt("accuracy", 0);
+		this.accuracy = move.getInt("accuracy", 100);
 		this.priority = Battle_Priority.getPriority(move.getInt("priority", 0));
-		this.cost = move.getInt("cost", 0);
+		this.cost = move.getInt("cost", this.power);
 
 		this.flags = EnumSet.noneOf(MoveFlags.class);
-		this.flags.addAll(Arrays.asList(move.getArray("flags", MoveFlags.class, new MoveFlags[0])));
+		this.flags.addAll(Arrays.asList(move.getArray("flags", MoveFlags.class,
+				new MoveFlags[]{MoveFlags.MAKES_CONTACT, MoveFlags.CAN_BE_MIRRORED})));
 
 		this.onBeforeFunction = move.getFunction("onBeforeAttack");
 		this.onAttackFunction = move.getFunction("onAttack");
@@ -106,10 +107,16 @@ public class MoveWrapper{
 
 	/**
 	 * The main method for moves. This must always be defined
-	 * @param attacker
-	 * @param defender
+	 * @param context The context this takes place in
+	 * @param attacker The attacker, aka the one performing the attack
+	 * @param defender The defender, aka the one receiving the attack
+	 * @param battle The battle this takes place in, can be null.
 	 */
 	public void onAttack(Context context, Player attacker, Player defender, @Nullable Battle battle){
+		if(this.onAttackFunction == null){
+			//TODO standard attack
+			return;
+		}
 		this.onAttackFunction.call(this, context, attacker, defender, battle);
 	}
 
@@ -123,6 +130,19 @@ public class MoveWrapper{
 		if(this.onSecondaryFunction == null || !this.onSecondaryFunction.isFunction()) return;
 		this.onSecondaryFunction.call(this, context, attacker, defender, damageDealt);
 	}
+
+//	/**
+//	 * Called when the enemy attempts to attack them, if defined this overrides
+//	 * @param context The context this takes place in
+//	 * @param moveID The id of the move being attempted
+//	 * @param attacker The attacking pokemon (one running the move)
+//	 * @param defender The defending pokemon (us, in this case)
+//	 * @param battle If needed, the battle context this takes place in
+//	 * @return True if this move can hit us, false if they can't
+//	 */
+//	public boolean willHit(Context context, String moveID, Player attacker, Player defender, Battle battle){
+//		if(this.)
+//	}
 
 	public String getName(){
 		return this.displayName;

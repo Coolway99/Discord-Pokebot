@@ -163,12 +163,12 @@ public class ItemBuilder{
 
 		@Override
 		public void run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item){
-			if(defender.HP < defender.getMaxHP()/2 && !defender.has(Effects.Volatile.HEAL_BLOCK) && item.canConsume(defender)){
+			/*if(defender.HP < defender.getMaxHP()/2 && !defender.has(Effects.Volatile.HEAL_BLOCK) && item.canConsume(defender)){
 				int heal = defender.getMaxHP()/8;
 				defender.HP = Math.min(heal, defender.getMaxHP());
 				Pokebot.sendMessage(channel, defender.mention()+" recovered "+heal+" using their "+item.getDisplayName()+"!");
 				//TODO if(this.negative == defender.nature.decrease) Move.confuse(defender);
-			}
+			}*/
 		}
 	}
 
@@ -182,9 +182,9 @@ public class ItemBuilder{
 
 		@Override
 		public void run(IChannel channel, Player player, Item item){
-			if(player.HP < player.getMaxHP()/4 /*TODO GLUTTONY*/ && item.canConsume(player)){
+			/*if(player.HP < player.getMaxHP()/4 /*TODO GLUTTONY*//* && item.canConsume(player)){
 				StatHandler.changeStat(channel, player, this.raisedStat, 1);
-			}
+			}*/
 		}
 	}
 
@@ -198,10 +198,10 @@ public class ItemBuilder{
 
 		@Override
 		public void run(IChannel channel, Player player, Item item){
-			if(player.has(this.effect) && item.canConsume(player)){
+			/*if(player.has(this.effect) && item.canConsume(player)){
 				player.cureNV();
 				Pokebot.sendMessage(channel, player.mention()+" got cured of "+this.effect+" using their "+item.getDisplayName());
-			}
+			}*/
 		}
 	}
 }

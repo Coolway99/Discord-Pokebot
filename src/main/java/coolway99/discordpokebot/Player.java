@@ -6,7 +6,6 @@ import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.items.Item;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -79,14 +78,14 @@ public class Player{
 
 	//public final Move[] moves = new Move[]{Move.NULL, Move.NULL, Move.NULL, Move.NULL};
 	public final MoveSet[] moves;
-	public Item heldItem = null;
+	//public Item heldItem = null;
 
 	public Battle battle = null;
 	public MoveSet lastMove = null; //Isn't set outside of a battle
 	public int lastMoveData = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
-	public Item modifiedItem = null; //This is instantiated during battle-time
+	//public Item modifiedItem = null; //This is instantiated during battle-time
 
 	public int counter = 0; //Used for Toxic, Sleep and Freeze
 
@@ -105,77 +104,81 @@ public class Player{
 
 		PlayerHandler.getMainFile(this.user).lastSlot = this.slot;
 	}
-	
+
+	public boolean hasType(Types type){
+		return this.primary == type || this.secondary == type;
+	}
+
 	public boolean hasSecondaryType(){
 		return this.secondary != Types.NULL;
 	}
-	
+
 	public boolean inBattle(){
 		return this.battle != null;
 	}
-	
+
 	public void set(Effects.NonVolatile nvEffect){
 		this.nvEffect = nvEffect;
 	}
-	
+
 	public boolean has(Effects.NonVolatile nvEffect){
 		return this.nvEffect == nvEffect;
 	}
-	
+
 	public Effects.NonVolatile getNV(){
 		return this.nvEffect;
 	}
-	
+
 	/*public void remove(){
 		this.nvEffect = Effects.NonVolatile.NORMAL;
 	}*/
-	
+
 	public void cureNV(){
 		this.nvEffect = Effects.NonVolatile.NORMAL;
 	}
-	
+
 	public void set(Effects.Volatile vEffect){
 		this.vEffects.add(vEffect);
 	}
-	
+
 	public boolean has(Effects.Volatile vEffect){
 		return this.vEffects.contains(vEffect);
 	}
-	
+
 	public EnumSet<Effects.Volatile> getV(){
 		return this.vEffects;
 	}
-	
+
 	public void remove(Effects.Volatile vEffect){
 		this.vEffects.remove(vEffect);
 	}
-	
+
 	public void set(Effects.VBattle battleEffect){
 		this.battleEffects.add(battleEffect);
 	}
-	
+
 	public boolean has(Effects.VBattle battleEffect){
 		return this.battleEffects.contains(battleEffect);
 	}
-	
+
 	public EnumSet<Effects.VBattle> getVB(){
 		return this.battleEffects;
 	}
-	
+
 	public void remove(Effects.VBattle battleEffect){
 		this.battleEffects.remove(battleEffect);
 	}
-	
+
 	public void removeAllEffects(){
 		this.cureNV();
 		this.vEffects.clear();
 		this.battleEffects.clear();
 	}
-	
+
 	public Abilities getAbility(){
 		return this.ability;
 	}
-	
+
 	public Abilities getModifiedAbility(){
 		if(this.has(Effects.VBattle.ABILITY_BLOCK)) return Abilities.MC_NORMAL_PANTS;
 		return this.ability;
@@ -184,19 +187,19 @@ public class Player{
 	public boolean hasAbility(Abilities ability){
 		return ability == this.getModifiedAbility();
 	}
-	
+
 	public void setAbility(Abilities ability){
 		this.ability = ability;
 	}
 
-	public Item getItem(){
+	/*public Item getItem(){
 		return this.heldItem;
 	}
 
 	/**
 	 * A helper method to consume the item
 	 * @return The item that was consumed, or null if there was no item to consume
-	 */
+	 *//*
 	public Item consumeItem(){
 		Item item = this.modifiedItem;
 		this.modifiedItem = null;
@@ -213,82 +216,52 @@ public class Player{
 
 	public void setItem(Item item){
 		this.heldItem = item;
-	}
+	}*/
 
 	public int getMaxHP(){
-		return StatHandler.calcStatValue(this.stats[Stats.HEALTH.getIndex()][SubStats.BASE.getIndex()],
-				this.stats[Stats.HEALTH.getIndex()][SubStats.IV.getIndex()],
-				this.stats[Stats.HEALTH.getIndex()][SubStats.EV.getIndex()],
-				this.level,
-				Stats.HEALTH,
-				this.modifiers[Stats.HEALTH.getIndex()],
-				this.nvEffect,
-				this.nature);
+		return this.getStat(Stats.HEALTH);
 	}
-	
+
 	public int getAttackStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.ATTACK.getIndex()][SubStats.BASE.getIndex()],
-				this.stats[Stats.ATTACK.getIndex()][SubStats.IV.getIndex()],
-				this.stats[Stats.ATTACK.getIndex()][SubStats.EV.getIndex()],
-				this.level,
-				Stats.ATTACK,
-				this.modifiers[Stats.ATTACK.getIndex()],
-				this.nvEffect,
-				this.nature);
+		return this.getStat(Stats.ATTACK);
 	}
-	
+
 	public int getSpecialAttackStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.BASE.getIndex()],
-				this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.IV.getIndex()],
-				this.stats[Stats.SPECIAL_ATTACK.getIndex()][SubStats.EV.getIndex()],
-				this.level,
-				Stats.SPECIAL_ATTACK,
-				this.modifiers[Stats.SPECIAL_ATTACK.getIndex()],
-				this.nvEffect,
-				this.nature);
+		return this.getStat(Stats.SPECIAL_ATTACK);
 	}
-	
+
 	public int getDefenseStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.DEFENSE.getIndex()][SubStats.BASE.getIndex()],
-				this.stats[Stats.DEFENSE.getIndex()][SubStats.IV.getIndex()],
-				this.stats[Stats.DEFENSE.getIndex()][SubStats.EV.getIndex()],
-				this.level,
-				Stats.DEFENSE,
-				this.modifiers[Stats.DEFENSE.getIndex()],
-				this.nvEffect,
-				this.nature);
+		return this.getStat(Stats.DEFENSE);
 	}
-	
+
 	public int getSpecialDefenseStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.BASE.getIndex()],
-				this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.IV.getIndex()],
-				this.stats[Stats.SPECIAL_DEFENSE.getIndex()][SubStats.EV.getIndex()],
-				this.level,
-				Stats.SPECIAL_DEFENSE,
-				this.modifiers[Stats.SPECIAL_DEFENSE.getIndex()],
-				this.nvEffect,
-				this.nature);
+		return this.getStat(Stats.SPECIAL_DEFENSE);
 	}
-	
+
 	public int getSpeedStat(){
-		return StatHandler.calcStatValue(this.stats[Stats.SPEED.getIndex()][SubStats.BASE.getIndex()],
-				this.stats[Stats.SPEED.getIndex()][SubStats.IV.getIndex()],
-				this.stats[Stats.SPEED.getIndex()][SubStats.EV.getIndex()],
-				this.level,
-				Stats.SPEED,
-				this.modifiers[Stats.SPEED.getIndex()],
-				this.nvEffect,
-				this.nature);
+		return this.getStat(Stats.SPEED);
 	}
-	
+
 	public double getAccuracy(){
 		return StatHandler.getHitModifierChange(this.modifiers[Stats.ACCURACY.getIndex()]);
 	}
-	
+
 	public double getEvasion(){
 		return StatHandler.getModifierChange(this.modifiers[Stats.EVASION.getIndex()]);
 	}
-	
+
+	public int getStat(Stats stat){
+		return StatHandler.calcStatValue(
+				this.stats[stat.getIndex()][SubStats.BASE.getIndex()],
+				this.stats[stat.getIndex()][SubStats.IV.getIndex()],
+				this.stats[stat.getIndex()][SubStats.EV.getIndex()],
+				this.level,
+				stat,
+				this.modifiers[stat.getIndex()],
+				this.nvEffect,
+				this.nature);
+	}
+
 	public int getStatFromIndex(int x){
 		switch(x){
 			case 0:
@@ -312,6 +285,69 @@ public class Player{
 		StatHandler.changeStat(channel, this, stat, amount);
 	}
 
+	public int damage(int amount){
+		int before = this.HP;
+		if(amount <= 0) return 0;
+		if(this.HP == this.getMaxHP() && this.HP - amount <= 0){
+			//TODO OHKO prevention
+		}
+		this.HP -= amount;
+		if(this.HP <= 0){
+			this.HP = 0;
+			this.set(Effects.NonVolatile.FAINTED);
+		}
+		return before - this.HP;
+	}
+
+	public int damage(IChannel channel, int amount){
+		if(amount <= 0){
+			Pokebot.sendMessage(channel, this.mention()+" didn't take any damage...");
+			return 0;
+		}
+		int max = this.getMaxHP();
+		int before = this.HP;
+		int dam = this.damage(amount);
+		if(before == max && this.HP == 0){
+			Messages.oneHitKO(channel, this);
+		} else {
+			Messages.tookDamage(channel, this, dam);
+		}
+		if(this.HP == 0){
+			Messages.fainted(channel, this);
+			this.set(Effects.NonVolatile.FAINTED);
+		}
+		return dam;
+	}
+
+	public int damage(float amount){
+		if(amount <= 0) return 0;
+		//Implicit Math.floor
+		return this.damage((int) (this.getMaxHP()* amount));
+	}
+
+	public int damage(IChannel channel, float amount){
+		if(amount <= 0) return this.damage(channel, 0);
+		//Implicit Math.floor
+		return this.damage(channel, (int) (this.getMaxHP()* amount));
+	}
+
+	public boolean hasMove(Move move){
+		for(MoveSet set : this.moves){
+			if(set == null) continue;
+			if(set.getMove() == move) return true;
+		}
+		return false;
+	}
+
+	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion") //It ends with one, get over it
+	public boolean lastMoveHas(Flags flag){
+		return this.lastMove != null && this.lastMove.getMove().has(flag);
+	}
+
+	public String mention(){
+		return this.user.mention();
+	}
+
 	private void loadData(){
 		//If the file is "incomplete", which should only result when the save format is updated
 		//with more info, then this will error out and close the file, with the default values
@@ -321,13 +357,13 @@ public class Player{
 		try(Scanner in = new Scanner(file)){
 			this.primary = Types.valueOf(in.nextLine());
 			this.secondary = Types.valueOf(in.nextLine());
-			
+
 			for(int y = 0; y < this.stats.length; y++){
 				for(int x = 0; x < this.stats[0].length; x++){
 					this.stats[y][x] = in.nextInt();
 				}
 			}
-			
+
 			this.numOfAttacks = in.nextInt();
 			in.nextLine(); //nextInt tends to leave over the \n, it seems
 			for(int x = 0; x < this.moves.length; x++){
@@ -348,19 +384,7 @@ public class Player{
 			System.err.println("We read from an incomplete or invalid file");
 		}
 	}
-	
-	public boolean hasMove(Move move){
-		for(MoveSet set : this.moves){
-			if(set == null) continue;
-			if(set.getMove() == move) return true;
-		}
-		return false;
-	}
-	
-	public String mention(){
-		return this.user.mention();
-	}
-	
+
 	public void saveData(){
 		System.out.println("Beginning to save");
 		File file = Pokebot.getSaveFile(this.user, this.slot);
@@ -368,8 +392,8 @@ public class Player{
 			file.getParentFile().mkdirs();
 		}
 		try(PrintStream out = new PrintStream(file)){
-			out.println(this.primary.toString());
-			out.println(this.secondary.toString());
+			out.println(this.primary);
+			out.println(this.secondary);
 			//If this doesn't guarantee an order, then this will cause issues
 			for(int[] stats : this.stats){
 				for(int stat : stats){
@@ -396,20 +420,12 @@ public class Player{
 		}
 	}
 
-	public boolean hasType(Types type){
-		return this.primary == type || this.secondary == type;
-	}
-
-	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion") //It ends with one, get over it
-	public boolean lastMoveHas(Flags flag){
-		return this.lastMove != null && this.lastMove.getMove().has(flag);
-	}
-
+	/*
 	@Override
 	public boolean equals(Object obj){
 		if(obj instanceof Player){
 			return this.user.getID().equals(((Player) obj).user.getID());
 		}
 		return false;
-	}
+	}*/
 }
