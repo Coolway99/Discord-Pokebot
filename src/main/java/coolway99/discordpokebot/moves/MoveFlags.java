@@ -51,4 +51,6 @@ public enum MoveFlags{
 	REFLECTABLE, //The move can be reflected
 	SNATCH, //Can be stolen via snatch and used
 	SOUND_BASED, //The move is based off of sound
+	//"Custom" flags
+	OHKO, //Used for defining that this move is a one-hit-knock-out move, and normal damage calculation doesn't apply
 }

@@ -1,12 +1,12 @@
 package coolway99.discordpokebot.moves;
 
-import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Context;
-import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
 import coolway99.discordpokebot.states.Types;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -28,6 +28,8 @@ public class MoveWrapper{
 	@Nullable
 	private final ScriptObjectMirror accuracyFunction;
 	@Nullable
+	private final ScriptObjectMirror onTryFunction;
+	@Nullable
 	private final ScriptObjectMirror onBeforeFunction;
 	private final ScriptObjectMirror onAttackFunction;
 	@Nullable
@@ -35,6 +37,9 @@ public class MoveWrapper{
 
 	private final String name;
 	private final String displayName;
+
+	private final String message;
+	private final boolean displayUsedMove;
 
 	@SuppressWarnings("FeatureEnvy")
 	public MoveWrapper(JSONObject move){
@@ -54,8 +59,8 @@ public class MoveWrapper{
 				this.accuracy = ((boolean) accuracy ) ? 100000 : 0;
 				this.accuracyFunction = null;
 			} else if(accuracy instanceof ScriptObjectMirror && ((ScriptObjectMirror) accuracy).isFunction()){
-				this.accuracy = -1;
 				this.accuracyFunction = (ScriptObjectMirror) accuracy;
+				this.accuracy = ((Number) this.accuracyFunction.call(null)).intValue();
 			} else {
 				this.accuracy = 100;
 				this.accuracyFunction = null;
@@ -69,6 +74,7 @@ public class MoveWrapper{
 				new MoveFlags[]{MoveFlags.MAKES_CONTACT, MoveFlags.CAN_BE_MIRRORED})));
 		this.target = move.getObject("target", Target.ADJACENT);
 
+		this.onTryFunction = move.getFunction("onTry");
 		this.onBeforeFunction = move.getFunction("onBeforeAttack");
 		this.onAttackFunction = move.getFunction("onAttack");
 		this.onSecondaryFunction = move.getFunction("onSecondary");
@@ -80,6 +86,9 @@ public class MoveWrapper{
 		} else {
 			this.displayName = displayName;
 		}
+
+		this.message = move.getString("message", "");
+		this.displayUsedMove = move.getBoolean("displayUsedMove", true);
 	}
 
 	public Types getType(){
@@ -104,7 +113,7 @@ public class MoveWrapper{
 
 	public int getAccuracy(Context context, Player attacker, Player defender){
 		if(this.accuracyFunction == null) return this.accuracy;
-		return (int) this.accuracyFunction.call(this, context, attacker, defender);
+		return ((Number) this.accuracyFunction.call(this, context, attacker, defender)).intValue();
 	}
 
 	public Battle_Priority getPriority(){
@@ -121,6 +130,21 @@ public class MoveWrapper{
 
 	public Target getTarget(){
 		return this.target;
+	}
+
+	/**
+	 * Tries to do the attack, this runs before accuracy is even checked
+	 * @param context The context we're doing this in
+	 * @param attacker The one using the attack
+	 * @param defender The one defending from the attack
+	 * @return false if we fail, true if we are able to attack
+	 */
+	@Contract(pure = true)
+	public boolean onTry(Context context, Player attacker, Player defender){
+		if(this.onTryFunction == null) return true;
+		Boolean b = (Boolean) this.onTryFunction.call(this, context, attacker, defender);
+		if(b == null) return true;
+		return b;
 	}
 
 	/**
@@ -177,12 +201,23 @@ public class MoveWrapper{
 //		if(this.)
 //	}
 
+	@NotNull
 	public String getID(){
 		return this.name;
 	}
 
+	@NotNull
 	public String getName(){
 		return this.displayName;
+	}
+
+	@NotNull
+	public String getMessage(){
+		return this.message;
+	}
+
+	public boolean displayUsedMoveText(){
+		return this.displayUsedMove;
 	}
 
 	public boolean has(MoveFlags flag){

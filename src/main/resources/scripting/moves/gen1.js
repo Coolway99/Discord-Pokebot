@@ -45,7 +45,6 @@ API.registerMoves([
 {
 	id: "payday",
 	name: "Pay Day",
-	accuracy: 100,
 	power: 40,
 	pp: 20,
 	flags: [FLAGS.CAN_BE_MIRRORED],
@@ -105,32 +104,55 @@ API.registerMoves([
 	pp: 35,
 },
 {
-		id: "vicegrip",
-		name: "Vice Grip",
-		power: 55,
-		pp: 30,
+	id: "vicegrip",
+	name: "Vice Grip",
+	power: 55,
+	pp: 30,
 },
-/*{
-		id: "guillotine",
-		name: "Guillotine",
-		accuracy: 30,
-		power: -1,
-		pp: 5,
-		desc: "Deals damage to the target equal to the target's maximum HP. Ignores accuracy and evasiveness modifiers. This attack's accuracy is equal to (user's level - target's level + 30)%, and fails if the target is at a higher level. Pokemon with the Ability Sturdy are immune.",
-		shortDesc: "OHKOs the target. Fails if user is a lower level.",
-		ohko: true,
-},*/
 {
-		id: "razorwind",
-		name: "Razor Wind",
-		category: API.MOVES.CATEGORY.SPECIAL,
-		power: 80,
-		pp: 10,
-		desc: "Has a higher chance for a critical hit. This attack charges on the first turn and executes on the second. If the user is holding a Power Herb, the move completes in one turn.",
-		shortDesc: "Charges, then hits foe(s) turn 2. High crit ratio.",
-		flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.REQUIRES_CHARGE],
-		critRatio: 2,
-		target: API.MOVES.TARGET.WILL_HIT_ADJACENT_FOES,
+	id: "guillotine",
+	name: "Guillotine",
+	accuracy: function(context, attacker, defender){
+		//When context == null, we're calling this to get the display accuracy of the move
+		if(context == null) return 30;
+		//onTry is ran before the accuracy check, therefore we know that this move will work
+		return (attacker.level - defender.level) + 30;
+	},
+	pp: 5,
+	cost: 120,
+	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.OHKO],
+	onTry: function(context, attacker, defender){
+		return attacker.level >= defender.level;
+	},
+	power: 9999,
+},
+{
+	id: "razorwind",
+	name: "Razor Wind",
+	category: API.MOVES.CATEGORY.SPECIAL,
+	accuracy: function(context, attacker, defender){
+		if(context == null) return 100;
+		if(context.battle == null){
+			return 100;
+		} else {
+			if(attacker.lastMoveData == 1){
+				return 100;
+			} else {
+				return 10000; //The "charge" should always hit
+			}
+		}
+	},
+	power: 80,
+	pp: 10,
+	cost: 100,
+	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.REQUIRES_CHARGE],
+	critRatio: 2,
+	onAttack: function(context, attacker, defender){
+		API.MOVES.UTILS.chargeMove(context, attacker, this, defender);
+	},
+	target: API.MOVES.TARGET.WILL_HIT_ADJACENT_FOES,
+	message: "%s is whipping up a whirlwind!",
+	displayUsedMove: false,
 },
 ]);
 

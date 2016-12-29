@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.TreeMap;
 
+@Deprecated
 //Fire punch, Ice punch, Thunder punch, Signal Beam, and Relic song are all the same, except with different effects
 //Any accuracy over 100 or over 1D will always hit, and will automatically have evasion and accuracy excluded
 //For multi-hit moves, refer to PMD if needed

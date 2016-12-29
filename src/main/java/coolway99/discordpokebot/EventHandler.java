@@ -316,12 +316,16 @@ public class EventHandler{
 							return;
 						}
 						MoveWrapper move = MoveAPI.REGISTRY.get(args[1].toUpperCase());
-						String b = "Stats of "+move+
+						if(move == null){
+							reply(message, "There's no move by that name!");
+							return;
+						}
+						String b = "Stats of "+move.getName()+
 								"\nType: "+move.getType()+//(Abilities.MC_NORMAL_PANTS)+
-								"\nPower: "+move.getPower()+
+								"\nPower: "+(move.getPower() > 1000 ? "OHKO" : numCheck(move.getPower()))+
 								"\nPP: "+move.getPP()+
-								"\nAccuracy: "+move.getAccuracy()+
-								'\n'+move.getCategory()+
+								"\nAccuracy: "+numCheck(move.getAccuracy())+
+								"\nCategory: "+move.getCategory()+
 								"\nPoint Cost: "+move.getCost();
 						Pokebot.sendMessage(channel, b);
 					} catch(IllegalArgumentException e){
@@ -354,7 +358,7 @@ public class EventHandler{
 				case "lam":
 				case "listallmoves":{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
-					for(MoveWrapper move : MoveAPI.REGISTRY.values()){ //Starting at one to prevent the NULL move
+					for(MoveWrapper move : MoveAPI.REGISTRY.values()){
 						builder.append(move.getName()).append(" (").append(move.getCategory()).append(')').append("\n");
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
@@ -389,12 +393,7 @@ public class EventHandler{
 						}
 						player.numOfAttacks--;
 						player.moves[slot] = null;
-						for(int x = 0; x < player.moves.length-1; x++){
-							if(player.moves[x] == null){
-								player.moves[x] = player.moves[x+1];
-								player.moves[x+1] = null;
-							}
-						}
+						player.compressMoves();
 						reply(message, "Cleared move in slot "+(slot+1));
 					} catch(NumberFormatException e){
 						reply(message, "That is not a valid number!");
@@ -806,6 +805,13 @@ public class EventHandler{
 
 	private static void reply(IMessage message, String reply){
 		Pokebot.sendMessage(message.getChannel(), message.getAuthor().mention()+", "+reply);
+	}
+
+	private static String numCheck(int num){
+		if(num <= 0){
+			return "--";
+		}
+		return Integer.toString(num);
 	}
 
 }

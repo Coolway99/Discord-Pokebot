@@ -15,6 +15,11 @@ public class AttackLogic{
 		if(!checkSleep(context, attacker, move)) return;
 		//Attacker onBeforeAttack for any applicable items
 		//Defender onBeforeDefend for any applicable items
+		if(move.displayUsedMoveText()) Messages.usedMove(context.channel, attacker, move);
+		if(!move.onTry(context, attacker, defender)){
+			Messages.fail(context.channel, attacker);
+			return;
+		}
 		//Accuracy check
 		if(!checkAccuracy(context, attacker, move, defender)){
 			Messages.miss(context.channel, attacker);
@@ -27,13 +32,12 @@ public class AttackLogic{
 		//Run onBeforeAttack
 		if(!move.onBeforeAttack(context, attacker, defender)) return;
 		//Actually do the attack
-		Messages.usedMove(context.channel, attacker, move);
 		move.onAttack(context, attacker, defender);
 		//Calculate recoil
 		int recoil = attackerHP - attacker.HP;
 		//Calculate damage
 		int damage = defenderHP - defender.HP;
-		//Run onSecondary for the move
+		//Run any secondary effects for the move
 		move.onSecondary(context, attacker, defender, damage);
 		//Attacker onAfterAttack for any applicable items
 		//Defender onAfterDefend for any applicable items

@@ -74,7 +74,9 @@ Object.freeze(API);
 	//How the move hits other pokemon, defaults to adjacent (the normal configuration)
 	target: API.MOVE.TARGET.ADJACENT,
 
-	//Is ran before the attack hits, can be null. Returns a boolean
+	//Is ran before even accuracy is checked, can be null. Returns a boolean, if false the move fails
+	onTry: null,
+	//Is ran right before the attack hits, can be null. Returns a boolean
 	onBefore: null,
 	//Is ran as the attack hits, aka how the attack is processed. If null, defaults to a standard damage attack
 	onAttack: null,
@@ -85,4 +87,10 @@ Object.freeze(API);
 	id: "default",
 	//The external "display name" of the move, if not defined will equal the id which may be undesirable.
 	name: "Default Move",
+
+	//The message of the move, this depends on what type of move it is
+	message: null,
+	//If to display "player x used move y!" automatically or not,
+	displayUsedMove: true,
+
 },*/

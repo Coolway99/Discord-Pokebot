@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.moves;
 
+import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
@@ -77,6 +78,24 @@ public class MoveUtils{
 			if(ran <= i) return times;
 		}
 		return chances.length+offset;
+	}
+
+	public static void chargeMove(Context context, Player attacker, MoveWrapper move, Player defender){
+		if(context.battle == null) attacker.lastMoveData = 1;
+		switch(attacker.lastMoveData){
+			case 1:{
+				attacker.lastMoveData = 0;
+				Messages.usedMove(context.channel, attacker, move);
+				dealDamage(context.channel, attacker, move, defender);
+				break;
+			}
+			case 0:
+			default:{
+				attacker.lastMoveData = 1;
+				Pokebot.sendMessage(context.channel, String.format(move.getMessage(), attacker.mention()));
+				//TODO this only occurs in battles, and therefore most re-queue the move
+			}
+		}
 	}
 
 	public static boolean checkParalysis(Player attacker){
