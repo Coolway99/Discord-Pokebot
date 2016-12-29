@@ -8,7 +8,7 @@ import sx.blah.discord.handle.obj.IChannel;
 public class Messages{
 
 	public static void usedMove(IChannel channel, Player attacker, MoveWrapper move){
-		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getDisplayName()+"!");
+		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+"!");
 	}
 
 	public static void fainted(IChannel channel, Player defender){

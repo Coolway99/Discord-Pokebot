@@ -48,7 +48,7 @@ public class MoveAPI{
 	public static void registerMove(ScriptObjectMirror moveObject){
 		MoveWrapper move = new MoveWrapper(new JSONObject(moveObject));
 		if(move.getName() == null) return;
-		REGISTRY.put(move.getName(), move);
+		REGISTRY.put(move.getID(), move);
 	}
 
 	public static void registerMoves(ScriptObjectMirror moveObject){

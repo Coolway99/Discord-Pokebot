@@ -11,7 +11,11 @@ var API = {
 	TYPES: Java.type("coolway99.discordpokebot.states.Types"),
 	STATS: Java.type("coolway99.discordpokebot.states.Stats"),
 	SUBSTATS: Java.type("coolway99.discordpokebot.states.SubStats"),
-	EFFECTS: Java.type("coolway99.discordpokebot.states.Effects"),
+	EFFECTS:{
+		NONVOLATILE: Java.type("coolway99.discordpokebot.states.Effects.NonVolatile"),
+		VOLATILE: Java.type("coolway99.discordpokebot.states.Effects.Volatile"),
+		VBATTLE: Java.type("coolway99.discordpokebot.states.Effects.VBattle"),
+	},
 
 	MOVES: {
 		CATEGORY: Java.type("coolway99.discordpokebot.moves.MoveCategory"),

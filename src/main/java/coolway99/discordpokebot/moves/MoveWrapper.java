@@ -2,6 +2,7 @@ package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Context;
+import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
 import coolway99.discordpokebot.states.Types;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -70,7 +71,7 @@ public class MoveWrapper{
 
 		this.onBeforeFunction = move.getFunction("onBeforeAttack");
 		this.onAttackFunction = move.getFunction("onAttack");
-		this.onSecondaryFunction = move.getFunction("OnSecondary");
+		this.onSecondaryFunction = move.getFunction("onSecondary");
 
 		this.name = move.getString("id", "default");
 		String displayName = move.getString("name");
@@ -176,11 +177,11 @@ public class MoveWrapper{
 //		if(this.)
 //	}
 
-	public String getName(){
-		return this.displayName;
+	public String getID(){
+		return this.name;
 	}
 
-	public String getDisplayName(){
+	public String getName(){
 		return this.displayName;
 	}
 

@@ -7,6 +7,7 @@ import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.moves.MoveAPI;
 import coolway99.discordpokebot.states.Abilities;
+import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Position;
 import coolway99.discordpokebot.states.Stats;
@@ -343,7 +344,7 @@ public class EventHandler{
 					StringBuilder builder = new StringBuilder("The moves for ").append(player.mention()).append(" are:\n");
 					for(int x = 0; x < player.numOfAttacks; x++){
 						MoveSet set = player.moves[x];
-						builder.append(x+1).append(": ").append(set.getMove().getDisplayName());
+						builder.append(x+1).append(": ").append(set.getMove().getName());
 						builder.append(" [").append(set.getPP()).append('/')
 								.append(player.moves[x].getMaxPP()).append("]\n");
 					}
@@ -354,7 +355,7 @@ public class EventHandler{
 				case "listallmoves":{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
 					for(MoveWrapper move : MoveAPI.REGISTRY.values()){ //Starting at one to prevent the NULL move
-						builder.append(move.getDisplayName()).append(" (").append(move.getCategory()).append(')').append("\n");
+						builder.append(move.getName()).append(" (").append(move.getCategory()).append(')').append("\n");
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent you all the moves I know");
@@ -514,6 +515,11 @@ public class EventHandler{
 				}
 				case "attack":{
 					try{
+						Player attacker = PlayerHandler.getPlayer(author);
+						if(attacker.has(Effects.NonVolatile.FAINTED)){
+							reply(message, "You have fainted and are unable to move!");
+							return;
+						}
 						//We rely on error catching if there is the incorrect args
 						int slot = Integer.parseInt(args[1]);
 						if(slot < 1 || slot > 4){
@@ -521,7 +527,6 @@ public class EventHandler{
 							return;
 						}
 						slot--;
-						Player attacker = PlayerHandler.getPlayer(author);
 						if(attacker.numOfAttacks == 0){
 							reply(message, "You have no moves! Set some with "+Pokebot.config.COMMAND_PREFIX+"setmove");
 							return;
@@ -535,6 +540,10 @@ public class EventHandler{
 							return;
 						}
 						Player defender = PlayerHandler.getPlayer(mentionOrAuthor);
+						if(defender.has(Effects.NonVolatile.FAINTED)){
+							reply(message, defender.mention()+" has already fainted!");
+							return;
+						}
 						//TODO check to see if both parties meet the stat level requirement
 						//TODO right here if we're in a battle we should hand control over to the battle system
 						MoveSet set = attacker.moves[slot];
@@ -775,6 +784,10 @@ public class EventHandler{
 					}
 					Pokebot.sendMessage(channel, "Running \""+msg.toString().trim()+"\"");
 					Pokebot.sendMessage(channel, "Result: \""+Pokebot.engine.eval(msg.toString().trim())+"\"");
+					return;
+				}
+				case "test":{
+					reply(message, PlayerHandler.getPlayer(mentionOrAuthor).getNV().toString());
 					return;
 				}
 				default:

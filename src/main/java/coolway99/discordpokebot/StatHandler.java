@@ -48,7 +48,7 @@ public class StatHandler{
 	
 	
 	public static int calcStatValue(int statpoints, int ivpoints, int evpoints, int level,
-			Stats type, byte modifier, Effects.NonVolatile effect, Natures nature){
+									Stats type, byte modifier, Effects.NonVolatile effect, Natures nature){
 		double firstStage =  Math.floor(((2*statpoints+ivpoints+evpoints)*level)/100D);
 		double ret = Math.max((type == Stats.HEALTH ?
 				(firstStage + level + 10)

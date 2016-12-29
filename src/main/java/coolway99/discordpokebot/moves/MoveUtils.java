@@ -90,6 +90,7 @@ public class MoveUtils{
 	}
 
 	public static void burn(IChannel channel, Player defender){
+		if(defender.has(Effects.NonVolatile.BURN)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;
@@ -103,6 +104,7 @@ public class MoveUtils{
 	}
 
 	public static void freeze(IChannel channel, Player defender){
+		if(defender.has(Effects.NonVolatile.FROZEN)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;
@@ -116,6 +118,7 @@ public class MoveUtils{
 	}
 
 	public static void paralyze(IChannel channel, Player defender){
+		if(defender.has(Effects.NonVolatile.PARALYSIS)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;
@@ -129,6 +132,7 @@ public class MoveUtils{
 	}
 
 	public static void poison(IChannel channel, Player defender){
+		if(defender.has(Effects.NonVolatile.POISON)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;
@@ -142,6 +146,7 @@ public class MoveUtils{
 	}
 
 	public static void toxic(IChannel channel, Player defender){
+		if(defender.has(Effects.NonVolatile.TOXIC)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;
@@ -156,6 +161,7 @@ public class MoveUtils{
 	}
 
 	public static void sleep(IChannel channel, Player defender){
+		if(defender.has(Effects.NonVolatile.SLEEP)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;

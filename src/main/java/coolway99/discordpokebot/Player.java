@@ -413,7 +413,7 @@ public class Player{
 					out.println("null");
 					continue;
 				}
-				out.println(set.getMove().getName());
+				out.println(set.getMove().getID());
 			}
 			out.println(this.level);
 			out.println(this.nature);

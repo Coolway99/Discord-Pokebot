@@ -9,7 +9,7 @@ public enum Target{
 	ANY_BUT_USER, //Can target any pokemon except the user
 	SELF, //Can only target themselves
 
-	WILL_HIT_ADJACENT_FOE(true), //WILL target all adjacent enemies
+	WILL_HIT_ADJACENT_FOES(true), //WILL target all adjacent enemies
 	WILL_HIT_ADJACENT(true), //WILL target all adjacent players
 	WILL_HIT_ALL_FOES(true), //WILL target all enemies
 	WILL_HIT_ALL_ALLIES(true), //WILL target all allies, including the user
@@ -34,7 +34,7 @@ public enum Target{
 				return areSameSide ? distance == 1 : distance <= 1;
 			case ADJACENT_ALLY:
 				return areSameSide && distance == 1;
-			case WILL_HIT_ADJACENT_FOE:
+			case WILL_HIT_ADJACENT_FOES:
 			case ADJACENT_FOE:
 				return !areSameSide && distance <= 1;
 			case SELF:
