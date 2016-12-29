@@ -1,9 +1,8 @@
-package coolway99.discordpokebot.moves.rewrite;
+package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.moves.MoveType;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Types;
@@ -46,7 +45,7 @@ public class MoveUtils{
 		}
 		double a = ((2*attacker.level)+10D)/250D;
 		double b;
-		if(move.getCategory() == MoveType.SPECIAL){
+		if(move.getCategory() == MoveCategory.SPECIAL){
 			b = attacker.getSpecialAttackStat();
 			b /= defender.getSpecialDefenseStat();
 		} else {

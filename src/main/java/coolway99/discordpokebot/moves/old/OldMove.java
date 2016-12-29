@@ -1,4 +1,4 @@
-package coolway99.discordpokebot.moves;
+package coolway99.discordpokebot.moves.old;
 
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
@@ -6,7 +6,9 @@ import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.IAttack;
-import coolway99.discordpokebot.moves.rewrite.MoveUtils;
+import coolway99.discordpokebot.moves.Battle_Priority;
+import coolway99.discordpokebot.moves.MoveCategory;
+import coolway99.discordpokebot.moves.MoveUtils;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
@@ -22,9 +24,9 @@ import java.util.TreeMap;
 //Any accuracy over 100 or over 1D will always hit, and will automatically have evasion and accuracy excluded
 //For multi-hit moves, refer to PMD if needed
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
-public abstract class Move{
+public abstract class OldMove{
 
-	public static final TreeMap<String, Move> REGISTRY = new TreeMap<>(String::compareToIgnoreCase);
+	public static final TreeMap<String, OldMove> REGISTRY = new TreeMap<>(String::compareToIgnoreCase);
 
 	/*
 	TODO Ally Switch can't be used here
@@ -47,50 +49,50 @@ public abstract class Move{
 
 	protected final Types type;
 	protected final int power;
-	protected final MoveType moveType;
+	protected final MoveCategory moveCategory;
 	protected final int PP; //The default PP of the move
 	protected final double accuracy; //From 0 to 1
 	protected final Battle_Priority priority;
 	protected final int cost; //How many points will this move use?
-	protected final EnumSet<Flags> flags;
+	protected final EnumSet<OldMoveFlags> flags;
 
 	protected String name;
 	protected String displayName;
 
-	public Move(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
-		 Flags... flags){
+	public OldMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, Battle_Priority priority,
+				   OldMoveFlags... flags){
 		this.type = type;
 		this.power = power;
-		this.moveType = moveType;
+		this.moveCategory = moveCategory;
 		this.PP = PP;
 		this.accuracy = accuracy/100D; //TODO perhaps make it 0-100D
 		this.priority = priority;
 		this.cost = cost;
 		if(flags.length <= 0){
-			this.flags = EnumSet.noneOf(Flags.class);
+			this.flags = EnumSet.noneOf(OldMoveFlags.class);
 		} else {
 			this.flags = EnumSet.copyOf(Arrays.asList(flags));
 		}
 
-		switch(moveType){
+		switch(moveCategory){
 			case PHYSICAL:{
-				if(!this.flags.contains(Flags.NO_CONTACT)) this.flags.add(Flags.CONTACT);
+				if(!this.flags.contains(OldMoveFlags.NO_CONTACT)) this.flags.add(OldMoveFlags.CONTACT);
 				break;
 			}
 			case SPECIAL:
 			default:{
-					if(!this.flags.contains(Flags.CONTACT)) this.flags.add(Flags.NO_CONTACT);
+					if(!this.flags.contains(OldMoveFlags.CONTACT)) this.flags.add(OldMoveFlags.NO_CONTACT);
 				break;
 			}
 		}
 	}
 
-	public Move(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Flags... flags){
-		this(type, moveType, PP, power, accuracy, cost, Battle_Priority.P0, flags);
+	public OldMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, OldMoveFlags... flags){
+		this(type, moveCategory, PP, power, accuracy, cost, Battle_Priority.P0, flags);
 	}
 
-	public Move(Types type, MoveType moveType, int PP, int power, int accuracy, Flags... flags){
-		this(type, moveType, PP, power, accuracy, power, flags);
+	public OldMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, OldMoveFlags... flags){
+		this(type, moveCategory, PP, power, accuracy, power, flags);
 	}
 
 	public String getName(){
@@ -112,11 +114,11 @@ public abstract class Move{
 	}
 
 	public boolean isSpecial(){
-		return this.moveType == MoveType.SPECIAL;
+		return this.moveCategory == MoveCategory.SPECIAL;
 	}
 
-	public MoveType getMoveType(){
-		return this.moveType;
+	public MoveCategory getMoveCategory(){
+		return this.moveCategory;
 	}
 
 	public int getPower(){
@@ -154,7 +156,7 @@ public abstract class Move{
 		return this.priority.getPriority();
 	}
 
-	public boolean has(Flags flag){
+	public boolean has(OldMoveFlags flag){
 		return this.flags.contains(flag);
 	}
 
@@ -199,14 +201,14 @@ public abstract class Move{
 	public static void registerMoves(){
 		System.out.println("Registering moves...");
 
-		REGISTRY.put("ARM_THRUST", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 20, 15, 100, 50));
-		REGISTRY.put("BARRAGE", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 20, 15, 85, 50, Flags.NO_CONTACT,
-				Flags.BALLBASED));
+		REGISTRY.put("ARM_THRUST", new MultiHitMove(Types.FIGHTING, MoveCategory.PHYSICAL, 20, 15, 100, 50));
+		REGISTRY.put("BARRAGE", new MultiHitMove(Types.NORMAL, MoveCategory.PHYSICAL, 20, 15, 85, 50, OldMoveFlags.NO_CONTACT,
+				OldMoveFlags.BALLBASED));
 		//REGISTRY.put("COMET_PUNCH", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60));
 		//REGISTRY.put("DOUBLE_SLAP", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50));
 
 		//REGISTRY.put("DOUBLE_KICK", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
-		REGISTRY.put("DOUBLE_KICK", new Move(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 60){
+		REGISTRY.put("DOUBLE_KICK", new OldMove(Types.FIGHTING, MoveCategory.PHYSICAL, 30, 30, 100, 60){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(willHit(this, attacker, defender, true)){
@@ -223,14 +225,14 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("ACID_ARMOR", new StatusChange(Types.POISON, 20, Stats.DEFENSE, 2, Flags.UNTARGETABLE));
-		REGISTRY.put("AGILITY", new StatusChange(Types.PSYCHIC, 30, Stats.SPEED, 2, Flags.UNTARGETABLE));
-		REGISTRY.put("AMNESIA", new StatusChange(Types.PSYCHIC, 20, Stats.SPECIAL_DEFENSE, 2, Flags.UNTARGETABLE));
-		REGISTRY.put("AUTOTOMIZE", new StatusChange(Types.STEEL, 15, 50, Stats.SPEED, 2, Flags.UNTARGETABLE));//TODO lowers weight
-		REGISTRY.put("BARRIER", new StatusChange(Types.PSYCHIC, 20, Stats.DEFENSE, 2, Flags.UNTARGETABLE));
+		REGISTRY.put("ACID_ARMOR", new StatusChange(Types.POISON, 20, Stats.DEFENSE, 2, OldMoveFlags.UNTARGETABLE));
+		REGISTRY.put("AGILITY", new StatusChange(Types.PSYCHIC, 30, Stats.SPEED, 2, OldMoveFlags.UNTARGETABLE));
+		REGISTRY.put("AMNESIA", new StatusChange(Types.PSYCHIC, 20, Stats.SPECIAL_DEFENSE, 2, OldMoveFlags.UNTARGETABLE));
+		REGISTRY.put("AUTOTOMIZE", new StatusChange(Types.STEEL, 15, 50, Stats.SPEED, 2, OldMoveFlags.UNTARGETABLE));//TODO lowers weight
+		REGISTRY.put("BARRIER", new StatusChange(Types.PSYCHIC, 20, Stats.DEFENSE, 2, OldMoveFlags.UNTARGETABLE));
 		REGISTRY.put("BABY_DOLL_EYES", new StatusChange(Types.FAIRY, 30, 100, 25, Stats.ATTACK, -1, Battle_Priority.P1));
-		REGISTRY.put("SWORDS_DANCE", new StatusChange(Types.NORMAL, 20, Stats.ATTACK, 2, Flags.UNTARGETABLE));
-		REGISTRY.put("BELLY_DRUM", new StatusChange(Types.NORMAL, 10, 150, Stats.ATTACK, 12, Flags.UNTARGETABLE){
+		REGISTRY.put("SWORDS_DANCE", new StatusChange(Types.NORMAL, 20, Stats.ATTACK, 2, OldMoveFlags.UNTARGETABLE));
+		REGISTRY.put("BELLY_DRUM", new StatusChange(Types.NORMAL, 10, 150, Stats.ATTACK, 12, OldMoveFlags.UNTARGETABLE){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(attacker.HP <= Math.floor(attacker.getMaxHP()/2F)){
@@ -242,19 +244,19 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("ACID", new StatChangeDamageMove(Types.POISON, MoveType.SPECIAL, 30, 40, 100, 10, Stats.SPECIAL_DEFENSE,
+		REGISTRY.put("ACID", new StatChangeDamageMove(Types.POISON, MoveCategory.SPECIAL, 30, 40, 100, 10, Stats.SPECIAL_DEFENSE,
 				-1, StatChangeDamageMove.Who.DEFENDER));
-		REGISTRY.put("ACID_SPRAY", new StatChangeDamageMove(Types.POISON, MoveType.SPECIAL, 20, 40, 100, 100, 100, Stats
-				.SPECIAL_DEFENSE, -2, StatChangeDamageMove.Who.DEFENDER, Flags.BALLBASED));
-		REGISTRY.put("AURORA_BEAM", new StatChangeDamageMove(Types.ICE, MoveType.SPECIAL, 20, 65, 100, 75, 10, Stats.ATTACK,
+		REGISTRY.put("ACID_SPRAY", new StatChangeDamageMove(Types.POISON, MoveCategory.SPECIAL, 20, 40, 100, 100, 100, Stats
+				.SPECIAL_DEFENSE, -2, StatChangeDamageMove.Who.DEFENDER, OldMoveFlags.BALLBASED));
+		REGISTRY.put("AURORA_BEAM", new StatChangeDamageMove(Types.ICE, MoveCategory.SPECIAL, 20, 65, 100, 75, 10, Stats.ATTACK,
 				-1, StatChangeDamageMove.Who.DEFENDER));
 
-		REGISTRY.put("AIR_SLASH", new FlinchDamageMove(Types.FLYING, MoveType.SPECIAL, 15, 75, 95, 90, 30));
-		REGISTRY.put("ASTONISH", new FlinchDamageMove(Types.GHOST, MoveType.PHYSICAL, 15, 30, 100, 45, 30));
-		REGISTRY.put("BITE", new FlinchDamageMove(Types.DARK, MoveType.PHYSICAL, 25, 60, 100, 75, 30));
-		REGISTRY.put("BONE_CLUB", new FlinchDamageMove(Types.GROUND, MoveType.PHYSICAL, 20, 65, 85, 75, 10, Flags.NO_CONTACT));
+		REGISTRY.put("AIR_SLASH", new FlinchDamageMove(Types.FLYING, MoveCategory.SPECIAL, 15, 75, 95, 90, 30));
+		REGISTRY.put("ASTONISH", new FlinchDamageMove(Types.GHOST, MoveCategory.PHYSICAL, 15, 30, 100, 45, 30));
+		REGISTRY.put("BITE", new FlinchDamageMove(Types.DARK, MoveCategory.PHYSICAL, 25, 60, 100, 75, 30));
+		REGISTRY.put("BONE_CLUB", new FlinchDamageMove(Types.GROUND, MoveCategory.PHYSICAL, 20, 65, 85, 75, 10, OldMoveFlags.NO_CONTACT));
 
-		REGISTRY.put("BLAZE_KICK", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 10, 85, 90, 90, 10, MoveUtils::burn));
+		REGISTRY.put("BLAZE_KICK", new AilmentDamageMove(Types.FIRE, MoveCategory.PHYSICAL, 10, 85, 90, 90, 10, MoveUtils::burn));
 
 		//REGISTRY.put("FIRE_PUNCH", new AilmentDamageMove(Types.FIRE, MoveType.PHYSICAL, 15, 75, 100, 80, 10,
 		// MoveUtils::burn));
@@ -263,53 +265,53 @@ public abstract class Move{
 		//REGISTRY.put("THUNDER_PUNCH", new AilmentDamageMove(Types.ELECTRIC, MoveType.PHYSICAL, 15, 75, 100, 80, 10,
 		// MoveUtils::paralyze));
 		//TODO CONFUSION REGISTRY.put("SIGNAL_BEAM", new AilmentDamageMove(Types.BUG, MoveType.SPECIAL, 15, 75, 100, 80, 10, ));
-		REGISTRY.put("RELIC_SONG", new AilmentDamageMove(Types.NORMAL, MoveType.SPECIAL, 10, 75, 100, 80, 10, MoveUtils::sleep));
+		REGISTRY.put("RELIC_SONG", new AilmentDamageMove(Types.NORMAL, MoveCategory.SPECIAL, 10, 75, 100, 80, 10, MoveUtils::sleep));
 
-		REGISTRY.put("KARATE_CHOP", new DamageMove(Types.FIGHTING, MoveType.PHYSICAL, 25, 50, 100));
-		REGISTRY.put("POISON_TAIL", new AilmentDamageMove(Types.POISON, MoveType.PHYSICAL, 25, 50, 100, 55, 10, MoveUtils::poison));
+		REGISTRY.put("KARATE_CHOP", new DamageMove(Types.FIGHTING, MoveCategory.PHYSICAL, 25, 50, 100));
+		REGISTRY.put("POISON_TAIL", new AilmentDamageMove(Types.POISON, MoveCategory.PHYSICAL, 25, 50, 100, 55, 10, MoveUtils::poison));
 
 		//One of the signature moves of Reshiram, boosts fusion bolt
-		REGISTRY.put("BLUE_FLARE", new AilmentDamageMove(Types.FIRE, MoveType.SPECIAL, 5, 130, 85, 140, 20, MoveUtils::burn));
+		REGISTRY.put("BLUE_FLARE", new AilmentDamageMove(Types.FIRE, MoveCategory.SPECIAL, 5, 130, 85, 140, 20, MoveUtils::burn));
 		//One of the signature moves of Zekrom, boosts fusion flare
-		REGISTRY.put("BOLT_STRIKE", new AilmentDamageMove(Types.ELECTRIC, MoveType.PHYSICAL, 5, 130, 85, 95, 20, MoveUtils::paralyze));
+		REGISTRY.put("BOLT_STRIKE", new AilmentDamageMove(Types.ELECTRIC, MoveCategory.PHYSICAL, 5, 130, 85, 95, 20, MoveUtils::paralyze));
 
 		//Lugia's signature move, only benefit is higher critical
-		REGISTRY.put("AEROBLAST", new DamageMove(Types.FLYING, MoveType.SPECIAL, 5, 100, 95));
-		REGISTRY.put("AIR_CUTTER", new DamageMove(Types.FLYING, MoveType.SPECIAL, 25, 60, 95));
-		REGISTRY.put("ATTACK_ORDER", new DamageMove(Types.BUG, MoveType.PHYSICAL, 15, 90, 100, 100, Flags.NO_CONTACT));
-		REGISTRY.put("AQUA_JET", new DamageMove(Types.WATER, MoveType.PHYSICAL, 20, 40, 100, 60, Battle_Priority.P1));
-		REGISTRY.put("CUT", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 30, 50, 95));
-		REGISTRY.put("FAIRY_WIND", new DamageMove(Types.FAIRY, MoveType.SPECIAL, 30, 40, 100));
-		REGISTRY.put("MEGA_KICK", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 5, 120, 75));
-		REGISTRY.put("MEGA_PUNCH", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 20, 80, 85));
-		REGISTRY.put("PAY_DAY", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 20, 80, 85));
-		REGISTRY.put("SLAM", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 20, 80, 75));
-		REGISTRY.put("WATER_GUN", new DamageMove(Types.WATER, MoveType.SPECIAL, 25, 40, 100));
-		REGISTRY.put("WING_ATTACK", new DamageMove(Types.FLYING, MoveType.SPECIAL, 35, 60, 100));
-		REGISTRY.put("VICE_GRIP", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 30, 55, 100));
-		REGISTRY.put("VINE_WHIP", new DamageMove(Types.GRASS, MoveType.PHYSICAL, 25, 45, 100));
+		REGISTRY.put("AEROBLAST", new DamageMove(Types.FLYING, MoveCategory.SPECIAL, 5, 100, 95));
+		REGISTRY.put("AIR_CUTTER", new DamageMove(Types.FLYING, MoveCategory.SPECIAL, 25, 60, 95));
+		REGISTRY.put("ATTACK_ORDER", new DamageMove(Types.BUG, MoveCategory.PHYSICAL, 15, 90, 100, 100, OldMoveFlags.NO_CONTACT));
+		REGISTRY.put("AQUA_JET", new DamageMove(Types.WATER, MoveCategory.PHYSICAL, 20, 40, 100, 60, Battle_Priority.P1));
+		REGISTRY.put("CUT", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 30, 50, 95));
+		REGISTRY.put("FAIRY_WIND", new DamageMove(Types.FAIRY, MoveCategory.SPECIAL, 30, 40, 100));
+		REGISTRY.put("MEGA_KICK", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 5, 120, 75));
+		REGISTRY.put("MEGA_PUNCH", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 20, 80, 85));
+		REGISTRY.put("PAY_DAY", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 20, 80, 85));
+		REGISTRY.put("SLAM", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 20, 80, 75));
+		REGISTRY.put("WATER_GUN", new DamageMove(Types.WATER, MoveCategory.SPECIAL, 25, 40, 100));
+		REGISTRY.put("WING_ATTACK", new DamageMove(Types.FLYING, MoveCategory.SPECIAL, 35, 60, 100));
+		REGISTRY.put("VICE_GRIP", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 30, 55, 100));
+		REGISTRY.put("VINE_WHIP", new DamageMove(Types.GRASS, MoveCategory.PHYSICAL, 25, 45, 100));
 
 		//REGISTRY.put("POUND", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 35, 40, 100));
 		//REGISTRY.put("SCRATCH", new DamageMove(Types.NORMAL, MoveType.PHYSICAL, 35, 40, 100));
 		//Affects fly and other moves like that, dealing double damage. +10 cost because of that
-		REGISTRY.put("GUST", new DamageMove(Types.FLYING, MoveType.SPECIAL, 35, 40, 100, 50));
+		REGISTRY.put("GUST", new DamageMove(Types.FLYING, MoveCategory.SPECIAL, 35, 40, 100, 50));
 
-		REGISTRY.put("AERIAL_ACE", new DamageMove(Types.FLYING, MoveType.PHYSICAL, 20, 60, -1, 80, Flags.ALWAYS_HIT));
-		REGISTRY.put("AURA_SPHERE", new DamageMove(Types.FIGHTING, MoveType.SPECIAL, 20, 80, -1, 100,
-				Flags.BALLBASED, Flags.ALWAYS_HIT));
+		REGISTRY.put("AERIAL_ACE", new DamageMove(Types.FLYING, MoveCategory.PHYSICAL, 20, 60, -1, 80, OldMoveFlags.ALWAYS_HIT));
+		REGISTRY.put("AURA_SPHERE", new DamageMove(Types.FIGHTING, MoveCategory.SPECIAL, 20, 80, -1, 100,
+				OldMoveFlags.BALLBASED, OldMoveFlags.ALWAYS_HIT));
 
-		REGISTRY.put("BLAST_BURN", new HarshRechargeMove(Types.FIRE, MoveType.SPECIAL, 4, 150, 90));
+		REGISTRY.put("BLAST_BURN", new HarshRechargeMove(Types.FIRE, MoveCategory.SPECIAL, 4, 150, 90));
 
-		REGISTRY.put("BODY_SLAM", new AilmentMinimizeMove(Types.NORMAL, MoveType.PHYSICAL, 15, 85, 100, 100, 30, MoveUtils::paralyze));
-		REGISTRY.put("STEAMROLLER", new AilmentMinimizeMove(Types.BUG, MoveType.PHYSICAL, 20, 65, 100, 80, 30, MoveUtils::flinch));
-		REGISTRY.put("STOMP", new AilmentMinimizeMove(Types.NORMAL, MoveType.PHYSICAL, 20, 65, 100, 80, 30, MoveUtils::flinch));
+		REGISTRY.put("BODY_SLAM", new AilmentMinimizeMove(Types.NORMAL, MoveCategory.PHYSICAL, 15, 85, 100, 100, 30, MoveUtils::paralyze));
+		REGISTRY.put("STEAMROLLER", new AilmentMinimizeMove(Types.BUG, MoveCategory.PHYSICAL, 20, 65, 100, 80, 30, MoveUtils::flinch));
+		REGISTRY.put("STOMP", new AilmentMinimizeMove(Types.NORMAL, MoveCategory.PHYSICAL, 20, 65, 100, 80, 30, MoveUtils::flinch));
 
-		REGISTRY.put("ABSORB", new HPStealingMove(Types.GRASS, MoveType.SPECIAL, 25, 20, 100, 40, 50));
+		REGISTRY.put("ABSORB", new HPStealingMove(Types.GRASS, MoveCategory.SPECIAL, 25, 20, 100, 40, 50));
 
-		REGISTRY.put("FLY", new SemiInvulChargeMove(Types.FLYING, MoveType.PHYSICAL, 15, 90, 95, 120, "%s flew up high!",
-				Flags.FLIGHT, Flags.GUST_VULNURABLE));
-		REGISTRY.put("RAZOR_WIND", new ChargeMove(Types.NORMAL, MoveType.SPECIAL, 10, 80, 100, 70, "%s whipped up a whirlwind!"));
-		REGISTRY.put("SKY_ATTACK", new ChargeMove(Types.FLYING, MoveType.PHYSICAL, 5, 140, 90, 150, "%s is glowing!"){
+		REGISTRY.put("FLY", new SemiInvulChargeMove(Types.FLYING, MoveCategory.PHYSICAL, 15, 90, 95, 120, "%s flew up high!",
+				OldMoveFlags.FLIGHT, OldMoveFlags.GUST_VULNURABLE));
+		REGISTRY.put("RAZOR_WIND", new ChargeMove(Types.NORMAL, MoveCategory.SPECIAL, 10, 80, 100, 70, "%s whipped up a whirlwind!"));
+		REGISTRY.put("SKY_ATTACK", new ChargeMove(Types.FLYING, MoveCategory.PHYSICAL, 5, 140, 90, 150, "%s is glowing!"){
 			@Override
 			public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
 				super.runAfter(channel, attacker, defender, damage);
@@ -319,13 +321,13 @@ public abstract class Move{
 
 		REGISTRY.put("AFTER_YOU", new FlagMove(Types.NORMAL, 15, -1, 50, null));
 		REGISTRY.put("DESTINY_BOND", new FlagMove(Types.GHOST, 5, -1, 100, "%s will take it's foe down with it!",
-				Flags.UNTARGETABLE));
+				OldMoveFlags.UNTARGETABLE));
 
 		//TODO Blizzard - doubles power in hail, hits everyone, and has a 10% chance of freezing
 		//BLIZZARD(Types.ICE, MoveType.SPECIAL, 5, 110, 70, 115, Flags.HAS_BEFORE, Flags.HAS_AFTER),
 
 		//TODO if the user has no item, power is doubled
-		REGISTRY.put("ACROBATICS", new Move(Types.FLYING, MoveType.PHYSICAL, 15, 55, 100, 120){
+		REGISTRY.put("ACROBATICS", new OldMove(Types.FLYING, MoveCategory.PHYSICAL, 15, 55, 100, 120){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				return BeforeResult.HAS_ADJUSTED_DAMAGE;
@@ -337,7 +339,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("ACUPRESSURE", new Move(Types.NORMAL, MoveType.STATUS, 30, -1, -1, 60){
+		REGISTRY.put("ACUPRESSURE", new OldMove(Types.NORMAL, MoveCategory.STATUS, 30, -1, -1, 60){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(attacker != defender && defender.has(Effects.VBattle.SUBSTITUTE)){
@@ -356,7 +358,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("ANCIENT_POWER", new DamageMove(Types.ROCK, MoveType.SPECIAL, 5, 60, 100, 150){
+		REGISTRY.put("ANCIENT_POWER", new DamageMove(Types.ROCK, MoveCategory.SPECIAL, 5, 60, 100, 150){
 			@Override
 			public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
 				if(Pokebot.diceRoll(10)){
@@ -367,7 +369,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("AQUA_RING", new Move(Types.WATER, MoveType.STATUS, 20, -1, -1, 150, Flags.UNTARGETABLE){
+		REGISTRY.put("AQUA_RING", new OldMove(Types.WATER, MoveCategory.STATUS, 20, -1, -1, 150, OldMoveFlags.UNTARGETABLE){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				//TODO BigRoot increases restoration
@@ -376,7 +378,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("AROMATHERAPY", new Move(Types.GRASS, MoveType.STATUS, 5, -1, -1, 50){
+		REGISTRY.put("AROMATHERAPY", new OldMove(Types.GRASS, MoveCategory.STATUS, 5, -1, -1, 50){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				//These are status moves, battle checking is done for us
@@ -392,7 +394,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("AVALANCHE", new Move(Types.ICE, MoveType.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4){
+		REGISTRY.put("AVALANCHE", new OldMove(Types.ICE, MoveCategory.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				return BeforeResult.HAS_ADJUSTED_DAMAGE;
@@ -404,7 +406,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("GRAVITY", new Move(Types.PSYCHIC, MoveType.STATUS, 5, -1, -1, 100, Flags.UNTARGETABLE){
+		REGISTRY.put("GRAVITY", new OldMove(Types.PSYCHIC, MoveCategory.STATUS, 5, -1, -1, 100, OldMoveFlags.UNTARGETABLE){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				attacker.battle.set(Battle.BattleEffects.GRAVITY, 1);
@@ -414,7 +416,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("HEAL_BELL", new Move(Types.NORMAL, MoveType.STATUS, 5, -1, -1, 50){
+		REGISTRY.put("HEAL_BELL", new OldMove(Types.NORMAL, MoveCategory.STATUS, 5, -1, -1, 50){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				//These are status moves, battle checking is done for us
@@ -429,7 +431,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("JUMP_KICK", new Move(Types.FIGHTING, MoveType.PHYSICAL, 10, 100, 95, 100, Flags.FLIGHT){
+		REGISTRY.put("JUMP_KICK", new OldMove(Types.FIGHTING, MoveCategory.PHYSICAL, 10, 100, 95, 100, OldMoveFlags.FLIGHT){
 				//Has recoil){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
@@ -443,7 +445,7 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("GASTRO_ACID", new Move(Types.POISON, MoveType.STATUS, 10, -1, 100, 150){
+		REGISTRY.put("GASTRO_ACID", new OldMove(Types.POISON, MoveCategory.STATUS, 10, -1, 100, 150){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(willHit(this, attacker, defender, true)){ //Implicit battle check, because it's a status move
@@ -458,7 +460,7 @@ public abstract class Move{
 		});
 
 		//TODO this can probably be in a OHKO move class, since other moves will be like it
-		REGISTRY.put("GUILLOTINE", new Move(Types.NORMAL, MoveType.PHYSICAL, 5, -1, 30, 150){
+		REGISTRY.put("GUILLOTINE", new OldMove(Types.NORMAL, MoveCategory.PHYSICAL, 5, -1, 30, 150){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				if(willHit(this, attacker, defender, true)){
@@ -471,8 +473,8 @@ public abstract class Move{
 			}
 		});
 
-		REGISTRY.put("SPLASH", new Move(Types.WATER, MoveType.PHYSICAL, 999, -1, 100, 200,
-				Flags.UNTARGETABLE, Flags.FLIGHT){
+		REGISTRY.put("SPLASH", new OldMove(Types.WATER, MoveCategory.PHYSICAL, 999, -1, 100, 200,
+				OldMoveFlags.UNTARGETABLE, OldMoveFlags.FLIGHT){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				Pokebot.sendMessage(channel, "... But nothing happened");
@@ -490,9 +492,9 @@ public abstract class Move{
 
 	//Returns ifDefenderFainted
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
-	public static boolean attack(IChannel channel, Player attacker, MoveSet moveSet, Player defender){
-		Move move = moveSet.getMove();
-		if(!attacker.inBattle() && move.getMoveType() == MoveType.STATUS){
+	public static boolean attack(IChannel channel, Player attacker, OldMoveSet moveSet, Player defender){
+		OldMove move = moveSet.getMove();
+		if(!attacker.inBattle() && move.getMoveCategory() == MoveCategory.STATUS){
 			Pokebot.sendMessage(channel, "But it doesn't work here!");
 			return false;
 		}
@@ -601,11 +603,11 @@ public abstract class Move{
 		return attacker.inBattle() && defender.inBattle() && attacker.battle == defender.battle;
 	}
 
-	public static int getDamage(Player attacker, Move move, Player defender){
+	public static int getDamage(Player attacker, OldMove move, Player defender){
 		return getDamage(attacker, move, defender, move.getPower());
 	}
 
-	public static int getDamage(Player attacker, Move move, Player defender, int power){
+	public static int getDamage(Player attacker, OldMove move, Player defender, int power){
 		double modifier =
 				getStab(attacker, move) //STAB
 						*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
@@ -640,7 +642,7 @@ public abstract class Move{
 		return (int) ret; //implicit math.floor
 	}
 
-	public static double getStab(Player attacker, Move move){
+	public static double getStab(Player attacker, OldMove move){
 		if(attacker.hasType(move.getType(attacker))){
 			if(attacker.hasAbility(Abilities.ADAPTABILITY)) return 2;
 			return 1.5;
@@ -649,7 +651,7 @@ public abstract class Move{
 	}
 
 	@SuppressWarnings("UnusedParameters")
-	public static double getPowerChange(Player attacker, Move move, Player defender, double power){
+	public static double getPowerChange(Player attacker, OldMove move, Player defender, double power){
 		switch(attacker.getModifiedAbility()){
 			case AERILATE:{
 				power *= 1.3;
@@ -662,7 +664,7 @@ public abstract class Move{
 	}
 
 	//TODO perhaps this isn't necessary?
-	public static float getOtherModifiers(Player attacker, Move move, Player defender){
+	public static float getOtherModifiers(Player attacker, OldMove move, Player defender){
 		/* TODO switch(move){
 			case GUST:{
 				switch(defender.lastMove){
@@ -687,7 +689,7 @@ public abstract class Move{
 	//Dice rolls for a hit, if not factoring in changes to accuracy and evasion, you can safely
 	//pass in null for Attacker and Defender
 	@SuppressWarnings("BooleanParameter")
-	public static boolean willHit(Move move, Player attacker, Player defender, boolean factorChanges){
+	public static boolean willHit(OldMove move, Player attacker, Player defender, boolean factorChanges){
 		if(move == null) return false;
 		if(MoveUtils.checkParalysis(attacker)) return false;
 		if(defender.inBattle()){
@@ -727,7 +729,7 @@ public abstract class Move{
 			}
 			switch(defender.getModifiedAbility()){
 				case BULLETPROOF:{
-					if(move.has(Flags.BALLBASED)){
+					if(move.has(OldMoveFlags.BALLBASED)){
 						Pokebot.sendMessage(defender.battle.channel, defender.mention()+" is immune to the attack!");
 						return false;
 					}

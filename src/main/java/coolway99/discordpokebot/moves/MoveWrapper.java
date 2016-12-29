@@ -1,12 +1,8 @@
-package coolway99.discordpokebot.moves.rewrite;
+package coolway99.discordpokebot.moves;
 
-import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.jsonUtils.Context;
+import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
-import coolway99.discordpokebot.moves.Battle_Priority;
-import coolway99.discordpokebot.moves.MoveType;
 import coolway99.discordpokebot.states.Types;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.jetbrains.annotations.Contract;
@@ -20,7 +16,7 @@ public class MoveWrapper{
 
 	private final Types type;
 	private final int power;
-	private final MoveType category;
+	private final MoveCategory category;
 	private final int PP;
 	private final int accuracy;
 	private final Battle_Priority priority;
@@ -43,7 +39,7 @@ public class MoveWrapper{
 	public MoveWrapper(JSONObject move){
 		this.type = move.getObject("type", Types.NORMAL);
 		this.power = move.getInt("power", 0);
-		this.category = move.getObject("category", MoveType.PHYSICAL);
+		this.category = move.getObject("category", MoveCategory.PHYSICAL);
 		this.PP = move.getInt("pp", 0);
 		Object accuracy = move.getObject("accuracy");
 		if(accuracy == null){
@@ -93,7 +89,7 @@ public class MoveWrapper{
 		return this.power;
 	}
 
-	public MoveType getCategory(){
+	public MoveCategory getCategory(){
 		return this.category;
 	}
 

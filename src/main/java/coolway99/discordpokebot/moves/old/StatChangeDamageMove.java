@@ -1,8 +1,10 @@
-package coolway99.discordpokebot.moves;
+package coolway99.discordpokebot.moves.old;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.moves.Battle_Priority;
+import coolway99.discordpokebot.moves.MoveCategory;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
@@ -14,23 +16,23 @@ public class StatChangeDamageMove extends DamageMove{
 	private final Stats stat;
 	private final Who who;
 
-	public StatChangeDamageMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, float chance,
-								Stats stat, int change, Who who, Battle_Priority priority, Flags... flags){
-		super(type, moveType, PP, power, accuracy, cost, priority, flags);
+	public StatChangeDamageMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, float chance,
+								Stats stat, int change, Who who, Battle_Priority priority, OldMoveFlags... flags){
+		super(type, moveCategory, PP, power, accuracy, cost, priority, flags);
 		this.chance = chance;
 		this.change = change;
 		this.stat = stat;
 		this.who = who;
 	}
 
-	public StatChangeDamageMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, float chance,
-								Stats stat, int change, Who who, Flags... flags){
-		this(type, moveType, PP, power, accuracy, cost, chance, stat, change, who, Battle_Priority.P0, flags);
+	public StatChangeDamageMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, float chance,
+								Stats stat, int change, Who who, OldMoveFlags... flags){
+		this(type, moveCategory, PP, power, accuracy, cost, chance, stat, change, who, Battle_Priority.P0, flags);
 	}
 
-	public StatChangeDamageMove(Types type, MoveType moveType, int PP, int power, int accuracy, float chance,
-								Stats stat, int change, Who who, Flags... flags){
-		this(type, moveType, PP, power, accuracy, power+((change/10)*5), chance, stat, change, who, flags);
+	public StatChangeDamageMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, float chance,
+								Stats stat, int change, Who who, OldMoveFlags... flags){
+		this(type, moveCategory, PP, power, accuracy, power+((change/10)*5), chance, stat, change, who, flags);
 	}
 
 	@Override

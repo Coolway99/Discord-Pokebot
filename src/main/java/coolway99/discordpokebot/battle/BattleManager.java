@@ -2,8 +2,6 @@ package coolway99.discordpokebot.battle;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;

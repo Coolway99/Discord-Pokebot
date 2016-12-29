@@ -3,9 +3,9 @@ package coolway99.discordpokebot.items;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.StatHandler;
-import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.moves.MoveSet;
-import coolway99.discordpokebot.moves.MoveType;
+import coolway99.discordpokebot.moves.old.OldMove;
+import coolway99.discordpokebot.moves.old.OldMoveSet;
+import coolway99.discordpokebot.moves.MoveCategory;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
@@ -67,15 +67,15 @@ public class Item{
 		return this.displayName;
 	}
 
-	public MoveSet onMove(IChannel channel, Player attacker, MoveSet move, Player defender){
+	public OldMoveSet onMove(IChannel channel, Player attacker, OldMoveSet move, Player defender){
 		return null;
 	}
 
-	public int onAttack(IChannel channel, Player attacker, Move move, Player defender, int damage){
+	public int onAttack(IChannel channel, Player attacker, OldMove move, Player defender, int damage){
 		return 0;
 	}
 
-	public void onAfterDamage(IChannel channel, Player attacker, Move move, Player defender, int damage){
+	public void onAfterDamage(IChannel channel, Player attacker, OldMove move, Player defender, int damage){
 
 	}
 
@@ -132,7 +132,7 @@ public class Item{
 		ItemBuilder.newItem(100, "ASSAULT_VEST", "Assault Vest")
 				.fling(80)
 				.onMove((channel, attacker, move, defender, item) -> {
-					if(move.getMove().getMoveType() == MoveType.STATUS) return null;
+					if(move.getMove().getMoveCategory() == MoveCategory.STATUS) return null;
 					return move;
 				})
 				//TODO mod special defence

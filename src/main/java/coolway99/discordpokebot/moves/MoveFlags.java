@@ -1,4 +1,4 @@
-package coolway99.discordpokebot.moves.rewrite;
+package coolway99.discordpokebot.moves;
 
 //This class would not be possible without showdown's move source code database.
 

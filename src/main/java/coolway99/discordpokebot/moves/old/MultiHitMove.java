@@ -1,16 +1,16 @@
-package coolway99.discordpokebot.moves;
+package coolway99.discordpokebot.moves.old;
 
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.moves.rewrite.MoveUtils;
+import coolway99.discordpokebot.moves.MoveCategory;
+import coolway99.discordpokebot.moves.MoveUtils;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**
  * The main object of typical multi-hit moves, used for convenience.
  */
-public class MultiHitMove extends Move{
+public class MultiHitMove extends OldMove{
 	/*(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
 	Flags... flags){*/
 
@@ -20,15 +20,15 @@ public class MultiHitMove extends Move{
 	/**
 	 * Used for a multi-hit move that always uses the same number of hits
 	 * @param type The {@link Types Type} of the move
-	 * @param moveType The {@link coolway99.discordpokebot.moves.MoveType} of the move (Physical, Status, etc.)
+	 * @param moveCategory The {@link MoveCategory} of the move (Physical, Status, etc.)
 	 * @param PP The max PP of the move
 	 * @param singleHitPower How much each hit does
 	 * @param accuracy The initial accuracy of the move
 	 * @param cost The cost of this move
-	 * @param flags The {@link coolway99.discordpokebot.moves.Flags} of the move
+	 * @param flags The {@link OldMoveFlags} of the move
 	 */
-	public MultiHitMove(Types type, MoveType moveType, int PP, int singleHitPower, int accuracy, int cost, Flags... flags){
-		super(type, moveType, PP, singleHitPower, accuracy, cost, flags);
+	public MultiHitMove(Types type, MoveCategory moveCategory, int PP, int singleHitPower, int accuracy, int cost, OldMoveFlags... flags){
+		super(type, moveCategory, PP, singleHitPower, accuracy, cost, flags);
 	}
 
 	@Override

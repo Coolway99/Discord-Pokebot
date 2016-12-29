@@ -1,10 +1,8 @@
 package coolway99.discordpokebot.items;
 
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.StatHandler;
-import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.old.OldMove;
+import coolway99.discordpokebot.moves.old.OldMoveSet;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
@@ -109,17 +107,17 @@ public class ItemBuilder{
 		Item item = new Item(this.itemType, this.cost, this.name, this.displayName,
 				this.flingPower, this.naturalGiftPower, this.naturalGiftType){
 			@Override
-			public MoveSet onMove(IChannel channel, Player attacker, MoveSet move, Player defender){
+			public OldMoveSet onMove(IChannel channel, Player attacker, OldMoveSet move, Player defender){
 				return ItemBuilder.this.onMove.run(channel, attacker, move, defender, this);
 			}
 
 			@Override
-			public int onAttack(IChannel channel, Player attacker, Move move, Player defender, int damage){
+			public int onAttack(IChannel channel, Player attacker, OldMove move, Player defender, int damage){
 				return ItemBuilder.this.onAttack.run(channel, attacker, move, defender, damage, this);
 			}
 
 			@Override
-			public void onAfterDamage(IChannel channel, Player attacker, Move move, Player defender, int damage){
+			public void onAfterDamage(IChannel channel, Player attacker, OldMove move, Player defender, int damage){
 				ItemBuilder.this.onAfterDamage.run(channel, attacker, move, defender, damage, this);
 			}
 
@@ -135,17 +133,17 @@ public class ItemBuilder{
 
 	@FunctionalInterface
 	public interface ModifyMoveMethod{
-		MoveSet run(IChannel channel, Player attacker, MoveSet move, Player defender, Item item);
+		OldMoveSet run(IChannel channel, Player attacker, OldMoveSet move, Player defender, Item item);
 	}
 
 	@FunctionalInterface
 	public interface DamageMethod{
-		void run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
+		void run(IChannel channel, Player attacker, OldMove move, Player defender, int damage, Item item);
 	}
 
 	@FunctionalInterface
 	public interface ModifyDamageMethod{
-		int run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item);
+		int run(IChannel channel, Player attacker, OldMove move, Player defender, int damage, Item item);
 	}
 
 	@FunctionalInterface
@@ -162,7 +160,7 @@ public class ItemBuilder{
 		}
 
 		@Override
-		public void run(IChannel channel, Player attacker, Move move, Player defender, int damage, Item item){
+		public void run(IChannel channel, Player attacker, OldMove move, Player defender, int damage, Item item){
 			/*if(defender.HP < defender.getMaxHP()/2 && !defender.has(Effects.Volatile.HEAL_BLOCK) && item.canConsume(defender)){
 				int heal = defender.getMaxHP()/8;
 				defender.HP = Math.min(heal, defender.getMaxHP());

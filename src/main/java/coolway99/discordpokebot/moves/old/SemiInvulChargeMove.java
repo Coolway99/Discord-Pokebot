@@ -1,19 +1,21 @@
-package coolway99.discordpokebot.moves;
+package coolway99.discordpokebot.moves.old;
 
 import coolway99.discordpokebot.Player;
+import coolway99.discordpokebot.moves.Battle_Priority;
+import coolway99.discordpokebot.moves.MoveCategory;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
 public class SemiInvulChargeMove extends ChargeMove{
-	public SemiInvulChargeMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, String chargeText,
-							   Battle_Priority priority, Flags... flags){
-		super(type, moveType, PP, power, accuracy, cost, chargeText, priority, flags);
+	public SemiInvulChargeMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, String chargeText,
+							   Battle_Priority priority, OldMoveFlags... flags){
+		super(type, moveCategory, PP, power, accuracy, cost, chargeText, priority, flags);
 	}
 
-	public SemiInvulChargeMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, String chargeText,
-							   Flags... flags){
-		super(type, moveType, PP, power, accuracy, cost, chargeText, flags);
+	public SemiInvulChargeMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, String chargeText,
+							   OldMoveFlags... flags){
+		super(type, moveCategory, PP, power, accuracy, cost, chargeText, flags);
 	}
 
 	@Override

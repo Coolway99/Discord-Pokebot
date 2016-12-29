@@ -1,9 +1,7 @@
 package coolway99.discordpokebot.web;
 
-import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.old.OldMove;
 import org.watertemplate.Template;
-
-import java.util.Arrays;
 
 /*
  * This was a copy/paste of TypeList
@@ -15,7 +13,7 @@ public final class MoveList extends Template{
 	private static String render = null;
 
 	private MoveList(){
-		this.addCollection("moves", Move.REGISTRY.values(), (move, map) -> {
+		this.addCollection("moves", OldMove.REGISTRY.values(), (move, map) -> {
 			map.add("name", move.getDisplayName());
 			map.add("value", move.getName());
 			map.add("cost", Integer.toString(move.getCost()));

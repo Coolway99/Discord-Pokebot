@@ -1,8 +1,7 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.misc.GameList;
-import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.moves.rewrite.MoveAPI;
+import coolway99.discordpokebot.moves.MoveAPI;
 import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.web.WebInterface;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +66,6 @@ public class Pokebot{
 		System.out.println("Logging in");
 		//Timers moved to BotReadyHandler
 		//Now that the main thread is done doing its business and the bot is busy logging in...
-		Move.registerMoves();
 		MoveAPI.registerMoves();
 		//Item.registerItems();
 	}

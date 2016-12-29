@@ -1,7 +1,9 @@
-package coolway99.discordpokebot.moves;
+package coolway99.discordpokebot.moves.old;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
+import coolway99.discordpokebot.moves.Battle_Priority;
+import coolway99.discordpokebot.moves.MoveCategory;
 import coolway99.discordpokebot.states.Types;
 import org.jetbrains.annotations.Nullable;
 import sx.blah.discord.handle.obj.IChannel;
@@ -9,17 +11,17 @@ import sx.blah.discord.handle.obj.IChannel;
 /**
  * A move that does nothing except set a flag
  */
-public class FlagMove extends Move{
+public class FlagMove extends OldMove{
 
 	private final String message;
 
 	public FlagMove(Types type, int PP, int accuracy, int cost, @Nullable String message, Battle_Priority priority,
-					Flags... flags){
-		super(type, MoveType.STATUS, PP, -1, accuracy, cost, priority, flags);
+					OldMoveFlags... flags){
+		super(type, MoveCategory.STATUS, PP, -1, accuracy, cost, priority, flags);
 		this.message = message;
 	}
 
-	public FlagMove(Types type, int PP, int accuracy, int cost, @Nullable String message, Flags... flags){
+	public FlagMove(Types type, int PP, int accuracy, int cost, @Nullable String message, OldMoveFlags... flags){
 		this(type, PP, accuracy, cost, message, Battle_Priority.P0, flags);
 	}
 

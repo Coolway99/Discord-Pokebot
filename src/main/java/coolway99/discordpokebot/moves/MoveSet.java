@@ -1,15 +1,15 @@
 package coolway99.discordpokebot.moves;
 
 public class MoveSet{
-	private final Move move;
+	private final MoveWrapper move;
 	private int PP;
 
-	public MoveSet(Move move){
+	public MoveSet(MoveWrapper move){
 		this.move = move;
 		this.PP = move.getPP();
 	}
 
-	public Move getMove(){
+	public MoveWrapper getMove(){
 		return this.move;
 	}
 

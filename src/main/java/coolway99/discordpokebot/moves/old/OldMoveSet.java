@@ -1,15 +1,15 @@
-package coolway99.discordpokebot.moves.rewrite;
+package coolway99.discordpokebot.moves.old;
 
-public class NewMoveSet{
-	private final MoveWrapper move;
+public class OldMoveSet{
+	private final OldMove move;
 	private int PP;
 
-	public NewMoveSet(MoveWrapper move){
+	public OldMoveSet(OldMove move){
 		this.move = move;
 		this.PP = move.getPP();
 	}
 
-	public MoveWrapper getMove(){
+	public OldMove getMove(){
 		return this.move;
 	}
 

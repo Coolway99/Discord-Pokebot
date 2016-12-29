@@ -1,6 +1,6 @@
-package coolway99.discordpokebot.moves;
+package coolway99.discordpokebot.moves.old;
 
-public enum Flags{
+public enum OldMoveFlags{
 	ALWAYS_HIT,
 	HIT_THROUGH_SEMIINVUL,
 	HIT_THROUGH_PROTECTION,

@@ -1,8 +1,8 @@
 package coolway99.discordpokebot.states;
 
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.moves.rewrite.MoveWrapper;
+import coolway99.discordpokebot.moves.old.OldMove;
+import coolway99.discordpokebot.moves.MoveWrapper;
 
 public enum Types{
 	NULL,
@@ -351,7 +351,7 @@ public enum Types{
 		return isImmune(attacker, move.getType(), defender);
 	}
 	
-	public static boolean isImmune(Player attacker, Move move, Player defender){
+	public static boolean isImmune(Player attacker, OldMove move, Player defender){
 		return isImmune(attacker, move.getType(attacker), defender);
 	}
 
@@ -376,7 +376,7 @@ public enum Types{
 	}
 	
 	//THIS DOES NOT FACTOR IN STAB
-	public static double getTypeMultiplier(Player attacker, Move move, Player defender){
+	public static double getTypeMultiplier(Player attacker, OldMove move, Player defender){
 		return getTypeMultiplier(attacker, move.getType(attacker), defender);
 	}
 

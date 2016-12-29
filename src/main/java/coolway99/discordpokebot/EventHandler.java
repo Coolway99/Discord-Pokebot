@@ -2,11 +2,10 @@ package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
-import coolway99.discordpokebot.jsonUtils.Context;
-import coolway99.discordpokebot.moves.rewrite.AttackLogic;
-import coolway99.discordpokebot.moves.rewrite.MoveWrapper;
-import coolway99.discordpokebot.moves.rewrite.NewMoveSet;
-import coolway99.discordpokebot.moves.rewrite.MoveAPI;
+import coolway99.discordpokebot.moves.AttackLogic;
+import coolway99.discordpokebot.moves.MoveWrapper;
+import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.MoveAPI;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Position;
@@ -301,7 +300,7 @@ public class EventHandler{
 							return;*//*
 							StatHandler.exceedWarning(channel, player);
 						}*/
-						player.moves[slot] = new NewMoveSet(move);
+						player.moves[slot] = new MoveSet(move);
 						reply(message, "Set move "+(slot+1)+" to "+move.getName());
 					} catch(NumberFormatException e){
 						reply(message, "That is not a valid number!");
@@ -343,7 +342,7 @@ public class EventHandler{
 					}
 					StringBuilder builder = new StringBuilder("The moves for ").append(player.mention()).append(" are:\n");
 					for(int x = 0; x < player.numOfAttacks; x++){
-						NewMoveSet set = player.moves[x];
+						MoveSet set = player.moves[x];
 						builder.append(x+1).append(": ").append(set.getMove().getDisplayName());
 						builder.append(" [").append(set.getPP()).append('/')
 								.append(player.moves[x].getMaxPP()).append("]\n");
@@ -538,7 +537,7 @@ public class EventHandler{
 						Player defender = PlayerHandler.getPlayer(mentionOrAuthor);
 						//TODO check to see if both parties meet the stat level requirement
 						//TODO right here if we're in a battle we should hand control over to the battle system
-						NewMoveSet set = attacker.moves[slot];
+						MoveSet set = attacker.moves[slot];
 						if(!set.getMove().getTarget().canHit(Position.CENTER, Position.CENTER, attacker == defender)){
 							reply(message, "This move can't target them!");
 							return;

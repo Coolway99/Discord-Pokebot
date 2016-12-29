@@ -1,4 +1,4 @@
-package coolway99.discordpokebot.moves.rewrite;
+package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.jsonUtils.JSONObject;

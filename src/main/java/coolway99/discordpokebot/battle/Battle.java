@@ -1,14 +1,13 @@
 package coolway99.discordpokebot.battle;
 
 import coolway99.discordpokebot.Messages;
-import coolway99.discordpokebot.MoveConstants;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.moves.Flags;
-import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.old.OldMoveFlags;
+import coolway99.discordpokebot.moves.old.OldMoveSet;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
-import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.old.OldMove;
 import sx.blah.discord.handle.obj.IChannel;
 
 import java.util.ArrayList;
@@ -75,7 +74,7 @@ public class Battle{
 		return this.participants;
 	}
 
-	public void onAttack(IChannel channel, Player attacker, MoveSet moveSet, Player defender){
+	public void onAttack(IChannel channel, Player attacker, OldMoveSet moveSet, Player defender){
 		synchronized(this.attacks){
 			if(this.attacks.containsKey(attacker)){
 				this.sendMessage(attacker.mention()+" you've already sent your attack!");
@@ -87,10 +86,10 @@ public class Battle{
 			} else {
 				this.sendMessage(attacker.mention()+" submitted their attack");
 			}
-			Move move = moveSet.getMove();
+			OldMove move = moveSet.getMove();
 			//attacker.lastMove = moveSet;
-			attacker.lastTarget = move.has(Flags.UNTARGETABLE) ? null : defender;
-			if(!move.has(Flags.UNTARGETABLE))
+			attacker.lastTarget = move.has(OldMoveFlags.UNTARGETABLE) ? null : defender;
+			if(!move.has(OldMoveFlags.UNTARGETABLE))
 				defender.lastAttacker = attacker; //free-for-all may make it weird, but it's intentional
 			if(this.attacks.size() == this.participants.size()){
 				this.timer.cancel();
@@ -100,7 +99,7 @@ public class Battle{
 	}
 
 	//Called for moves that auto-set themselves
-	private void onAutoAttack(Player attacker, MoveSet move, Player defender){
+	private void onAutoAttack(Player attacker, OldMoveSet move, Player defender){
 		synchronized(this.attacks){
 			this.attacks.put(attacker, new IAttack(attacker, move, defender));
 			this.sendMessage(attacker.mention()+" has a multiturn attack!");
@@ -151,7 +150,7 @@ public class Battle{
 					}
 					case POISON:{
 						if(player.hasAbility(Abilities.POISON_HEAL)){
-							Move.heal(this.channel, player, player.getMaxHP()/8);
+							OldMove.heal(this.channel, player, player.getMaxHP()/8);
 							break;
 						}
 						player.HP = Math.max(0, player.HP-(player.getMaxHP()/8));
@@ -160,7 +159,7 @@ public class Battle{
 					}
 					case TOXIC:{
 						if(player.hasAbility(Abilities.POISON_HEAL)){
-							Move.heal(this.channel, player, player.getMaxHP()/8);
+							OldMove.heal(this.channel, player, player.getMaxHP()/8);
 							++player.counter;
 							break;
 						}
@@ -216,7 +215,7 @@ public class Battle{
 					+" went to attack, but there was no target!");
 			return false;
 		}
-		if(Move.attack(this.channel, attack)){
+		if(OldMove.attack(this.channel, attack)){
 			//if(attack.defender.lastMove.getMove() == Move.REGISTRY.get("DESTINY_BOND")){
 				this.sendMessage(attack.attacker.mention()
 						+" was taken down with "+attack.defender.mention());

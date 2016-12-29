@@ -1,6 +1,6 @@
 package coolway99.discordpokebot.moves;
 
-public enum MoveType{
+public enum MoveCategory{
 	PHYSICAL,
 	SPECIAL,
 	STATUS

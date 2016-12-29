@@ -1,9 +1,9 @@
-package coolway99.discordpokebot.moves.rewrite;
+package coolway99.discordpokebot.moves;
 
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.jsonUtils.Context;
+import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.states.Effects;
 
 public class AttackLogic{

@@ -4,7 +4,7 @@
 	return JSON.parse(JSON.stringify(x));
 }*/
 
-var MoveAPI = Java.type("coolway99.discordpokebot.moves.rewrite.MoveAPI");
+var MoveAPI = Java.type("coolway99.discordpokebot.moves.MoveAPI");
 var Pokebot = Java.type("coolway99.discordpokebot.Pokebot");
 
 var API = {
@@ -14,10 +14,10 @@ var API = {
 	EFFECTS: Java.type("coolway99.discordpokebot.states.Effects"),
 
 	MOVES: {
-		CATEGORY: Java.type("coolway99.discordpokebot.moves.MoveType"),
-		FLAGS: Java.type("coolway99.discordpokebot.moves.rewrite.MoveFlags"),
-		TARGET: Java.type("coolway99.discordpokebot.moves.rewrite.Target"),
-		UTILS: Java.type("coolway99.discordpokebot.moves.rewrite.MoveUtils"),
+		CATEGORY: Java.type("coolway99.discordpokebot.moves.MoveCategory"),
+		FLAGS: Java.type("coolway99.discordpokebot.moves.MoveFlags"),
+		TARGET: Java.type("coolway99.discordpokebot.moves.Target"),
+		UTILS: Java.type("coolway99.discordpokebot.moves.MoveUtils"),
 
 		standardMultiHit: function(context, attacker, defender){
 			var hits = API.MOVES.UTILS.getTimesHit(1, 1/3, 1/3, 1/6, 1/6);

@@ -1,11 +1,11 @@
-package coolway99.discordpokebot.jsonUtils;
+package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
-import coolway99.discordpokebot.moves.rewrite.MoveWrapper;
+import coolway99.discordpokebot.moves.MoveWrapper;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**
- * A class created to keep context between different states. Currently only used for JSON
+ * A class created to keep context between different states.
  */
 public class Context{
 	public IChannel channel = null;

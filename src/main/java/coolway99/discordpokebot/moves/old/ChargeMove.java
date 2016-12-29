@@ -1,30 +1,32 @@
-package coolway99.discordpokebot.moves;
+package coolway99.discordpokebot.moves.old;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.moves.rewrite.MoveUtils;
+import coolway99.discordpokebot.moves.Battle_Priority;
+import coolway99.discordpokebot.moves.MoveCategory;
+import coolway99.discordpokebot.moves.MoveUtils;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**
  * For "multiturn" moves that have to be charged up first
  */
-public class ChargeMove extends Move{
+public class ChargeMove extends OldMove{
 
 	private final String chargeText;
 
 	protected static final int CHARGING = 0;
 	protected static final int ATTACKING = 1;
 
-	public ChargeMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, String chargeText,
-					  Battle_Priority priority, Flags... flags){
-		super(type, moveType, PP, power, accuracy, cost, priority, flags);
+	public ChargeMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, String chargeText,
+					  Battle_Priority priority, OldMoveFlags... flags){
+		super(type, moveCategory, PP, power, accuracy, cost, priority, flags);
 		this.chargeText = chargeText;
 	}
 
-	public ChargeMove(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, String chargeText,
-					  Flags... flags){
-		this(type, moveType, PP, power, accuracy, cost, chargeText, Battle_Priority.P0, flags);
+	public ChargeMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, String chargeText,
+					  OldMoveFlags... flags){
+		this(type, moveCategory, PP, power, accuracy, cost, chargeText, Battle_Priority.P0, flags);
 	}
 
 	@Override

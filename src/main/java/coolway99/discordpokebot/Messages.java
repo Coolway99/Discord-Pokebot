@@ -1,7 +1,7 @@
 package coolway99.discordpokebot;
 
-import coolway99.discordpokebot.moves.Move;
-import coolway99.discordpokebot.moves.rewrite.MoveWrapper;
+import coolway99.discordpokebot.moves.old.OldMove;
+import coolway99.discordpokebot.moves.MoveWrapper;
 import sx.blah.discord.handle.obj.IChannel;
 
 //Used for containing all the standard messages
@@ -39,7 +39,7 @@ public class Messages{
 		Pokebot.sendMessage(channel, "But "+defender.mention()+"'s substitute blocked it!");
 	}
 
-	public static void attackMessage(IChannel channel, Player attacker, Move move){
+	public static void attackMessage(IChannel channel, Player attacker, OldMove move){
 		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getName()+'!');
 	}
 
