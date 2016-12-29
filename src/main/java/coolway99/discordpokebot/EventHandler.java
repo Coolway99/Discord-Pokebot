@@ -2,12 +2,14 @@ package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
-import coolway99.discordpokebot.moves.Flags;
-import coolway99.discordpokebot.moves.MoveSet;
-import coolway99.discordpokebot.moves.rewrite.NewMoves;
+import coolway99.discordpokebot.jsonUtils.Context;
+import coolway99.discordpokebot.moves.rewrite.AttackLogic;
+import coolway99.discordpokebot.moves.rewrite.MoveWrapper;
+import coolway99.discordpokebot.moves.rewrite.NewMoveSet;
+import coolway99.discordpokebot.moves.rewrite.MoveAPI;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
+import coolway99.discordpokebot.states.Position;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
@@ -21,8 +23,6 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.MessageBuilder;
 
-import javax.script.Bindings;
-import javax.script.ScriptContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -274,7 +274,7 @@ public class EventHandler{
 						return;
 					}
 					try{
-						Move move = Move.REGISTRY.get(args[2].toUpperCase());
+						MoveWrapper move = MoveAPI.REGISTRY.get(args[2].toUpperCase());
 						if(move == null){
 							reply(message, "That is not a valid move!");
 							return;
@@ -289,7 +289,7 @@ public class EventHandler{
 							return;
 						}
 						if(player.numOfAttacks < 4){
-							if(slot != player.numOfAttacks++){
+							if(slot-1 != player.numOfAttacks++){
 								reply(message, "Less than 4 moves detected, setting slot to the last slot in the list...");
 							}
 							slot = player.numOfAttacks;
@@ -301,7 +301,7 @@ public class EventHandler{
 							return;*//*
 							StatHandler.exceedWarning(channel, player);
 						}*/
-						//player.moves[slot] = new MoveSet(move);
+						player.moves[slot] = new NewMoveSet(move);
 						reply(message, "Set move "+(slot+1)+" to "+move.getName());
 					} catch(NumberFormatException e){
 						reply(message, "That is not a valid number!");
@@ -315,13 +315,13 @@ public class EventHandler{
 							reply(message, "Usage: gmi <move>");
 							return;
 						}
-						Move move = Move.REGISTRY.get(args[1].toUpperCase());
+						MoveWrapper move = MoveAPI.REGISTRY.get(args[1].toUpperCase());
 						String b = "Stats of "+move+
-								"\nType: "+move.getType(Abilities.MC_NORMAL_PANTS)+
+								"\nType: "+move.getType()+//(Abilities.MC_NORMAL_PANTS)+
 								"\nPower: "+move.getPower()+
 								"\nPP: "+move.getPP()+
-								"\nAccuracy: "+Math.round(move.getAccuracy()*10000)/100+
-								'\n'+(move.isSpecial() ? "Special" : "Physical")+
+								"\nAccuracy: "+move.getAccuracy()+
+								'\n'+move.getCategory()+
 								"\nPoint Cost: "+move.getCost();
 						Pokebot.sendMessage(channel, b);
 					} catch(IllegalArgumentException e){
@@ -338,15 +338,15 @@ public class EventHandler{
 				case "listmoves":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
 					if(player.numOfAttacks <= 0){
-						Pokebot.sendMessage(channel, " has no moves!");
+						Pokebot.sendMessage(channel, player.mention()+" has no moves!");
 						return;
 					}
 					StringBuilder builder = new StringBuilder("The moves for ").append(player.mention()).append(" are:\n");
 					for(int x = 0; x < player.numOfAttacks; x++){
-						//MoveSet set = player.moves[x];
-						//builder.append(x+1).append(": ").append(set.getMove().getDisplayName());
-						//builder.append(" [").append(set.getPP()).append('/')
-						//		.append(player.moves[x].getMaxPP()).append("]\n");
+						NewMoveSet set = player.moves[x];
+						builder.append(x+1).append(": ").append(set.getMove().getDisplayName());
+						builder.append(" [").append(set.getPP()).append('/')
+								.append(player.moves[x].getMaxPP()).append("]\n");
 					}
 					Pokebot.sendMessage(channel, builder.toString());
 					return;
@@ -354,8 +354,8 @@ public class EventHandler{
 				case "lam":
 				case "listallmoves":{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
-					for(Move move : Move.REGISTRY.values()){ //Starting at one to prevent the NULL move
-						builder.append(move.getDisplayName()).append(" (").append(move.getMoveType()).append(')').append("\n");
+					for(MoveWrapper move : MoveAPI.REGISTRY.values()){ //Starting at one to prevent the NULL move
+						builder.append(move.getDisplayName()).append(" (").append(move.getCategory()).append(')').append("\n");
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent you all the moves I know");
@@ -435,7 +435,8 @@ public class EventHandler{
 					reply(message, player.mention()+" is level "+player.level);
 					return;
 				}
-				case "attack":{
+				case "oldAttack":{
+					if(!author.getID().equals(Pokebot.config.OWNERID)) break;
 					try{
 						//We rely on error catching if there is the incorrect args
 						int slot = Integer.parseInt(args[1]);
@@ -512,7 +513,51 @@ public class EventHandler{
 					}
 					return;
 				}
-				//TODO this should redirect to the heal function
+				case "attack":{
+					try{
+						//We rely on error catching if there is the incorrect args
+						int slot = Integer.parseInt(args[1]);
+						if(slot < 1 || slot > 4){
+							reply(message, "Slot number is from 1-4");
+							return;
+						}
+						slot--;
+						Player attacker = PlayerHandler.getPlayer(author);
+						if(attacker.numOfAttacks == 0){
+							reply(message, "You have no moves! Set some with "+Pokebot.config.COMMAND_PREFIX+"setmove");
+							return;
+						}
+						if(attacker.numOfAttacks < slot){
+							reply(message, "That slot is empty");
+							return;
+						}
+						if(attacker.moves[slot].getPP() < 1){
+							reply(message, "You have no PP left for that move!");
+							return;
+						}
+						Player defender = PlayerHandler.getPlayer(mentionOrAuthor);
+						//TODO check to see if both parties meet the stat level requirement
+						//TODO right here if we're in a battle we should hand control over to the battle system
+						NewMoveSet set = attacker.moves[slot];
+						if(!set.getMove().getTarget().canHit(Position.CENTER, Position.CENTER, attacker == defender)){
+							reply(message, "This move can't target them!");
+							return;
+						}
+						//They can hit the target, stats are in check, let's attack
+						if(set.useMove()){
+							Context context = new Context();
+							context.channel = channel;
+							context.move = set.getMove();
+							AttackLogic.attack(context, attacker, set.getMove(), defender);
+						}
+					} catch(NumberFormatException e){
+						reply(message, "That's not a number!");
+					} catch(IndexOutOfBoundsException e){
+						reply(message, "Usage: attack <slotnum> @target");
+					}
+					return;
+				}
+				//TODO this should redirect to the heal function -- which is...?
 				case "revive":
 				case "heal":{
 					if(PlayerHandler.getPlayer(author).inBattle()){
@@ -685,7 +730,11 @@ public class EventHandler{
 				}
 				case "webinterface":
 				case "wi":{
-					reply(message, "My web interface can be found here: "+Pokebot.config.REDIRECT_URL);
+					if(Pokebot.config.WEBENABLED){
+						reply(message, "My web interface can be found here: "+Pokebot.config.REDIRECT_URL);
+					} else {
+						reply(message, "My web interface isn't up currently.");
+					}
 					return;
 				}
 				case "switchslot":{
@@ -734,7 +783,7 @@ public class EventHandler{
 			}
 			//reply(message, "invalid command");
 		} catch(Exception e){
-			reply(message, "there was an exception");
+			reply(message, "there was an exception!\n"+e.getMessage());
 			e.printStackTrace();
 		}
 	}

@@ -4,7 +4,7 @@
 	return JSON.parse(JSON.stringify(x));
 }*/
 
-var NewMoves = Java.type("coolway99.discordpokebot.moves.rewrite.NewMoves").INSTANCE;
+var MoveAPI = Java.type("coolway99.discordpokebot.moves.rewrite.MoveAPI");
 var Pokebot = Java.type("coolway99.discordpokebot.Pokebot");
 
 var API = {
@@ -13,18 +13,18 @@ var API = {
 	SUBSTATS: Java.type("coolway99.discordpokebot.states.SubStats"),
 	EFFECTS: Java.type("coolway99.discordpokebot.states.Effects"),
 
-	MOVE: {
+	MOVES: {
 		CATEGORY: Java.type("coolway99.discordpokebot.moves.MoveType"),
 		FLAGS: Java.type("coolway99.discordpokebot.moves.rewrite.MoveFlags"),
 		TARGET: Java.type("coolway99.discordpokebot.moves.rewrite.Target"),
 		UTILS: Java.type("coolway99.discordpokebot.moves.rewrite.MoveUtils"),
 
 		standardMultiHit: function(context, attacker, defender){
-			var hits = API.MOVE.UTILS.getTimesHit(1, 1/3, 1/3, 1/6, 1/6);
+			var hits = API.MOVES.UTILS.getTimesHit(1, 1/3, 1/3, 1/6, 1/6);
 			var damage = 0;
 			for(var x = 0; x < hits; x++){
 				//Even inside functions, using "this" in a move context will return the move (as a MoveWrapper) itself
-				damage += API.MOVE.UTILS.dealDamage(attacker, this, defender);
+				damage += API.MOVES.UTILS.dealDamage(attacker, this, defender);
 			}
 			API.MESSAGES.multiHit(context.channel, defender, hits, damage);
 			if(defender.has(API.EFFECTS.NONVOLATILE.FAINTED)){
@@ -40,12 +40,12 @@ var API = {
 	diceRoll: Pokebot.diceRoll,
 	sendMessage: Pokebot.sendMessage,
 
-	registerMove: NewMoves.registerMove,
-	registerMoves: NewMoves.registerMoves,
+	registerMove: MoveAPI.registerMove,
+	registerMoves: MoveAPI.registerMoves,
 
 };
 
-delete NewMoves;
+delete MoveAPI;
 delete Pokebot;
 Object.freeze(API);
 

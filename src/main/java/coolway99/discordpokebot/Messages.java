@@ -1,10 +1,15 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.rewrite.MoveWrapper;
 import sx.blah.discord.handle.obj.IChannel;
 
 //Used for containing all the standard messages
 public class Messages{
+
+	public static void usedMove(IChannel channel, Player attacker, MoveWrapper move){
+		Pokebot.sendMessage(channel, attacker.mention()+" used "+move.getDisplayName()+"!");
+	}
 
 	public static void fainted(IChannel channel, Player defender){
 		Pokebot.sendMessage(channel, defender.mention()+" fainted!");

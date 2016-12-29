@@ -1,13 +1,15 @@
 package coolway99.discordpokebot.moves.rewrite;
 
+import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.jsonUtils.Context;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
 import coolway99.discordpokebot.moves.Battle_Priority;
 import coolway99.discordpokebot.moves.MoveType;
 import coolway99.discordpokebot.states.Types;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -24,7 +26,10 @@ public class MoveWrapper{
 	private final Battle_Priority priority;
 	private final int cost;
 	private final EnumSet<MoveFlags> flags;
+	private final Target target;
 
+	@Nullable
+	private final ScriptObjectMirror accuracyFunction;
 	@Nullable
 	private final ScriptObjectMirror onBeforeFunction;
 	private final ScriptObjectMirror onAttackFunction;
@@ -40,13 +45,32 @@ public class MoveWrapper{
 		this.power = move.getInt("power", 0);
 		this.category = move.getObject("category", MoveType.PHYSICAL);
 		this.PP = move.getInt("pp", 0);
-		this.accuracy = move.getInt("accuracy", 100);
+		Object accuracy = move.getObject("accuracy");
+		if(accuracy == null){
+			this.accuracy = 100;
+			this.accuracyFunction = null;
+		} else {
+			if(accuracy instanceof Integer){
+				this.accuracy = (int) accuracy;
+				this.accuracyFunction = null;
+			} else if(accuracy instanceof Boolean){
+				this.accuracy = ((boolean) accuracy ) ? 100000 : 0;
+				this.accuracyFunction = null;
+			} else if(accuracy instanceof ScriptObjectMirror && ((ScriptObjectMirror) accuracy).isFunction()){
+				this.accuracy = -1;
+				this.accuracyFunction = (ScriptObjectMirror) accuracy;
+			} else {
+				this.accuracy = 100;
+				this.accuracyFunction = null;
+			}
+		}
 		this.priority = Battle_Priority.getPriority(move.getInt("priority", 0));
 		this.cost = move.getInt("cost", this.power);
 
 		this.flags = EnumSet.noneOf(MoveFlags.class);
 		this.flags.addAll(Arrays.asList(move.getArray("flags", MoveFlags.class,
 				new MoveFlags[]{MoveFlags.MAKES_CONTACT, MoveFlags.CAN_BE_MIRRORED})));
+		this.target = move.getObject("target", Target.ADJACENT);
 
 		this.onBeforeFunction = move.getFunction("onBeforeAttack");
 		this.onAttackFunction = move.getFunction("onAttack");
@@ -81,16 +105,25 @@ public class MoveWrapper{
 		return this.accuracy;
 	}
 
+	public int getAccuracy(Context context, Player attacker, Player defender){
+		if(this.accuracyFunction == null) return this.accuracy;
+		return (int) this.accuracyFunction.call(this, context, attacker, defender);
+	}
+
 	public Battle_Priority getPriority(){
 		return this.priority;
 	}
 
 	public int getCost(){
-		return this.getCost();
+		return this.cost;
 	}
 
 	public EnumSet<MoveFlags> getFlags(){
 		return this.flags;
+	}
+
+	public Target getTarget(){
+		return this.target;
 	}
 
 	/**
@@ -100,9 +133,12 @@ public class MoveWrapper{
 	 * @return If to continue or not
 	 * Can be null or a function
 	 */
+	@Contract(pure = true)
 	public boolean onBeforeAttack(Context context, Player attacker, Player defender){
 		if(this.onBeforeFunction == null) return true;
-		return (boolean) this.onBeforeFunction.call(this, context, attacker, defender);
+		Boolean b = (Boolean) this.onBeforeFunction.call(this, context, attacker, defender);
+		if(b == null) return true;
+		return b;
 	}
 
 	/**
@@ -110,14 +146,14 @@ public class MoveWrapper{
 	 * @param context The context this takes place in
 	 * @param attacker The attacker, aka the one performing the attack
 	 * @param defender The defender, aka the one receiving the attack
-	 * @param battle The battle this takes place in, can be null.
 	 */
-	public void onAttack(Context context, Player attacker, Player defender, @Nullable Battle battle){
+	public void onAttack(Context context, Player attacker, Player defender){
 		if(this.onAttackFunction == null){
-			//TODO standard attack
+			//The default attack function
+			MoveUtils.dealDamage(context.channel, attacker, this, defender);
 			return;
 		}
-		this.onAttackFunction.call(this, context, attacker, defender, battle);
+		this.onAttackFunction.call(this, context, attacker, defender, context.battle);
 	}
 
 	/**
@@ -152,4 +188,7 @@ public class MoveWrapper{
 		return this.displayName;
 	}
 
+	public boolean has(MoveFlags flag){
+		return this.getFlags().contains(flag);
+	}
 }

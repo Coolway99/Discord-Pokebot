@@ -1,11 +1,13 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
-import coolway99.discordpokebot.moves.Flags;
-import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.Move;
+import coolway99.discordpokebot.moves.rewrite.MoveFlags;
+import coolway99.discordpokebot.moves.rewrite.MoveWrapper;
+import coolway99.discordpokebot.moves.rewrite.NewMoveSet;
+import coolway99.discordpokebot.moves.rewrite.MoveAPI;
 import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
-import coolway99.discordpokebot.moves.Move;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -77,11 +79,11 @@ public class Player{
 	public int numOfAttacks = 0;
 
 	//public final Move[] moves = new Move[]{Move.NULL, Move.NULL, Move.NULL, Move.NULL};
-	public final MoveSet[] moves;
+	public final NewMoveSet[] moves;
 	//public Item heldItem = null;
 
 	public Battle battle = null;
-	public MoveSet lastMove = null; //Isn't set outside of a battle
+	public NewMoveSet lastMove = null; //Isn't set outside of a battle
 	public int lastMoveData = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
@@ -96,7 +98,7 @@ public class Player{
 	public Player(IUser user, byte slot){
 		this.user = user;
 		this.slot = slot;
-		this.moves = new MoveSet[4];
+		this.moves = new NewMoveSet[4];
 		this.loadData();
 		this.HP = this.getMaxHP();
 		this.vEffects = EnumSet.noneOf(Effects.Volatile.class);
@@ -332,15 +334,18 @@ public class Player{
 	}
 
 	public boolean hasMove(Move move){
-		for(MoveSet set : this.moves){
+		return false;
+	}
+
+	public boolean hasMove(MoveWrapper move){
+		for(NewMoveSet set : this.moves){
 			if(set == null) continue;
 			if(set.getMove() == move) return true;
 		}
 		return false;
 	}
 
-	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion") //It ends with one, get over it
-	public boolean lastMoveHas(Flags flag){
+	public boolean doesLastMoveHave(MoveFlags flag){
 		return this.lastMove != null && this.lastMove.getMove().has(flag);
 	}
 
@@ -367,13 +372,14 @@ public class Player{
 			this.numOfAttacks = in.nextInt();
 			in.nextLine(); //nextInt tends to leave over the \n, it seems
 			for(int x = 0; x < this.moves.length; x++){
-				Move move = Move.REGISTRY.get(in.nextLine());
+				MoveWrapper move = MoveAPI.REGISTRY.get(in.nextLine());
 				if(move == null){
 					this.moves[x] = null;
 					continue;
 				}
-				this.moves[x] = new MoveSet(move);
+				this.moves[x] = new NewMoveSet(move);
 			}
+			this.compressMoves();
 			this.level = in.nextInt();
 			in.nextLine();
 			this.nature = Natures.valueOf(in.nextLine());
@@ -402,7 +408,7 @@ public class Player{
 			}
 
 			out.println(this.numOfAttacks);
-			for(MoveSet set : this.moves){
+			for(NewMoveSet set : this.moves){
 				if(set == null){
 					out.println("null");
 					continue;
@@ -417,6 +423,19 @@ public class Player{
 			System.out.println(Pokebot.getSaveFile(this.user, this.slot).getAbsolutePath());
 		}catch(Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	public void compressMoves(){
+		for(int x = this.moves.length-1; x > 0; x--){
+			if(this.moves[x-1] == null || this.moves[x-1].getMove() == null){
+				this.moves[x-1] = this.moves[x];
+				this.moves[x] = null;
+			}
+		}
+		this.numOfAttacks = 0;
+		for(NewMoveSet move : this.moves){
+			if(move != null) this.numOfAttacks++;
 		}
 	}
 

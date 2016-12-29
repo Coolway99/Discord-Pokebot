@@ -1,5 +1,4 @@
-
-FLAGS = API.MOVES.FLAGS;
+var FLAGS = API.MOVES.FLAGS;
 
 API.registerMoves([
 {
