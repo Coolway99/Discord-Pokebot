@@ -25,7 +25,7 @@ public enum GameList{
 	DISCORD_BROKE_STUFF("discord broke everything, that's why the bot didn't work for a bit!"),
 	NEW_VERSION("overhaul in development!"),
 	TEASE("soon to have new move system where users can easily contribute moves? Sign me up."),
-	TEASE2("next update mmight have items~"),
+	TEASE2("next update might have items~"),
 	PLEASE("please help with development! Contact Coolway#7694 for details"),
 	;
 	
