@@ -3,6 +3,7 @@ package coolway99.discordpokebot;
 import coolway99.discordpokebot.battle.Battle;
 import coolway99.discordpokebot.battle.BattleManager;
 import coolway99.discordpokebot.moves.AttackLogic;
+import coolway99.discordpokebot.moves.MoveFlags;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.moves.MoveAPI;
@@ -21,11 +22,13 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Status;
+import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("FeatureEnvy")
 public class EventHandler{
 
 	//TODO: Not all commands have outputs, this needs to be fixed
@@ -274,7 +277,7 @@ public class EventHandler{
 						return;
 					}
 					try{
-						MoveWrapper move = MoveAPI.REGISTRY.get(args[2].toUpperCase());
+						MoveWrapper move = MoveAPI.getMove(2, args);
 						if(move == null){
 							reply(message, "That is not a valid move!");
 							return;
@@ -315,19 +318,39 @@ public class EventHandler{
 							reply(message, "Usage: gmi <move>");
 							return;
 						}
-						MoveWrapper move = MoveAPI.REGISTRY.get(args[1].toUpperCase());
+						MoveWrapper move = MoveAPI.getMove(1, args);
 						if(move == null){
 							reply(message, "There's no move by that name!");
 							return;
 						}
-						String b = "Stats of "+move.getName()+
-								"\nType: "+move.getType()+//(Abilities.MC_NORMAL_PANTS)+
-								"\nPower: "+(move.getPower() > 1000 ? "OHKO" : numCheck(move.getPower()))+
-								"\nPP: "+move.getPP()+
-								"\nAccuracy: "+numCheck(move.getAccuracy())+
-								"\nCategory: "+move.getCategory()+
-								"\nPoint Cost: "+move.getCost();
-						Pokebot.sendMessage(channel, b);
+						EmbedBuilder builder = new EmbedBuilder();
+						builder.ignoreNullEmptyFields();
+						builder.withColor(move.getType().getColor());
+						builder.withAuthorName(move.getName());
+						switch(move.getCategory()){
+							case PHYSICAL:
+								builder.withAuthorIcon("http://faqsmedia.ign.com/faqs/image/article/109/1094653/physical_attack_icon.jpg");
+								break;
+							case SPECIAL:
+								builder.withAuthorIcon("http://faqsmedia.ign.com/faqs/image/article/109/1094653/special_attack_icon.jpg");
+								break;
+							case STATUS:
+								builder.withAuthorIcon("http://faqsmedia.ign.com/faqs/image/article/109/1094653/other_attack_icon.jpg");
+								break;
+						}
+						builder.appendField("Type", move.getType().toString(), true);
+						builder.appendField("Category", String.valueOf(move.getCategory()), true);
+						builder.appendField("Point Cost", String.valueOf(move.getCost()), true);
+						builder.appendField("PP", String.valueOf(move.getPP()), true);
+						builder.appendField("Accuracy", numCheck(move.getAccuracy()), true);
+						builder.appendField("Power", (move.getPower() > 1000) ? "OHKO" : numCheck(move.getPower()), true);
+						builder.appendField("Description", move.getDescription(), false);
+						StringBuilder b = new StringBuilder();
+						for(MoveFlags flag : move.getFlags()){
+							b.append(flag.toString().replaceAll("_", " ")).append(", ");
+						}
+						builder.withFooterText(b.toString());
+						channel.sendMessage("", builder.build(), false);
 					} catch(IllegalArgumentException e){
 						reply(message, "That's not a valid move!");
 					}
@@ -358,7 +381,7 @@ public class EventHandler{
 				case "lam":
 				case "listallmoves":{
 					StringBuilder builder = new StringBuilder("Here are all the moves I know:\n");
-					for(MoveWrapper move : MoveAPI.REGISTRY.values()){
+					for(MoveWrapper move : MoveAPI.getAllMoves()){
 						builder.append(move.getName()).append(" (").append(move.getCategory()).append(')').append("\n");
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
@@ -434,84 +457,9 @@ public class EventHandler{
 					reply(message, player.mention()+" is level "+player.level);
 					return;
 				}
-				case "oldAttack":{
-					if(!author.getID().equals(Pokebot.config.OWNERID)) break;
-					try{
-						//We rely on error catching if there is the incorrect args
-						int slot = Integer.parseInt(args[1]);
-						if(slot < 1 || slot > 4){
-							reply(message, "Slot number is from 1-4");
-							return;
-						}
-						slot--;
-						Player attacker = PlayerHandler.getPlayer(author);
-						if(attacker.numOfAttacks == 0){
-							reply(message, "You have no moves! Set some with "+Pokebot.config.COMMAND_PREFIX+"setmove");
-							return;
-						}
-						if(attacker.numOfAttacks < slot){
-							reply(message, "That slot is empty");
-							return;
-						}
-						if(attacker.moves[slot].getPP() < 1){
-							reply(message, "You have no PP left for that move!");
-							return;
-						}
-						//MoveSet moveSet = attacker.moves[slot];
-						Player defender;
-						//If this is a status move, then usually we are targeting ourselves
-						/*if(moveSet.getMove().has(Flags.UNTARGETABLE)){
-							defender = PlayerHandler.getPlayer(author);
-						} else {
-							defender = PlayerHandler.getPlayer(message.getMentions().get(0));
-						}*/
-						/*if(attacker.HP < 1 || defender.HP < 1){
-							reply(message, attacker.HP < 1 ? "You have fainted and are unable to move!"
-									: defender.mention()+" has already fainted!");
-							return;
-						}*/
-						//At this point, we know there's a valid move in the slot and neither party has fainted
-						//Before anything else, lets see if the target is the bot
 						/*if(defender.user.getID().equals(Pokebot.client.getOurUser().getID()) && !attacker.inBattle()){
 							Pokebot.sendMessage(channel, author.mention()+" tried hurting me!");
-							return;
-						}*/
-						//Sanity check for points, due to prevent "errors" between versions and balancing
-						if(StatHandler.getTotalPoints(attacker) > StatHandler.MAX_TOTAL_POINTS){
-							reply(message, "you have used too many points! You need to reduce them before attacking");
-							return;
-						}
-						//If the player is in a battle, we want to pass on the message
-						if(attacker.inBattle()){
-							/*if(defender.inBattle()){
-								if(attacker.battle == defender.battle){
-									//attacker.battle.onAttack(channel, attacker, moveSet, defender);
-									return; //We don't want the standard logic to run
-								}
-								reply(message, "you two are in different battles!");
-								return;
-							}*/
-							reply(message, "you can only attack those in your battle!");
-							return;
-						}
-						//at this point, we know the attacker is not in battle
-						/*if(defender.inBattle()){
-							reply(message, "you unable to hit them because they are in a battle!");
-							return;
-						}*/
-						//This is the normal neither-in-battle mess around attack
-						//Move.attack(channel, attacker, moveSet, defender);
-						/*if(StatHandler.getStatPoints(defender) <= 10){
-							Pokebot.sendMessage(channel, defender.mention()+", it looks like you haven't set any stats!"
-									+" Set some with setstats");
-						}*/
-					} catch(NumberFormatException e){
-						reply(message, "That's not a number!");
-					} catch(IndexOutOfBoundsException e){
-						reply(message, "Usage: attack <slotnum> @target");
-					}
-					return;
-				}
+							return;*/
 				case "attack":{
 					try{
 						Player attacker = PlayerHandler.getPlayer(author);
@@ -813,5 +761,4 @@ public class EventHandler{
 		}
 		return Integer.toString(num);
 	}
-
 }

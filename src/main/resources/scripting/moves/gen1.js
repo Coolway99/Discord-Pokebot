@@ -6,6 +6,7 @@ API.registerMoves([
 	name: "Pound",
 	power: 40,
 	pp: 35,
+	description: "The target is physically pounded with a long tail, a foreleg, or the like.",
 },
 {
 	id: "karatechop",
@@ -14,6 +15,7 @@ API.registerMoves([
 	power: 50,
 	pp: 25,
 	critRatio: 2, //Unused, no idea if I will actually use it
+	description: "The target is attacked with a sharp chop.",// Critical hits land more easily.",
 },
 {
 	id: "doubleslap",
@@ -23,6 +25,7 @@ API.registerMoves([
 	pp: 10,
 	cost: 45,
 	onAttack: API.MOVES.standardMultiHit,
+	description: "The target is slapped repeatedly, back and forth, two to five times in a row.",
 },
 {
 	id: "cometpunch",
@@ -33,6 +36,7 @@ API.registerMoves([
 	cost: (18*3),
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.PUNCH_BASED],
 	onAttack: API.MOVES.standardMultiHit,
+	description: "The target is hit with a flurry of punches that strike two to five times in a row.",
 },
 {
 	id: "megapunch",
@@ -41,6 +45,7 @@ API.registerMoves([
 	power: 80,
 	pp: 20,
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.PUNCH_BASED],
+	description: "The target is slugged by a punch thrown with muscle-packed power.",
 },
 {
 	id: "payday",
@@ -50,7 +55,8 @@ API.registerMoves([
 	flags: [FLAGS.CAN_BE_MIRRORED],
 	onSecondary: function(context){
 		API.sendMessage(context.channel, "Coins scattered everywhere!");
-	}
+	},
+	description: "Numerous coins are hurled at the target to inflict damage.",
 },
 {
 	id: "firepunch",
@@ -65,7 +71,8 @@ API.registerMoves([
 		if(API.diceRoll(10)){
 			API.MOVES.UTILS.burn(context.channel, defender);
 		}
-	}
+	},
+	description: "The target is punched with a fiery fist. This may also leave the target with a burn.",
 },
 {
 	id: "icepunch",
@@ -80,7 +87,8 @@ API.registerMoves([
 		if(API.diceRoll(10)){
 			API.MOVES.UTILS.freeze(context.channel, defender);
 		}
-	}
+	},
+	description: "The target is punched with an icy fist. This may also leave the target frozen.",
 },
 {
 	id: "thunderpunch",
@@ -95,19 +103,22 @@ API.registerMoves([
 		if(API.diceRoll(10)){
 			API.MOVES.UTILS.paralyze(context.channel, defender);
 		}
-	}
+	},
+	description: "The target is punched with an electrified fist. This may also leave the target with paralysis.",
 },
 {
 	id: "scratch",
 	name: "Scratch",
 	power: 40,
 	pp: 35,
+	description: "Hard, pointed, sharp claws rake the target to inflict damage.",
 },
 {
 	id: "vicegrip",
 	name: "Vice Grip",
 	power: 55,
 	pp: 30,
+	description: "The target is gripped and squeezed from both sides to inflict damage",
 },
 {
 	id: "guillotine",
@@ -125,6 +136,7 @@ API.registerMoves([
 		return attacker.level >= defender.level;
 	},
 	power: 9999,
+	description: "A vicious, tearing attack with big pincers. The target faints instantly if this attack hits.",
 },
 {
 	id: "razorwind",
@@ -153,6 +165,7 @@ API.registerMoves([
 	target: API.MOVES.TARGET.WILL_HIT_ADJACENT_FOES,
 	message: "%s is whipping up a whirlwind!",
 	displayUsedMove: false,
+	description: "In this two-turn attack, blades of wind hit opposing Pokémon on the second turn.",// Critical hits land more easily.",
 },
 ]);
 

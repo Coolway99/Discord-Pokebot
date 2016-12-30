@@ -99,7 +99,12 @@ public class JSONObject{
 	public <T> T[] getArray(String key, @NotNull Class<T> type, T[] def){
 		Object[] o = this.getArray(key);
 		//noinspection unchecked
-		return type.isInstance(o) ? (T[]) o : def;
+		if(o == null) return def;
+		try{
+			return (T[]) o;
+		} catch(ClassCastException e){
+			return def;
+		}
 	}
 
 	@Nullable

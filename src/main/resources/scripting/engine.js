@@ -87,6 +87,8 @@ Object.freeze(API);
 	id: "default",
 	//The external "display name" of the move, if not defined will equal the id which may be undesirable.
 	name: "Default Move",
+	//The description of the move, can be excluded
+	description: "There is no description yet for this move.",
 
 	//The message of the move, this depends on what type of move it is
 	message: null,

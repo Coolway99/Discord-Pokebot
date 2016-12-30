@@ -37,6 +37,7 @@ public class MoveWrapper{
 
 	private final String name;
 	private final String displayName;
+	private final String description;
 
 	private final String message;
 	private final boolean displayUsedMove;
@@ -86,6 +87,7 @@ public class MoveWrapper{
 		} else {
 			this.displayName = displayName;
 		}
+		this.description = move.getString("description", "There is no description yet for this move.");
 
 		this.message = move.getString("message", "");
 		this.displayUsedMove = move.getBoolean("displayUsedMove", true);
@@ -222,5 +224,9 @@ public class MoveWrapper{
 
 	public boolean has(MoveFlags flag){
 		return this.getFlags().contains(flag);
+	}
+
+	public String getDescription(){
+		return this.description;
 	}
 }

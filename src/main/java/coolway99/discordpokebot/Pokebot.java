@@ -66,7 +66,7 @@ public class Pokebot{
 		System.out.println("Logging in");
 		//Timers moved to BotReadyHandler
 		//Now that the main thread is done doing its business and the bot is busy logging in...
-		MoveAPI.registerMoves();
+		MoveAPI.setUpMoves();
 		//Item.registerItems();
 	}
 

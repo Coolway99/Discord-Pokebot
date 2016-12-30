@@ -372,7 +372,7 @@ public class Player{
 			this.numOfAttacks = in.nextInt();
 			in.nextLine(); //nextInt tends to leave over the \n, it seems
 			for(int x = 0; x < this.moves.length; x++){
-				MoveWrapper move = MoveAPI.REGISTRY.get(in.nextLine());
+				MoveWrapper move = MoveAPI.getMove(in.nextLine());
 				if(move == null){
 					this.moves[x] = null;
 					continue;

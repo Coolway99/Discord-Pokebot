@@ -5,26 +5,36 @@ import coolway99.discordpokebot.moves.old.OldMove;
 import coolway99.discordpokebot.moves.MoveWrapper;
 
 public enum Types{
-	NULL,
-	NORMAL,
-	FIGHTING,
-	FLYING,
-	POISON,
-	GROUND,
-	ROCK,
-	BUG,
-	GHOST,
-	STEEL,
-	FIRE,
-	WATER,
-	GRASS,
-	ELECTRIC,
-	PSYCHIC,
-	ICE,
-	DRAGON,
-	DARK,
-	FAIRY
+	NULL(0x68A090),
+	NORMAL(0xA8A878),
+	FIGHTING(0xC03028),
+	FLYING(0xA890F0),
+	POISON(0xA890F0),
+	GROUND(0xE0C068),
+	ROCK(0xE0C068),
+	BUG(0xA8B820),
+	GHOST(0x705898),
+	STEEL(0xB8B8D0),
+	FIRE(0xF08030),
+	WATER(0x6890F0),
+	GRASS(0x78C850),
+	ELECTRIC(0xF8D030),
+	PSYCHIC(0xF85888),
+	ICE(0x98D8D8),
+	DRAGON(0x7038F8),
+	DARK(0x705848),
+	FAIRY(0xEE99AC)
 	;
+
+	private final int color;
+
+	Types(int color){
+		this.color = color;
+	}
+
+	public int getColor(){
+		return this.color;
+	}
 
 	public static Types[] getImmune(Types type){
 		switch(type){
