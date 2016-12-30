@@ -8,6 +8,15 @@
 	<description>A bot for discord adding better pokemon battles</description>
 	<version>dev-2.0.0</version>
 	<url>https://github.com/Coolway99/Discord-Pokebot</url>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jetty.version>9.4.0.v20161208</jetty.version>
+	</properties>
+
 	<repositories>
 		<repository>
 			<snapshots>
@@ -26,6 +35,7 @@
 			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
@@ -68,19 +78,33 @@
 			<artifactId>annotations</artifactId>
 			<version>15.0</version>
 		</dependency>
-		<!-- For deep cloning --> <!--
+		<!-- Fixing Jetty -->
 		<dependency>
-			<groupId>uk.com.robust-it</groupId>
-			<artifactId>cloning</artifactId>
-			<version>1.9.3</version>
-		</dependency> -->
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-client</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-server</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-servlet</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
 	</dependencies>
-	<properties>
-		<java.version>1.8</java.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 	<build>
 		<plugins>
 			<!-- For checking dependancies -->
