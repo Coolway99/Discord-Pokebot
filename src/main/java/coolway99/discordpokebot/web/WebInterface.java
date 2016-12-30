@@ -3,8 +3,10 @@ package coolway99.discordpokebot.web;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.moves.MoveAPI;
+import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.moves.old.OldMove;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -137,7 +139,7 @@ public class WebInterface{
 					return "Checksum error. Reload the application";
 				}
 
-				OldMove[] moves = new OldMove[4];
+				MoveWrapper[] moves = new MoveWrapper[4];
 				String[] moveNames = {req.headers("move1"), req.headers("move2"), req.headers("move3"), req.headers("move4")};
 				for(int x = 0; x < moveNames.length; x++){
 					String moveSelector = moveNames[x];
@@ -146,7 +148,7 @@ public class WebInterface{
 					if(moveName.equals("NONE")){
 						moves[x] = null;
 					} else {
-						OldMove move = OldMove.REGISTRY.get(moveName);
+						MoveWrapper move = MoveAPI.getMove(moveName);
 						if(move == null) return "Move Checksum Error (did you try setting a move manually?)";
 						if(cost != move.getCost()) return "Move Checksum Error (did you try setting a move manually?)";
 						moves[x] = move;
@@ -217,12 +219,12 @@ public class WebInterface{
 				if(player.inBattle()) return "Error: You are in a battle, your stats cannot be set";
 				player.numOfAttacks = 0;
 				for(int x = 0; x < player.moves.length; x++){
-					OldMove move = moves[x];
+					MoveWrapper move = moves[x];
 					if(move == null){
 						player.moves[x] = null;
 						continue;
 					} else {
-						//player.moves[x] = new MoveSet(moves[x]);
+						player.moves[x] = new MoveSet(moves[x]);
 						player.numOfAttacks++;
 					}
 				}

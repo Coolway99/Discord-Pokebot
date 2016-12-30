@@ -2,9 +2,9 @@ package coolway99.discordpokebot.web;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.StatHandler;
-import coolway99.discordpokebot.moves.old.OldMoveSet;
+import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.states.Abilities;
-import coolway99.discordpokebot.moves.old.OldMove;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import org.watertemplate.Template;
@@ -37,17 +37,17 @@ public class FormHandler extends Template{
 			this.add("secondary", player.secondary.toString());
 		}
 		for(int x = 0; x < 4; x++){
-			OldMoveSet moveSet = null;// player.moves[x];
+			MoveSet moveSet = player.moves[x];
 			if(moveSet == null){
 				this.add("move"+(x+1), "0|NONE");
 			} else {
-				OldMove move = moveSet.getMove();
+				MoveWrapper move = moveSet.getMove();
 				this.add("move"+(x+1), move.getCost()+"|"+move.getName());
 			}
 		}
 		this.add("ran", ran);
 		Abilities ability = player.getAbility();
-		this.add("ability", ability.getCost()+"|"+ability.toString());
+		this.add("ability", ability.getCost()+"|"+ability);
 	}
 
 	@Override

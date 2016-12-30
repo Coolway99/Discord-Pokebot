@@ -1,7 +1,6 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.battle.Battle;
-import coolway99.discordpokebot.moves.old.OldMove;
 import coolway99.discordpokebot.moves.MoveFlags;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
@@ -331,10 +330,6 @@ public class Player{
 		if(amount <= 0) return this.damage(channel, 0);
 		//Implicit Math.floor
 		return this.damage(channel, (int) (this.getMaxHP()* amount));
-	}
-
-	public boolean hasMove(OldMove move){
-		return false;
 	}
 
 	public boolean hasMove(MoveWrapper move){

@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.web;
 
+import coolway99.discordpokebot.moves.MoveAPI;
 import coolway99.discordpokebot.moves.old.OldMove;
 import org.watertemplate.Template;
 
@@ -13,8 +14,8 @@ public final class MoveList extends Template{
 	private static String render = null;
 
 	private MoveList(){
-		this.addCollection("moves", OldMove.REGISTRY.values(), (move, map) -> {
-			map.add("name", move.getDisplayName());
+		this.addCollection("moves", MoveAPI.getAllMoves(), (move, map) -> {
+			map.add("name", move.getName());
 			map.add("value", move.getName());
 			map.add("cost", Integer.toString(move.getCost()));
 		});
