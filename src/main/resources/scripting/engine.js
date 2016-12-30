@@ -83,9 +83,7 @@ Object.freeze(API);
 	//Is ran after the attack hits, used for any secondary effects
 	onSecondary: null,
 
-	//The internal name/definition of the move, must be defined
-	id: "default",
-	//The external "display name" of the move, if not defined will equal the id which may be undesirable.
+	//The "display name" of the move
 	name: "Default Move",
 	//The description of the move, can be excluded
 	description: "There is no description yet for this move.",

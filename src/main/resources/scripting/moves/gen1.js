@@ -2,14 +2,12 @@ var FLAGS = API.MOVES.FLAGS;
 
 API.registerMoves([
 {
-	id: "pound",
 	name: "Pound",
 	power: 40,
 	pp: 35,
 	description: "The target is physically pounded with a long tail, a foreleg, or the like.",
 },
 {
-	id: "karatechop",
 	name: "Karate Chop",
 	type: API.TYPES.FIGHTING,
 	power: 50,
@@ -18,7 +16,6 @@ API.registerMoves([
 	description: "The target is attacked with a sharp chop.",// Critical hits land more easily.",
 },
 {
-	id: "doubleslap",
 	name: "Double Slap",
 	accuracy: 85,
 	power: 15,
@@ -28,7 +25,6 @@ API.registerMoves([
 	description: "The target is slapped repeatedly, back and forth, two to five times in a row.",
 },
 {
-	id: "cometpunch",
 	name: "Comet Punch",
 	accuracy: 85,
 	power: 18,
@@ -39,7 +35,6 @@ API.registerMoves([
 	description: "The target is hit with a flurry of punches that strike two to five times in a row.",
 },
 {
-	id: "megapunch",
 	name: "Mega Punch",
 	accuracy: 85,
 	power: 80,
@@ -48,7 +43,6 @@ API.registerMoves([
 	description: "The target is slugged by a punch thrown with muscle-packed power.",
 },
 {
-	id: "payday",
 	name: "Pay Day",
 	power: 40,
 	pp: 20,
@@ -59,7 +53,6 @@ API.registerMoves([
 	description: "Numerous coins are hurled at the target to inflict damage.",
 },
 {
-	id: "firepunch",
 	name: "Fire Punch",
 	type: API.TYPES.FIRE,
 	accuracy: 100,
@@ -75,7 +68,6 @@ API.registerMoves([
 	description: "The target is punched with a fiery fist. This may also leave the target with a burn.",
 },
 {
-	id: "icepunch",
 	name: "Ice Punch",
 	type: API.TYPES.ICE,
 	accuracy: 100,
@@ -91,7 +83,6 @@ API.registerMoves([
 	description: "The target is punched with an icy fist. This may also leave the target frozen.",
 },
 {
-	id: "thunderpunch",
 	name:"Thunder Punch",
 	type: API.TYPES.ELECTRIC,
 	accuracy: 100,
@@ -107,21 +98,18 @@ API.registerMoves([
 	description: "The target is punched with an electrified fist. This may also leave the target with paralysis.",
 },
 {
-	id: "scratch",
 	name: "Scratch",
 	power: 40,
 	pp: 35,
 	description: "Hard, pointed, sharp claws rake the target to inflict damage.",
 },
 {
-	id: "vicegrip",
 	name: "Vice Grip",
 	power: 55,
 	pp: 30,
 	description: "The target is gripped and squeezed from both sides to inflict damage",
 },
 {
-	id: "guillotine",
 	name: "Guillotine",
 	accuracy: function(context, attacker, defender){
 		//When context == null, we're calling this to get the display accuracy of the move
@@ -139,7 +127,6 @@ API.registerMoves([
 	description: "A vicious, tearing attack with big pincers. The target faints instantly if this attack hits.",
 },
 {
-	id: "razorwind",
 	name: "Razor Wind",
 	category: API.MOVES.CATEGORY.SPECIAL,
 	accuracy: function(context, attacker, defender){

@@ -36,7 +36,6 @@ public class MoveWrapper{
 	private final ScriptObjectMirror onSecondaryFunction;
 
 	private final String name;
-	private final String displayName;
 	private final String description;
 
 	private final String message;
@@ -80,13 +79,7 @@ public class MoveWrapper{
 		this.onAttackFunction = move.getFunction("onAttack");
 		this.onSecondaryFunction = move.getFunction("onSecondary");
 
-		this.name = move.getString("id", "default");
-		String displayName = move.getString("name");
-		if(displayName == null){
-			this.displayName = this.name;
-		} else {
-			this.displayName = displayName;
-		}
+		this.name = move.getString("name", "Default Move");
 		this.description = move.getString("description", "There is no description yet for this move.");
 
 		this.message = move.getString("message", "");
@@ -204,13 +197,8 @@ public class MoveWrapper{
 //	}
 
 	@NotNull
-	public String getID(){
-		return this.name;
-	}
-
-	@NotNull
 	public String getName(){
-		return this.displayName;
+		return this.name;
 	}
 
 	@NotNull
