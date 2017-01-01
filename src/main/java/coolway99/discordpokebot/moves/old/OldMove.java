@@ -4,8 +4,8 @@ import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
-import coolway99.discordpokebot.battle.Battle;
-import coolway99.discordpokebot.battle.IAttack;
+import coolway99.discordpokebot.battles.Battle;
+import coolway99.discordpokebot.battles.IAttack;
 import coolway99.discordpokebot.moves.Battle_Priority;
 import coolway99.discordpokebot.moves.MoveCategory;
 import coolway99.discordpokebot.moves.MoveUtils;
@@ -410,7 +410,7 @@ public abstract class OldMove{
 		REGISTRY.put("GRAVITY", new OldMove(Types.PSYCHIC, MoveCategory.STATUS, 5, -1, -1, 100, OldMoveFlags.UNTARGETABLE){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
-				attacker.battle.set(Battle.BattleEffects.GRAVITY, 1);
+				//attacker.battle.set(Battle.BattleEffects.GRAVITY, 1);
 				Messages.attackMessage(channel, attacker, this);
 				Pokebot.sendMessage(channel, "Gravity Intensified!");
 				return BeforeResult.STOP;
@@ -488,7 +488,8 @@ public abstract class OldMove{
 
 	@SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
 	public static boolean attack(IChannel channel, IAttack attack){
-		return attack(channel, attack.attacker, attack.move, attack.defender);
+		//return attack(channel, attack.attacker, attack.move, attack.defender);
+		return false;
 	}
 
 	//Returns ifDefenderFainted
@@ -611,7 +612,7 @@ public abstract class OldMove{
 	public static int getDamage(Player attacker, OldMove move, Player defender, int power){
 		double modifier =
 				getStab(attacker, move) //STAB
-						*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
+						//*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
 						*getOtherModifiers(attacker, move, defender)
 						*((Pokebot.ran.nextInt(100-85)+85+1)/100D) //Random chance, it would be 85-99 if there wasn't the +1
 				;

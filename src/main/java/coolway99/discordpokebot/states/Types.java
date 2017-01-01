@@ -358,14 +358,7 @@ public enum Types{
 	}
 
 	public static boolean isImmune(Player attacker, MoveWrapper move, Player defender){
-		return isImmune(attacker, move.getType(), defender);
-	}
-	
-	public static boolean isImmune(Player attacker, OldMove move, Player defender){
-		return isImmune(attacker, move.getType(attacker), defender);
-	}
-
-	public static boolean isImmune(Player attacker, Types moveType, Player defender){
+		Types moveType = move.getType();
 		for(Types type : getImmune(defender.primary)){
 			if(moveType == type){
 				return true;
@@ -381,17 +374,10 @@ public enum Types{
 		return false;
 	}
 
-	public static double getTypeMultiplier(Player attacker, MoveWrapper move, Player defender){
-		return getTypeMultiplier(attacker, move.getType(), defender);
-	}
-	
 	//THIS DOES NOT FACTOR IN STAB
-	public static double getTypeMultiplier(Player attacker, OldMove move, Player defender){
-		return getTypeMultiplier(attacker, move.getType(attacker), defender);
-	}
-
-	public static double getTypeMultiplier(Player attacker, Types moveType, Player defender){
-		if(isImmune(attacker, moveType, defender)) return 0;
+	public static double getTypeMultiplier(Player attacker, MoveWrapper move, Player defender){
+		Types moveType = move.getType();
+		if(isImmune(attacker, move, defender)) return 0;
 		
 		double multiplier = 1D; //We start with 1X damage
 		

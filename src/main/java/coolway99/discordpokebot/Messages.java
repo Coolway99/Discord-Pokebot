@@ -59,6 +59,10 @@ public class Messages{
 		Pokebot.sendMessage(channel, attacker.mention()+" woke up!");
 	}
 
+	public static void sleep(IChannel channel, Player defender){
+		Pokebot.sendMessage(channel, defender.mention()+" fell asleep!");
+	}
+
 	public static void isAsleep(IChannel channel, Player attacker){
 		Pokebot.sendMessage(channel, attacker.mention()+" is fast asleep!");
 	}
@@ -99,7 +103,31 @@ public class Messages{
 		Pokebot.sendMessage(channel, defender.mention()+"'s type is immune to burns!");
 	}
 
-	public static void isBurned(IChannel channel, Player defender){
-		Pokebot.sendMessage(channel, defender.mention()+" took damage from their burn!");
+	public static void isBurned(IChannel channel, Player player, int damage){
+		Pokebot.sendMessage(channel, player.mention()+" lost "+damage+"HP from their burn!");
+	}
+
+	public static void immunePoison(IChannel channel, Player defender){
+		Pokebot.sendMessage(channel, defender.mention()+"'s type is immune to poison!");
+	}
+
+	public static void poisoned(IChannel channel, Player defender){
+		Pokebot.sendMessage(channel, defender.mention()+" was poisoned!");
+	}
+
+	public static void badlyPoisoned(IChannel channel, Player defender){
+		Pokebot.sendMessage(channel, defender.mention()+" was badly poisoned!");
+	}
+
+	public static void isPoisoned(IChannel channel, Player player, int damage){
+		Pokebot.sendMessage(channel, player.mention()+" lost "+damage+"HP due to poison!");
+	}
+
+	public static void flinched(IChannel channel, Player defender){
+		Pokebot.sendMessage(channel, defender.mention()+" flinched!");
+	}
+
+	public static void stopFlinching(IChannel channel, Player player){
+		Pokebot.sendMessage(channel, player.mention()+" stopped cringing!");
 	}
 }

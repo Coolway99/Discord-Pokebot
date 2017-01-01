@@ -151,31 +151,31 @@ public class MoveUtils{
 	}
 
 	public static void poison(IChannel channel, Player defender){
-		if(defender.has(Effects.NonVolatile.POISON)) return;
+		if(defender.has(Effects.NonVolatile.POISON) || defender.has(Effects.NonVolatile.TOXIC)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;
 		}
 		if(defender.hasType(Types.POISON) || defender.hasType(Types.STEEL)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s type is immune to "+"poison"+"!");
+			Messages.immunePoison(channel, defender);
 		} else {
 			defender.set(Effects.NonVolatile.POISON);
-			Pokebot.sendMessage(channel, defender.mention()+" was "+"poisoned"+"!");
+			Messages.poisoned(channel, defender);
 		}
 	}
 
 	public static void toxic(IChannel channel, Player defender){
-		if(defender.has(Effects.NonVolatile.TOXIC)) return;
+		if(defender.has(Effects.NonVolatile.TOXIC) || defender.has(Effects.NonVolatile.POISON)) return;
 		if(defender.has(Effects.VBattle.SUBSTITUTE)){
 			Messages.substitute(channel, defender);
 			return;
 		}
 		if(defender.hasType(Types.POISON) || defender.hasType(Types.STEEL)){
-			Pokebot.sendMessage(channel, defender.mention()+"'s type is immune to "+"poison"+"!");
+			Messages.immunePoison(channel, defender);
 		} else {
 			defender.set(Effects.NonVolatile.TOXIC);
 			defender.counter = 0;
-			Pokebot.sendMessage(channel, defender.mention()+" was "+"badly poisoned"+"!");
+			Messages.badlyPoisoned(channel, defender);
 		}
 	}
 
@@ -187,6 +187,7 @@ public class MoveUtils{
 		}
 		defender.set(Effects.NonVolatile.SLEEP);
 		defender.counter = Pokebot.ran.nextInt(3)+1;
+		Messages.sleep(channel, defender);
 
 	}
 
@@ -196,7 +197,42 @@ public class MoveUtils{
 			return;
 		}
 		defender.set(Effects.Volatile.FLINCH); //TODO Check for abilities
-		Pokebot.sendMessage(channel, defender.mention()+" flinched!");
+		Messages.flinched(channel, defender);
 		//We assume this is only called within-battle
+	}
+
+	public static void doEffectDamage(IChannel channel, Player player){
+		switch(player.getNV()){
+			case BURN:{
+				//TODO Check for ability heatproof
+				int damage = player.getMaxHP() / 8;
+				player.damage(damage);
+				Messages.isBurned(channel, player, damage);
+				break;
+			}
+			case POISON:{
+				/*TODO if(player.hasAbility(Abilities.POISON_HEAL)){
+					OldMove.heal(this.channel, player, player.getMaxHP()/8);
+					break;
+				}*/
+				int damage = player.getMaxHP() / 8;
+				player.damage(damage);
+				Messages.isPoisoned(channel, player, damage);
+				break;
+			}
+			case TOXIC:{
+				/* TODO if(player.hasAbility(Abilities.POISON_HEAL)){
+					OldMove.heal(this.channel, player, player.getMaxHP()/8);
+					++player.counter;
+					break;
+				}*/
+				int damage = (int) (player.getMaxHP()*(++player.counter/16D));
+				player.damage(damage);
+				Messages.isPoisoned(channel, player, damage);
+				break;
+			}
+			default:
+				break;
+		}
 	}
 }

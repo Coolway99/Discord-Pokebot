@@ -57,7 +57,7 @@ public enum Natures{ //In this case, "Health" is null, since nature never applie
 	
 	public String getExpandedText(){
 		if(!this.hasEffect()) return this.toString();
-		return this.toString()+
+		return this+
 				" (+"+
 				this.increase+
 				") (-"+

@@ -1,6 +1,6 @@
 package coolway99.discordpokebot;
 
-import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.battles.Battle;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import sx.blah.discord.handle.obj.IChannel;
 

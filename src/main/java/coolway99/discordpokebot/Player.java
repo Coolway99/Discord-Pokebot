@@ -1,6 +1,6 @@
 package coolway99.discordpokebot;
 
-import coolway99.discordpokebot.battle.Battle;
+import coolway99.discordpokebot.battles.Battle;
 import coolway99.discordpokebot.moves.MoveFlags;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
@@ -430,6 +430,7 @@ public class Player{
 		}
 		this.numOfAttacks = 0;
 		for(MoveSet move : this.moves){
+			//noinspection VariableNotUsedInsideIf
 			if(move != null) this.numOfAttacks++;
 		}
 	}

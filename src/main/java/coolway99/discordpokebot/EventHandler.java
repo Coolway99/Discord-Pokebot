@@ -1,7 +1,8 @@
 package coolway99.discordpokebot;
 
-import coolway99.discordpokebot.battle.Battle;
-import coolway99.discordpokebot.battle.BattleManager;
+import coolway99.discordpokebot.battles.Battle;
+import coolway99.discordpokebot.battles.BattleManager;
+import coolway99.discordpokebot.battles.SingleBattle;
 import coolway99.discordpokebot.moves.AttackLogic;
 import coolway99.discordpokebot.moves.MoveFlags;
 import coolway99.discordpokebot.moves.MoveWrapper;
@@ -21,12 +22,14 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("FeatureEnvy")
 public class EventHandler{
@@ -43,6 +46,8 @@ public class EventHandler{
 		//We don't want to respond to bots
 		if(author.isBot() && !author.getID().equals(Pokebot.client.getOurUser().getID())) return;
 		IChannel channel = message.getChannel();
+		//If we can't send messages, don't bother even processing them
+		if(!channel.getModifiedPermissions(Pokebot.client.getOurUser()).contains(Permissions.SEND_MESSAGES)) return;
 		//The first person the author mentioned, or the author if there was nobody
 		IUser mentionOrAuthor = message.getMentions().isEmpty() ? author : message.getMentions().get(0);
 		if(!message.toString().startsWith(Pokebot.config.COMMAND_PREFIX)) return;
@@ -54,8 +59,8 @@ public class EventHandler{
 				case "type":
 				case "types":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-					Pokebot.sendMessage(channel, mentionOrAuthor.mention()+" is type "+player.primary.toString()
-							+(player.hasSecondaryType() ? " with secondary type "+player.secondary.toString()
+					Pokebot.sendMessage(channel, mentionOrAuthor.mention()+" is type "+player.primary
+							+(player.hasSecondaryType() ? " with secondary type "+player.secondary
 							: ""));
 					return;
 				}
@@ -100,11 +105,11 @@ public class EventHandler{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
 					StringBuilder builder = new StringBuilder(mentionOrAuthor.mention());
 					builder.append(" has:\n");
-					builder.append(Stats.HEALTH.toString()).append(": ");
+					builder.append(Stats.HEALTH).append(": ");
 					builder.append(player.HP).append('/').append(player.getMaxHP()).append("HP");
 					for(int x = 1; x < player.stats.length; x++){
 						builder.append('\n');
-						builder.append(Stats.getStatFromIndex(x).toString()).append(": ");
+						builder.append(Stats.getStatFromIndex(x)).append(": ");
 						builder.append(player.getStatFromIndex(x));
 						if(player.modifiers[x] != 0){
 							builder.append(String.format(" (%+d)", player.modifiers[x]));
@@ -143,7 +148,7 @@ public class EventHandler{
 					Player player = PlayerHandler.getPlayer(author);
 					StringBuilder builder = new StringBuilder("Your stats are as follows:\n");
 					for(int x = 0; x < player.stats.length; x++){
-						builder.append(Stats.getStatFromIndex(x).toString())
+						builder.append(Stats.getStatFromIndex(x))
 								.append('\t')
 								//if(!(x == 2 || x == 4)) builder.append("\t\t\t\t")
 								.append(SubStats.BASE)
@@ -214,7 +219,7 @@ public class EventHandler{
 					try{
 						Natures nature = Natures.valueOf(args[1].toUpperCase());
 						player.nature = nature;
-						reply(message, "Set nature to "+nature.toString());
+						reply(message, "Set nature to "+nature);
 					} catch(IllegalArgumentException e){
 						reply(message, "That's not a valid nature!");
 					}
@@ -300,8 +305,8 @@ public class EventHandler{
 						slot--;
 
 						/*if(StatHandler.wouldExceedTotalPoints(player, player.moves[slot].getMove(), move)){
-							/*reply(message, "You don't have enough points left for that move!");
-							return;*//*
+							reply(message, "You don't have enough points left for that move!");
+							return;
 							StatHandler.exceedWarning(channel, player);
 						}*/
 						player.moves[slot] = new MoveSet(move);
@@ -493,6 +498,10 @@ public class EventHandler{
 						}
 						//TODO check to see if both parties meet the stat level requirement
 						//TODO right here if we're in a battle we should hand control over to the battle system
+						if(attacker.inBattle() && attacker.battle == defender.battle){
+							attacker.battle.onInputAttack(channel, attacker, attacker.moves[slot], defender);
+							return;
+						}
 						MoveSet set = attacker.moves[slot];
 						if(!set.getMove().getTarget().canHit(Position.CENTER, Position.CENTER, attacker == defender)){
 							reply(message, "This move can't target them!");
@@ -548,12 +557,11 @@ public class EventHandler{
 					}
 					try{
 						if(args.length < 3 || message.getMentions().isEmpty()){
-							reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+"battle <time for turns> "
+							reply(message, "Usage: "+Pokebot.config.COMMAND_PREFIX+"battle <battleType> <time for turns> "
 									+"<@User, @User, @User...>");
 							return;
 						}
-						BattleManager.createBattle(channel, author,
-								message.getMentions(), Integer.parseInt(args[1]));
+						BattleManager.createBattle(channel, args[1], Integer.parseInt(args[2]), author, message.getMentions());
 					} catch(NumberFormatException e){
 						reply(message, "That's not a valid number!");
 					}
@@ -572,12 +580,10 @@ public class EventHandler{
 					}
 					//Sanity check for points, due to prevent "errors" between versions and balancing
 					if(StatHandler.getTotalPoints(PlayerHandler.getPlayer(author)) > StatHandler.MAX_TOTAL_POINTS){
-						reply(message, "you have used too many points! You need to reduce them before joining a " +
-								"battle");
+						reply(message, "you have used too many points! You need to reduce them before joining a battle");
 						return;
 					}
-					BattleManager.onJoinBattle(channel,
-							author, message.getMentions().get(0));
+					BattleManager.onJoinBattle(channel, message.getMentions().get(0), author);
 					return;
 				}
 				case "lb":
@@ -652,8 +658,10 @@ public class EventHandler{
 					ArrayList<Player> list = new ArrayList<>();
 					list.add(PlayerHandler.getPlayer(author));
 					list.add(PlayerHandler.getPlayer(Pokebot.client.getOurUser()));
-					Battle battle = new Battle(message.getChannel(), 200000, list);
-					BattleManager.battles.add(battle);
+					Battle battle = new SingleBattle(message.getChannel(), 200000, list);
+					BattleManager.runningBattles.add(battle);
+					battle.timer = Pokebot.timer.schedule(() -> {}, 10, TimeUnit.DAYS);
+					battle.setupBattle();
 					return;
 				}
 				case "spoof":{

@@ -172,7 +172,7 @@ public class WebInterface{
 						Stats stat = Stats.getStatFromIndex(x);
 						for(int y = 0; y < stats[x].length; y++){
 							SubStats subStat = SubStats.getSubStatFromIndex(y);
-							int val = Integer.parseInt(req.headers(stat.toString()+'.'+subStat.toString()));
+							int val = Integer.parseInt(req.headers(stat.toString()+'.'+subStat));
 							if(val < 0 || val > StatHandler.MAX_SINGLE_SUBSTATS[subStat.getIndex()]){
 								return "Stat Error: "+stat+" "+subStat+" "+val+" is outside of the range";
 							}

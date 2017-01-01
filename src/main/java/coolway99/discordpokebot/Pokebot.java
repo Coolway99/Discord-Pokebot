@@ -6,6 +6,7 @@ import coolway99.discordpokebot.storage.ConfigHandler;
 import coolway99.discordpokebot.web.WebInterface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -29,7 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
-	public static final String VERSION = "dev-2.0.0 Move-Scripting.Pre_-1";
+	public static final String VERSION = "dev-2.0.0 New-Battle-System";
 	//TODO make the rest of these configs
 	public static final byte SAVE_DELAY = 1; //In minutes
 	public static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
@@ -49,6 +50,7 @@ public class Pokebot{
 
 	public static void main(String... args) throws Exception{
 		System.out.println("Pokebot version "+VERSION);
+		Discord4J.disableChannelWarnings();
 		if(config.TOKEN.isEmpty()){
 			System.out.println("Error: No token found in pokebot.conf file");
 			System.exit(0);
