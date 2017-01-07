@@ -80,6 +80,23 @@ public class MoveUtils{
 		return chances.length+offset;
 	}
 
+	public static void standardMultiHit(Context context, Player attacker, MoveWrapper move, Player defender){
+		multiHitMove(context, attacker, move, defender, 1, 1/3F, 1/3F, 1/6F, 1/6F);
+	}
+
+	public static void multiHitMove(Context context, Player attacker, MoveWrapper move, Player defender,
+									int offset, float... times){
+		int hits = getTimesHit(offset, times);
+		int damage = 0;
+		for(int x = 0; x < hits; x++){
+			damage += dealDamage(attacker, move, defender);
+		}
+		Messages.multiHit(context.channel, defender, hits, damage);
+		if(defender.has(Effects.NonVolatile.FAINTED)){
+			Messages.fainted(context.channel, defender);
+		}
+	}
+
 	public static void chargeMove(Context context, Player attacker, MoveWrapper move, Player defender){
 		if(context.battle == null) attacker.lastMoveData = 1;
 		switch(attacker.lastMoveData){
@@ -93,7 +110,7 @@ public class MoveUtils{
 			default:{
 				attacker.lastMoveData = 1;
 				Pokebot.sendMessage(context.channel, String.format(move.getMessage(), attacker.mention()));
-				//TODO this only occurs in battles, and therefore most re-queue the move
+				context.battle.propegateAttack(attacker);
 			}
 		}
 	}

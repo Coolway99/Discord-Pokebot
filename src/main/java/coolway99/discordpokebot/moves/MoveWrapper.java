@@ -164,6 +164,7 @@ public class MoveWrapper{
 	 * @param defender The defender, aka the one receiving the attack
 	 */
 	public void onAttack(Context context, Player attacker, Player defender){
+
 		if(this.onAttackFunction == null){
 			//The default attack function
 			MoveUtils.dealDamage(context.channel, attacker, this, defender);

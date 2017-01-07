@@ -30,6 +30,10 @@ public abstract class Battle{
 	 * The list of players who have already submitted an attack
 	 */
 	protected final ArrayList<Player> attackers;
+	/**
+	 * The list of players who's attacks are multi-turn
+	 */
+	protected final ArrayList<Player> propegateAttacks;
 	protected int currentTurn = 0;
 	/**
 	 * Set the timeout for a turn on the battle
@@ -61,6 +65,7 @@ public abstract class Battle{
 		for(Player player : participants){
 			player.battle = this;
 		}
+		this.propegateAttacks = new ArrayList<>();
 	}
 
 	public void setupBattle(){
@@ -135,6 +140,10 @@ public abstract class Battle{
 		}
 	}
 
+	public void propegateAttack(Player attacker){
+		this.propegateAttacks.add(attacker);
+	}
+
 	public abstract boolean checkPosition(IChannel channel, Player attacker, MoveSet moveSet, Player defender);
 
 	//Called for moves that auto-set themselves
@@ -179,7 +188,27 @@ public abstract class Battle{
 				}
 				return false;
 			});
-			this.attacks.clear();
+			if(this.propegateAttacks.isEmpty()){
+				this.attacks.clear();
+			} else {
+				this.attacks.removeIf(attack -> {
+					if(this.propegateAttacks.contains(attack.attacker)){
+						attack.unCancel();
+						return false;
+					}
+					return true;
+				});
+			}
+			this.attackers.clear();
+			this.attackers.addAll(this.propegateAttacks);
+			this.propegateAttacks.clear();
+
+			if(!this.attackers.isEmpty()){
+				for(Player player : this.attackers){
+					this.sendMessage(player.mention()+" has a multiturn attack!");
+				}
+			}
+
 			this.sendMessage("Begin next turn, you have "+this.turnTime+" seconds to make your attack");
 			this.timer = Pokebot.timer.schedule(this::onTurn, this.turnTime, TimeUnit.SECONDS);
 		}

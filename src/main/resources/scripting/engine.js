@@ -23,7 +23,7 @@ var API = {
 		TARGET: Java.type("coolway99.discordpokebot.moves.Target"),
 		UTILS: Java.type("coolway99.discordpokebot.moves.MoveUtils"),
 
-		standardMultiHit: function(context, attacker, defender){
+		/*standardMultiHit: function(context, attacker, defender){
 			var hits = API.MOVES.UTILS.getTimesHit(1, 1/3, 1/3, 1/6, 1/6);
 			var damage = 0;
 			for(var x = 0; x < hits; x++){
@@ -34,7 +34,7 @@ var API = {
 			if(defender.has(API.EFFECTS.NONVOLATILE.FAINTED)){
 				API.MESSAGES.fainted(context.channel, defender);
 			}
-		},
+		},*/
 	},
 
 	RANDOM: Pokebot.ran,

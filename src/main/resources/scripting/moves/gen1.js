@@ -21,7 +21,9 @@ API.registerMoves([
 	power: 15,
 	pp: 10,
 	cost: 45,
-	onAttack: API.MOVES.standardMultiHit,
+	onAttack: function(context, attacker, defender){
+		API.MOVES.UTILS.standardMultiHit(context, attacker, this, defender);
+	},
 	description: "The target is slapped repeatedly, back and forth, two to five times in a row.",
 },
 {
@@ -31,7 +33,9 @@ API.registerMoves([
 	pp: 15,
 	cost: (18*3),
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.PUNCH_BASED],
-	onAttack: API.MOVES.standardMultiHit,
+	onAttack: function(context, attacker, defender){
+		API.MOVES.UTILS.standardMultiHit(context, attacker, this, defender);
+	},
 	description: "The target is hit with a flurry of punches that strike two to five times in a row.",
 },
 {

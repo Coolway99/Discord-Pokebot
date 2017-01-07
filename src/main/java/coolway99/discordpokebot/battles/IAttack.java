@@ -34,6 +34,9 @@ public class IAttack{
 		return this.canceled;
 	}
 
+	public void unCancel(){
+		this.canceled = false;
+	}
 	//We check the usual for if IAttacks equal each other
 	@Override
 	public boolean equals(Object obj){
