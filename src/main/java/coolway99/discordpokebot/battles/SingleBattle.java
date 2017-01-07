@@ -1,7 +1,6 @@
 package coolway99.discordpokebot.battles;
 
 import coolway99.discordpokebot.Context;
-import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.moves.AttackLogic;
 import coolway99.discordpokebot.moves.MoveSet;

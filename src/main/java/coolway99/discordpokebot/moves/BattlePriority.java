@@ -1,6 +1,6 @@
 package coolway99.discordpokebot.moves;
 
-public enum Battle_Priority{
+public enum BattlePriority{
 	P5(+5),
 	P4(+4),
 	P3(+3),
@@ -17,7 +17,7 @@ public enum Battle_Priority{
 
 	private final int priority;
 
-	Battle_Priority(int priority){
+	BattlePriority(int priority){
 		this.priority = priority;
 	}
 
@@ -25,7 +25,7 @@ public enum Battle_Priority{
 		return this.priority;
 	}
 
-	public static Battle_Priority getPriority(String num){
+	public static BattlePriority getPriority(String num){
 		try{
 			return getPriority(Integer.parseInt(num));
 		} catch(NumberFormatException e){
@@ -33,7 +33,7 @@ public enum Battle_Priority{
 		}
 	}
 
-	public static Battle_Priority getPriority(int num){
+	public static BattlePriority getPriority(int num){
 		switch(num){
 			case 5: return P5;
 			case 4: return P4;

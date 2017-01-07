@@ -4,12 +4,11 @@ import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
-import coolway99.discordpokebot.battles.Battle;
 import coolway99.discordpokebot.battles.IAttack;
-import coolway99.discordpokebot.moves.Battle_Priority;
+import coolway99.discordpokebot.moves.BattlePriority;
 import coolway99.discordpokebot.moves.MoveCategory;
 import coolway99.discordpokebot.moves.MoveUtils;
-import coolway99.discordpokebot.states.Abilities;
+import coolway99.discordpokebot.abilities.OldAbilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
@@ -53,14 +52,14 @@ public abstract class OldMove{
 	protected final MoveCategory moveCategory;
 	protected final int PP; //The default PP of the move
 	protected final double accuracy; //From 0 to 1
-	protected final Battle_Priority priority;
+	protected final BattlePriority priority;
 	protected final int cost; //How many points will this move use?
 	protected final EnumSet<OldMoveFlags> flags;
 
 	protected String name;
 	protected String displayName;
 
-	public OldMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, Battle_Priority priority,
+	public OldMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, BattlePriority priority,
 				   OldMoveFlags... flags){
 		this.type = type;
 		this.power = power;
@@ -89,7 +88,7 @@ public abstract class OldMove{
 	}
 
 	public OldMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, int cost, OldMoveFlags... flags){
-		this(type, moveCategory, PP, power, accuracy, cost, Battle_Priority.P0, flags);
+		this(type, moveCategory, PP, power, accuracy, cost, BattlePriority.P0, flags);
 	}
 
 	public OldMove(Types type, MoveCategory moveCategory, int PP, int power, int accuracy, OldMoveFlags... flags){
@@ -126,11 +125,7 @@ public abstract class OldMove{
 		return this.power;
 	}
 
-	public Types getType(Player attacker){
-		return this.getType(attacker.getModifiedAbility());
-	}
-
-	public Types getType(Abilities ability){
+	public Types getType(OldAbilities ability){
 		switch(ability){
 			case NORMALIZE: return Types.NORMAL;
 			case AERILATE: return Types.FLYING;
@@ -205,7 +200,6 @@ public abstract class OldMove{
 		REGISTRY.put("ARM_THRUST", new MultiHitMove(Types.FIGHTING, MoveCategory.PHYSICAL, 20, 15, 100, 50));
 		REGISTRY.put("BARRAGE", new MultiHitMove(Types.NORMAL, MoveCategory.PHYSICAL, 20, 15, 85, 50, OldMoveFlags.NO_CONTACT,
 				OldMoveFlags.BALLBASED));
-		//REGISTRY.put("COMET_PUNCH", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 15, 18, 85, 60));
 		//REGISTRY.put("DOUBLE_SLAP", new MultiHitMove(Types.NORMAL, MoveType.PHYSICAL, 10, 15, 85, 50));
 
 		//REGISTRY.put("DOUBLE_KICK", new MultiHitMove(Types.FIGHTING, MoveType.PHYSICAL, 30, 30, 100, 2)); //Hits twice
@@ -231,7 +225,7 @@ public abstract class OldMove{
 		REGISTRY.put("AMNESIA", new StatusChange(Types.PSYCHIC, 20, Stats.SPECIAL_DEFENSE, 2, OldMoveFlags.UNTARGETABLE));
 		REGISTRY.put("AUTOTOMIZE", new StatusChange(Types.STEEL, 15, 50, Stats.SPEED, 2, OldMoveFlags.UNTARGETABLE));//TODO lowers weight
 		REGISTRY.put("BARRIER", new StatusChange(Types.PSYCHIC, 20, Stats.DEFENSE, 2, OldMoveFlags.UNTARGETABLE));
-		REGISTRY.put("BABY_DOLL_EYES", new StatusChange(Types.FAIRY, 30, 100, 25, Stats.ATTACK, -1, Battle_Priority.P1));
+		REGISTRY.put("BABY_DOLL_EYES", new StatusChange(Types.FAIRY, 30, 100, 25, Stats.ATTACK, -1, BattlePriority.P1));
 		REGISTRY.put("SWORDS_DANCE", new StatusChange(Types.NORMAL, 20, Stats.ATTACK, 2, OldMoveFlags.UNTARGETABLE));
 		REGISTRY.put("BELLY_DRUM", new StatusChange(Types.NORMAL, 10, 150, Stats.ATTACK, 12, OldMoveFlags.UNTARGETABLE){
 			@Override
@@ -268,7 +262,6 @@ public abstract class OldMove{
 		//TODO CONFUSION REGISTRY.put("SIGNAL_BEAM", new AilmentDamageMove(Types.BUG, MoveType.SPECIAL, 15, 75, 100, 80, 10, ));
 		REGISTRY.put("RELIC_SONG", new AilmentDamageMove(Types.NORMAL, MoveCategory.SPECIAL, 10, 75, 100, 80, 10, MoveUtils::sleep));
 
-		REGISTRY.put("KARATE_CHOP", new DamageMove(Types.FIGHTING, MoveCategory.PHYSICAL, 25, 50, 100));
 		REGISTRY.put("POISON_TAIL", new AilmentDamageMove(Types.POISON, MoveCategory.PHYSICAL, 25, 50, 100, 55, 10, MoveUtils::poison));
 
 		//One of the signature moves of Reshiram, boosts fusion bolt
@@ -280,7 +273,7 @@ public abstract class OldMove{
 		REGISTRY.put("AEROBLAST", new DamageMove(Types.FLYING, MoveCategory.SPECIAL, 5, 100, 95));
 		REGISTRY.put("AIR_CUTTER", new DamageMove(Types.FLYING, MoveCategory.SPECIAL, 25, 60, 95));
 		REGISTRY.put("ATTACK_ORDER", new DamageMove(Types.BUG, MoveCategory.PHYSICAL, 15, 90, 100, 100, OldMoveFlags.NO_CONTACT));
-		REGISTRY.put("AQUA_JET", new DamageMove(Types.WATER, MoveCategory.PHYSICAL, 20, 40, 100, 60, Battle_Priority.P1));
+		REGISTRY.put("AQUA_JET", new DamageMove(Types.WATER, MoveCategory.PHYSICAL, 20, 40, 100, 60, BattlePriority.P1));
 		REGISTRY.put("CUT", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 30, 50, 95));
 		REGISTRY.put("FAIRY_WIND", new DamageMove(Types.FAIRY, MoveCategory.SPECIAL, 30, 40, 100));
 		REGISTRY.put("MEGA_KICK", new DamageMove(Types.NORMAL, MoveCategory.PHYSICAL, 5, 120, 75));
@@ -311,7 +304,6 @@ public abstract class OldMove{
 
 		REGISTRY.put("FLY", new SemiInvulChargeMove(Types.FLYING, MoveCategory.PHYSICAL, 15, 90, 95, 120, "%s flew up high!",
 				OldMoveFlags.FLIGHT, OldMoveFlags.GUST_VULNURABLE));
-		REGISTRY.put("RAZOR_WIND", new ChargeMove(Types.NORMAL, MoveCategory.SPECIAL, 10, 80, 100, 70, "%s whipped up a whirlwind!"));
 		REGISTRY.put("SKY_ATTACK", new ChargeMove(Types.FLYING, MoveCategory.PHYSICAL, 5, 140, 90, 150, "%s is glowing!"){
 			@Override
 			public void runAfter(IChannel channel, Player attacker, Player defender, int damage){
@@ -395,7 +387,7 @@ public abstract class OldMove{
 			}
 		});
 
-		REGISTRY.put("AVALANCHE", new OldMove(Types.ICE, MoveCategory.PHYSICAL, 10, 60, 100, 80, Battle_Priority.N4){
+		REGISTRY.put("AVALANCHE", new OldMove(Types.ICE, MoveCategory.PHYSICAL, 10, 60, 100, 80, BattlePriority.N4){
 			@Override
 			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
 				return BeforeResult.HAS_ADJUSTED_DAMAGE;
@@ -453,20 +445,6 @@ public abstract class OldMove{
 					Messages.attackMessage(channel, attacker, this);
 					defender.set(Effects.VBattle.ABILITY_BLOCK);
 					Pokebot.sendMessage(channel, defender.mention()+" 's ability was suppressed!");
-				} else {
-					Messages.miss(channel, attacker);
-				}
-				return BeforeResult.STOP;
-			}
-		});
-
-		//TODO this can probably be in a OHKO move class, since other moves will be like it
-		REGISTRY.put("GUILLOTINE", new OldMove(Types.NORMAL, MoveCategory.PHYSICAL, 5, -1, 30, 150){
-			@Override
-			public BeforeResult runBefore(IChannel channel, Player attacker, Player defender){
-				if(willHit(this, attacker, defender, true)){
-					defender.HP = 0;
-					Pokebot.sendMessage(channel, defender.mention()+" was OHKO'd!");
 				} else {
 					Messages.miss(channel, attacker);
 				}
@@ -614,22 +592,7 @@ public abstract class OldMove{
 				getStab(attacker, move) //STAB
 						//*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
 						*getOtherModifiers(attacker, move, defender)
-						*((Pokebot.ran.nextInt(100-85)+85+1)/100D) //Random chance, it would be 85-99 if there wasn't the +1
-				;
-		switch(attacker.getModifiedAbility()){
-			case ANALYTIC:{
-				modifier *= 1.3; //30% increase
-				break;
-			}
-			case BLAZE:{
-				if(move.getType(attacker) == Types.FIRE && attacker.HP < Math.floorDiv(attacker.getMaxHP(), 3)){
-					modifier *= 1.5;
-				}
-				break;
-			}
-			default:
-				break;
-		}
+						*((Pokebot.ran.nextInt(100-85)+85+1)/100D); //Random chance, it would be 85-99 if there wasn't the +1
 		double a = ((2*attacker.level)+10D)/250D;
 		double b;
 		if(move.isSpecial()){
@@ -645,24 +608,12 @@ public abstract class OldMove{
 	}
 
 	public static double getStab(Player attacker, OldMove move){
-		if(attacker.hasType(move.getType(attacker))){
-			if(attacker.hasAbility(Abilities.ADAPTABILITY)) return 2;
-			return 1.5;
-		}
 		return 1;
 	}
 
 	@SuppressWarnings("UnusedParameters")
 	public static double getPowerChange(Player attacker, OldMove move, Player defender, double power){
-		switch(attacker.getModifiedAbility()){
-			case AERILATE:{
-				power *= 1.3;
-				break;
-			}
-			default:
-				break;
-		}
-		return power;
+		return 0;
 	}
 
 	//TODO perhaps this isn't necessary?
@@ -728,17 +679,6 @@ public abstract class OldMove{
 						Pokebot.sendMessage(defender.battle.channel, "But "+defender.mention()+" protected itself!");
 						return false;
 				}
-			}
-			switch(defender.getModifiedAbility()){
-				case BULLETPROOF:{
-					if(move.has(OldMoveFlags.BALLBASED)){
-						Pokebot.sendMessage(defender.battle.channel, defender.mention()+" is immune to the attack!");
-						return false;
-					}
-					break;
-				}
-				default:
-					break;
 			}
 		}
 

@@ -1,8 +1,8 @@
 package coolway99.discordpokebot.states;
 
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.moves.old.OldMove;
 import coolway99.discordpokebot.moves.MoveWrapper;
+import org.jetbrains.annotations.Nullable;
 
 public enum Types{
 	NULL(0x68A090),
@@ -357,15 +357,26 @@ public enum Types{
 		}
 	}
 
-	public static boolean isImmune(Player attacker, MoveWrapper move, Player defender){
-		Types moveType = move.getType();
-		for(Types type : getImmune(defender.primary)){
+	public static boolean isImmune(MoveWrapper move, Player defender){
+		return isImmune(move.getType(), defender);
+	}
+
+	public static boolean isImmune(Types moveType, Player defender){
+		return isImmune(moveType, defender.primary, defender.secondary);
+	}
+
+	public static boolean isImmune(Types moveType, Types primary){
+		return isImmune(moveType, primary, null);
+	}
+
+	public static boolean isImmune(Types moveType, Types primary, @Nullable Types secondary){
+		for(Types type : getImmune(primary)){
 			if(moveType == type){
 				return true;
 			}
 		}
-		if(defender.hasSecondaryType()){
-			for(Types type : getImmune(defender.secondary)){
+		if(secondary != null){
+			for(Types type : getImmune(secondary)){
 				if(moveType == type){
 					return true;
 				}
@@ -374,36 +385,48 @@ public enum Types{
 		return false;
 	}
 
+
+	public static double getTypeMultiplier(MoveWrapper move, Player defender){
+		return getTypeMultiplier(move.getType(), defender);
+	}
+
+	public static double getTypeMultiplier(Types moveType, Player defender){
+		return getTypeMultiplier(moveType, defender.primary, defender.secondary);
+	}
+
+	public static double getTypeMultiplier(Types moveType, Types primary){
+		return getTypeMultiplier(moveType, primary, null);
+	}
+
 	//THIS DOES NOT FACTOR IN STAB
-	public static double getTypeMultiplier(Player attacker, MoveWrapper move, Player defender){
-		Types moveType = move.getType();
-		if(isImmune(attacker, move, defender)) return 0;
-		
+	public static double getTypeMultiplier(Types moveType, Types primary, @Nullable Types secondary){
+		if(isImmune(moveType, primary, secondary)) return 0;
+
 		double multiplier = 1D; //We start with 1X damage
-		
-		for(Types type : getResistive(defender.primary)){
+
+		for(Types type : getResistive(primary)){
 			if(moveType == type){
 				multiplier /= 2;
 				break;
 			}
 		}
-		if(defender.hasSecondaryType()){
-			for(Types type : getResistive(defender.secondary)){
-				if(moveType == type){
-					multiplier /= 2;
-					break;
-				}
-			}
-		}
-		
-		for(Types type : getEffective(defender.primary)){
+
+		for(Types type : getEffective(primary)){
 			if(moveType == type){
 				multiplier *= 2;
 				break;
 			}
 		}
-		if(defender.hasSecondaryType()){
-			for(Types type : getEffective(defender.secondary)){
+
+		if(secondary != null){
+			for(Types type : getResistive(secondary)){
+				if(moveType == type){
+					multiplier /= 2;
+					break;
+				}
+			}
+
+			for(Types type : getEffective(secondary)){
 				if(moveType == type){
 					multiplier *= 2;
 					break;

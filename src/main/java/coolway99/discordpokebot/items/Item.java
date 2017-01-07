@@ -2,7 +2,6 @@ package coolway99.discordpokebot.items;
 
 
 import coolway99.discordpokebot.Player;
-import coolway99.discordpokebot.StatHandler;
 import coolway99.discordpokebot.moves.old.OldMove;
 import coolway99.discordpokebot.moves.old.OldMoveSet;
 import coolway99.discordpokebot.moves.MoveCategory;
@@ -107,10 +106,10 @@ public class Item{
 		System.out.println("Registering items");
 		ItemBuilder.newItem(30, "ABSORB_BULB", "Absorb Bulb")
 				.onAfterDamage((channel, attacker, move, defender, damage, item) -> {
-					if(move.getType(attacker) == Types.WATER){
+					/*if(move.getType(attacker) == Types.WATER){
 						//attacker.itemConsumed = true;
 						StatHandler.changeStat(channel, attacker, Stats.SPECIAL_ATTACK, 1);
-					}
+					}*/
 				})
 				.register();
 		ItemBuilder.newItem(50, "AGUAV_BERRY", "Aguav Berry")

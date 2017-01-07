@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.battles;
 
+import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
@@ -89,6 +90,7 @@ public abstract class Battle{
 		builder.append(" seconds to make your first move!");
 		this.sendMessage(builder.toString());
 		this.timer = Pokebot.timer.schedule(this::onTurn, this.turnTime*2, TimeUnit.SECONDS);
+		this.onStart();
 	}
 
 	public void joinBattle(Player player){
@@ -146,13 +148,14 @@ public abstract class Battle{
 
 	public abstract boolean checkPosition(IChannel channel, Player attacker, MoveSet moveSet, Player defender);
 
-	//Called for moves that auto-set themselves
-	/*protected void onAutoAttack(Player attacker, OldMoveSet move, Player defender){
-		synchronized(this.attacks){
-			this.attacks.put(attacker, new IAttack(attacker, move, defender));
-			this.sendMessage(attacker.mention()+" has a multiturn attack!");
+	private void onStart(){
+		Context context = new Context();
+		context.channel = this.channel;
+		context.battle = this;
+		for(Player player : this.participants){
+			player.getModifiedAbility().onBegin(context, player);
 		}
-	}*/
+	}
 
 	//This is called every time the BattleTurnTimer times out, or if onAttack is completely filled
 	public void onTurn(){
@@ -313,6 +316,9 @@ public abstract class Battle{
 		return this.battleEffects.keySet().contains(effect);
 	}
 
+	public void clear(BattleEffects effect){
+		this.battleEffects.remove(effect);
+	}
 	/*//This is in this class, because only battles prevent explosions
 	protected void preventExplosion(Player player, Player attacker){
 		this.sendMessage("But "+player.mention()+"'s DAMP prevented"
@@ -350,6 +356,10 @@ public abstract class Battle{
 	}
 
 	public void onLeaveBattle(Player player){
+		Context context = new Context();
+		context.battle = this;
+		context.channel = this.channel;
+		player.getModifiedAbility().onEnd(context, player);
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 		this.attackers.remove(player);
@@ -358,6 +368,10 @@ public abstract class Battle{
 	}
 
 	protected void onSafeLeaveBattle(Player player){
+		Context context = new Context();
+		context.battle = this;
+		context.channel = this.channel;
+		player.getModifiedAbility().onEnd(context, player);
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 	}

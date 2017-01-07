@@ -42,14 +42,7 @@ public class MoveAPI{
 	}
 
 	public static void setUpMoves(){
-		//TODO Move the engine setup
-		try{
-			//noinspection ConstantConditions
-			Pokebot.engine.eval(new FileReader(Pokebot.getResource("scripting/engine.js")));
-		} catch(ScriptException | FileNotFoundException e){
-			e.printStackTrace();
-		}
-
+		System.out.println("Registering moves");
 		//Registering the moves o3o
 		File files = Pokebot.getResource("scripting/moves/");
 		if(files == null){
@@ -70,16 +63,22 @@ public class MoveAPI{
 		}
 	}
 
-	public static void registerMove(ScriptObjectMirror moveObject){
+	/**
+	 * A method for JSON to register moves
+	 * @param moveObject The move to register
+	 */
+	public static void register(ScriptObjectMirror moveObject){
 		MoveWrapper move = new MoveWrapper(new JSONObject(moveObject));
-		if(move.getName() == null) return;
 		REGISTRY.put(move.getName(), move);
 	}
 
-	public static void registerMoves(ScriptObjectMirror moveObject){
-		ScriptObjectMirror[] moves = moveObject.to(ScriptObjectMirror[].class);
+	/**
+	 * An overload that accepts an array of moves
+	 * @param moves The list of moves to register
+	 */
+	public static void register(ScriptObjectMirror[] moves){
 		for(ScriptObjectMirror move : moves){
-			registerMove(move);
+			register(move);
 		}
 	}
 }

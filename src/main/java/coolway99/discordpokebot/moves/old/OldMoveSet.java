@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.moves.old;
 
+@Deprecated
 public class OldMoveSet{
 	private final OldMove move;
 	private int PP;

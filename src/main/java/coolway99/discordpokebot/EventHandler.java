@@ -1,5 +1,7 @@
 package coolway99.discordpokebot;
 
+import coolway99.discordpokebot.abilities.AbilityAPI;
+import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.battles.Battle;
 import coolway99.discordpokebot.battles.BattleManager;
 import coolway99.discordpokebot.battles.SingleBattle;
@@ -8,7 +10,6 @@ import coolway99.discordpokebot.moves.MoveFlags;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.moves.MoveAPI;
-import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Position;
@@ -239,21 +240,28 @@ public class EventHandler{
 				case "ga":
 				case "getability":{
 					Player player = PlayerHandler.getPlayer(mentionOrAuthor);
-					Pokebot.sendMessage(channel, player.mention()+"'s ability is "+player.getAbility());
+					AbilityWrapper ability = player.getModifiedAbility();
+					if(ability == AbilityAPI.getDefaultAbility()){
+						Pokebot.sendMessage(channel, player.mention()+" has no ability!");
+					} else {
+						Pokebot.sendMessage(channel, player.mention()+"'s ability is "+ability);
+					}
 					return;
 				}
 				case "sa":
 				case "setability":{
 					Player player = PlayerHandler.getPlayer(author);
 					try{
-						Abilities ability = Abilities.valueOf(args[1].toUpperCase());
+						AbilityWrapper ability = AbilityAPI.getAbility(1, args);
+						if(ability == AbilityAPI.getDefaultAbility() && !ability.getName().equals(args[1])){
+							reply(message, "That's not an ability, list them with laa");
+							return;
+						}
 						if(StatHandler.wouldExceedTotalPoints(player, ability)) StatHandler.exceedWarning(channel, player);
 						player.setAbility(ability);
 						reply(message, "Set ability to "+ability);
 					} catch(IndexOutOfBoundsException e){
 						reply(message, "Usage: sa <ability>");
-					} catch(IllegalArgumentException e){
-						reply(message, "That's not an ability, list them with laa");
 					}
 					return;
 				}
@@ -261,7 +269,7 @@ public class EventHandler{
 				case "listallability":
 				case "laa":{
 					StringBuilder builder = new StringBuilder("These are all the abilities I know:");
-					for(Abilities ability : Abilities.values()){
+					for(AbilityWrapper ability : AbilityAPI.getAllAbilities()){
 						builder.append('\n');
 						builder.append(ability);
 						builder.append(" Cost:(").append(ability.getCost()).append(')');
@@ -675,7 +683,7 @@ public class EventHandler{
 					MessageBuilder newMessage = new MessageBuilder(Pokebot.client);
 					newMessage.appendContent(builder.toString());
 					newMessage.withChannel(channel);
-					this.onMessage(new MessageReceivedEvent(newMessage.send()));
+					this.onMessage(new MessageReceivedEvent(newMessage.build()));
 					return;
 				}
 				case "info":{

@@ -1,6 +1,6 @@
 var FLAGS = API.MOVES.FLAGS;
 
-API.registerMoves([
+API.MOVES.register([
 {
 	name: "Pound",
 	power: 40,

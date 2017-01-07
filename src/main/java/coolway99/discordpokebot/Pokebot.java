@@ -1,5 +1,6 @@
 package coolway99.discordpokebot;
 
+import coolway99.discordpokebot.abilities.AbilityAPI;
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.moves.MoveAPI;
 import coolway99.discordpokebot.storage.ConfigHandler;
@@ -19,7 +20,10 @@ import sx.blah.discord.util.RequestBuffer;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
@@ -30,7 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
-	public static final String VERSION = "dev-2.0.0 New-Battle-System";
+	public static final String VERSION = "dev-2.0.0 abilities-rewrite";
 	//TODO make the rest of these configs
 	public static final byte SAVE_DELAY = 1; //In minutes
 	public static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
@@ -68,7 +72,9 @@ public class Pokebot{
 		System.out.println("Logging in");
 		//Timers moved to BotReadyHandler
 		//Now that the main thread is done doing its business and the bot is busy logging in...
+		Pokebot.setupEngine();
 		MoveAPI.setUpMoves();
+		AbilityAPI.setUpAbilities();
 		//Item.registerItems();
 	}
 
@@ -171,7 +177,14 @@ public class Pokebot{
 	}
 
 	public static void setupEngine(){
-
+		System.out.println("Building API");
+		//TODO Move the engine setup
+		try{
+			//noinspection ConstantConditions
+			Pokebot.engine.eval(new FileReader(Pokebot.getResource("scripting/engine.js")));
+		} catch(ScriptException | FileNotFoundException e){
+			e.printStackTrace();
+		}
 	}
 
 	@Nullable

@@ -1,17 +1,19 @@
 package coolway99.discordpokebot;
 
+import coolway99.discordpokebot.abilities.AbilityAPI;
+import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.battles.Battle;
 import coolway99.discordpokebot.moves.MoveFlags;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.moves.MoveAPI;
-import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
+import org.jetbrains.annotations.NotNull;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -59,9 +61,10 @@ public class Player{
 	 */
 	public Natures nature = Natures.values()[Pokebot.ran.nextInt(Natures.values().length)];
 	/**
-	 * The ability of the player
+	 * The ability of the player, null means no ability
 	 */
-	private Abilities ability = Abilities.MC_NORMAL_PANTS;
+	@NotNull
+	private AbilityWrapper ability = AbilityAPI.getDefaultAbility();
 	/**
 	 * What nonvolatile effect is the player currently under?
 	 */
@@ -176,20 +179,23 @@ public class Player{
 		this.battleEffects.clear();
 	}
 
-	public Abilities getAbility(){
+	@NotNull
+	public AbilityWrapper getAbility(){
 		return this.ability;
 	}
 
-	public Abilities getModifiedAbility(){
-		if(this.has(Effects.VBattle.ABILITY_BLOCK)) return Abilities.MC_NORMAL_PANTS;
+	//TODO perhaps have the battle keep track of this
+	@NotNull
+	public AbilityWrapper getModifiedAbility(){
+		if(this.has(Effects.VBattle.ABILITY_BLOCK)) return AbilityAPI.getDefaultAbility();
 		return this.ability;
 	}
 
-	public boolean hasAbility(Abilities ability){
+	public boolean hasAbility(AbilityWrapper ability){
 		return ability == this.getModifiedAbility();
 	}
 
-	public void setAbility(Abilities ability){
+	public void setAbility(@NotNull AbilityWrapper ability){
 		this.ability = ability;
 	}
 
@@ -378,7 +384,7 @@ public class Player{
 			this.level = in.nextInt();
 			in.nextLine();
 			this.nature = Natures.valueOf(in.nextLine());
-			this.ability = Abilities.valueOf(in.nextLine());
+			this.ability = AbilityAPI.getAbility(in.nextLine());
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
 		}catch(NoSuchElementException | NullPointerException e){

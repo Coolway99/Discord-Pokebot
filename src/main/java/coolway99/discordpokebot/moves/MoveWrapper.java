@@ -20,7 +20,7 @@ public class MoveWrapper{
 	private final MoveCategory category;
 	private final int PP;
 	private final int accuracy;
-	private final Battle_Priority priority;
+	private final BattlePriority priority;
 	private final int cost;
 	private final EnumSet<MoveFlags> flags;
 	private final Target target;
@@ -66,7 +66,7 @@ public class MoveWrapper{
 				this.accuracyFunction = null;
 			}
 		}
-		this.priority = Battle_Priority.getPriority(move.getInt("priority", 0));
+		this.priority = BattlePriority.getPriority(move.getInt("priority", 0));
 		this.cost = move.getInt("cost", this.power);
 
 		this.flags = EnumSet.noneOf(MoveFlags.class);
@@ -111,7 +111,7 @@ public class MoveWrapper{
 		return ((Number) this.accuracyFunction.call(this, context, attacker, defender)).intValue();
 	}
 
-	public Battle_Priority getPriority(){
+	public BattlePriority getPriority(){
 		return this.priority;
 	}
 
@@ -217,5 +217,10 @@ public class MoveWrapper{
 
 	public String getDescription(){
 		return this.description;
+	}
+
+	@Override
+	public String toString(){
+		return this.getName();
 	}
 }

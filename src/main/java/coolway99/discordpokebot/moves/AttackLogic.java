@@ -37,10 +37,14 @@ public class AttackLogic{
 		int recoil = attackerHP - attacker.HP;
 		//Calculate damage
 		int damage = defenderHP - defender.HP;
+		attacker.getModifiedAbility().onAttack(context, attacker, move, defender);
 		//Run any secondary effects for the move
 		move.onSecondary(context, attacker, defender, damage);
 		//Attacker onAfterAttack for any applicable items
 		//Defender onAfterDefend for any applicable items
+		if(attacker.has(Effects.NonVolatile.FAINTED)){
+			attacker.getModifiedAbility().onFaint(context, attacker);
+		}
 	}
 
 	public static boolean checkAccuracy(Context context, Player attacker, MoveWrapper move, Player defender){

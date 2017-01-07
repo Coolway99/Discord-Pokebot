@@ -52,7 +52,7 @@ public enum Natures{ //In this case, "Health" is null, since nature never applie
 	}
 	
 	public boolean hasEffect(){
-		return !(this.increase == Stats.HEALTH);
+		return this.increase != Stats.HEALTH;
 	}
 	
 	public String getExpandedText(){

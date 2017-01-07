@@ -142,7 +142,7 @@ public class BattleManager{
 		builder.append(host.mention());
 		builder.append(" has invited you ");
 		if(users.size() > 1) builder.append("all ");
-		builder.append("to battle in a "+battle.getBattleType()+", last one standing wins!\n");
+		builder.append("to battle in a ").append(battle.getBattleType()).append(", last one standing wins!\n");
 		builder.append("To join, type ");
 		builder.append(Pokebot.config.COMMAND_PREFIX);
 		builder.append("joinbattle ");

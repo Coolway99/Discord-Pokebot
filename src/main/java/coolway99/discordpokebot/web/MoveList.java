@@ -1,7 +1,6 @@
 package coolway99.discordpokebot.web;
 
 import coolway99.discordpokebot.moves.MoveAPI;
-import coolway99.discordpokebot.moves.old.OldMove;
 import org.watertemplate.Template;
 
 /*

@@ -10,6 +10,7 @@ import sx.blah.discord.handle.obj.IChannel;
 /**
  * The main object of typical multi-hit moves, used for convenience.
  */
+@Deprecated
 public class MultiHitMove extends OldMove{
 	/*(Types type, MoveType moveType, int PP, int power, int accuracy, int cost, Battle_Priority priority,
 	Flags... flags){*/

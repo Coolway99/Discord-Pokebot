@@ -1,40 +1,33 @@
 
 
-/*function convert(x){
-	return JSON.parse(JSON.stringify(x));
-}*/
-
 var MoveAPI = Java.type("coolway99.discordpokebot.moves.MoveAPI");
+var AbilityAPI = Java.type("coolway99.discordpokebot.abilities.AbilityAPI");
 var Pokebot = Java.type("coolway99.discordpokebot.Pokebot");
 
 var API = {
 	TYPES: Java.type("coolway99.discordpokebot.states.Types"),
 	STATS: Java.type("coolway99.discordpokebot.states.Stats"),
 	SUBSTATS: Java.type("coolway99.discordpokebot.states.SubStats"),
+
 	EFFECTS:{
 		NONVOLATILE: Java.type("coolway99.discordpokebot.states.Effects.NonVolatile"),
 		VOLATILE: Java.type("coolway99.discordpokebot.states.Effects.Volatile"),
 		VBATTLE: Java.type("coolway99.discordpokebot.states.Effects.VBattle"),
+		BATTLE: Java.type("coolway99.discordpokebot.battles.BattleEffects"),
 	},
 
-	MOVES: {
+	MOVES:{
 		CATEGORY: Java.type("coolway99.discordpokebot.moves.MoveCategory"),
 		FLAGS: Java.type("coolway99.discordpokebot.moves.MoveFlags"),
 		TARGET: Java.type("coolway99.discordpokebot.moves.Target"),
 		UTILS: Java.type("coolway99.discordpokebot.moves.MoveUtils"),
 
-		/*standardMultiHit: function(context, attacker, defender){
-			var hits = API.MOVES.UTILS.getTimesHit(1, 1/3, 1/3, 1/6, 1/6);
-			var damage = 0;
-			for(var x = 0; x < hits; x++){
-				//Even inside functions, using "this" in a move context will return the move (as a MoveWrapper) itself
-				damage += API.MOVES.UTILS.dealDamage(attacker, this, defender);
-			}
-			API.MESSAGES.multiHit(context.channel, defender, hits, damage);
-			if(defender.has(API.EFFECTS.NONVOLATILE.FAINTED)){
-				API.MESSAGES.fainted(context.channel, defender);
-			}
-		},*/
+		register: MoveAPI.register,
+	},
+
+	ABILITIES:{
+
+		register: AbilityAPI.register,
 	},
 
 	RANDOM: Pokebot.ran,
@@ -43,12 +36,9 @@ var API = {
 
 	diceRoll: Pokebot.diceRoll,
 	sendMessage: Pokebot.sendMessage,
-
-	registerMove: MoveAPI.registerMove,
-	registerMoves: MoveAPI.registerMoves,
-
 };
 
+delete AbilityAPI;
 delete MoveAPI;
 delete Pokebot;
 Object.freeze(API);

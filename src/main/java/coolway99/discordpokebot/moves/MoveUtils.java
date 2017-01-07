@@ -4,32 +4,27 @@ import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.states.Abilities;
+import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
 public class MoveUtils{
 
-	public static double getStab(Player attacker, MoveWrapper move){
-		if(attacker.hasType(move.getType())){
-			if(attacker.hasAbility(Abilities.ADAPTABILITY)) return 2;
-			return 1.5;
-		}
-		return 1;
-	}
-
 	public static int getDamage(Player attacker, MoveWrapper move, Player defender){
-		return getDamage(attacker, move, defender, move.getPower());
-	}
+		DamageCalculationHelper helper = new DamageCalculationHelper(attacker, move, defender);
 
-	//TODO Critical hits are purposefully removed, however look into putting them back or not depending on feedback
-	public static int getDamage(Player attacker, MoveWrapper move, Player defender, int power){
-		double modifier = getStab(attacker, move)//STAB
-						*Types.getTypeMultiplier(attacker, move, defender) //Effectiveness
+		AbilityWrapper ability = attacker.getModifiedAbility();
+		if(ability != null){
+			ability.onDamageModifier(helper, attacker, move, defender);
+		}
+		/*double modifier = (attacker.hasType(move.getType()) ? 1.5 : 1)//STAB
+						*Types.getTypeMultiplier(move, defender) //Effectiveness
 						//*getOtherModifiers(attacker, move, defender) TODO had to do with moves like gust
 						*((Pokebot.ran.nextInt(100-85+1)+85+1)/100D) //Random chance, it would be 85-99 if there wasn't the +1
+						*attacker.getModifiedAbility().onDamageModifier(attacker, move, defender);
 				;
+		/*
 		switch(attacker.getModifiedAbility()){
 			case ANALYTIC:{
 				modifier *= 1.3; //30% increase
@@ -44,6 +39,7 @@ public class MoveUtils{
 			default:
 				break;
 		}
+		*//*
 		double a = ((2*attacker.level)+10D)/250D;
 		double b;
 		if(move.getCategory() == MoveCategory.SPECIAL){
@@ -55,7 +51,8 @@ public class MoveUtils{
 		}
 		//power = (int) getPowerChange(attacker, move, defender, power); TODO has to do with abilities
 		double ret = ((a*b*power)+2)*modifier;
-		return (int) ret; //implicit math.floor
+		return (int) ret; //implicit math.floor*/
+		return helper.computeDamage();
 	}
 
 	//A helper method to combine the two

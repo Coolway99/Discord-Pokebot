@@ -1,5 +1,6 @@
 package coolway99.discordpokebot.moves.old;
 
+@Deprecated
 public enum OldMoveFlags{
 	ALWAYS_HIT,
 	HIT_THROUGH_SEMIINVUL,

@@ -3,10 +3,11 @@ package coolway99.discordpokebot.web;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.abilities.AbilityAPI;
+import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.moves.MoveAPI;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.moves.MoveWrapper;
-import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -183,12 +184,12 @@ public class WebInterface{
 					return "Stat Error: Are you sure you only entered numbers into the stat grid?";
 				}
 
-				Abilities ability;
+				AbilityWrapper ability;
 				try{
 					String abilitySelector = req.headers("ability");
 					int cost = Integer.parseInt(abilitySelector.substring(0, abilitySelector.indexOf('|')));
 					String abilityName = abilitySelector.substring(abilitySelector.indexOf('|')+1);
-					ability = Abilities.valueOf(abilityName);
+					ability = AbilityAPI.getAbility(abilityName);
 					if(ability.getCost() != cost){
 						return "Ability Checksum Error (did you try setting an ability manually?)";
 					}

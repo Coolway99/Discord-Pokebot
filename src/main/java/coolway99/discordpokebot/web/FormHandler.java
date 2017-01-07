@@ -2,9 +2,9 @@ package coolway99.discordpokebot.web;
 
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.StatHandler;
+import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.moves.MoveWrapper;
-import coolway99.discordpokebot.states.Abilities;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
 import org.watertemplate.Template;
@@ -46,8 +46,12 @@ public class FormHandler extends Template{
 			}
 		}
 		this.add("ran", ran);
-		Abilities ability = player.getAbility();
-		this.add("ability", ability.getCost()+"|"+ability);
+		AbilityWrapper ability = player.getAbility();
+		if(ability == null){
+			this.add("ability", "0|NONE");
+		} else {
+			this.add("ability", ability.getCost()+"|"+ability);
+		}
 	}
 
 	@Override

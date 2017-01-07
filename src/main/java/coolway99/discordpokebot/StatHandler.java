@@ -1,8 +1,8 @@
 package coolway99.discordpokebot;
 
-import coolway99.discordpokebot.states.Abilities;
+import coolway99.discordpokebot.abilities.AbilityWrapper;
+import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.states.Effects;
-import coolway99.discordpokebot.moves.old.OldMove;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
@@ -209,15 +209,15 @@ public class StatHandler{
 		return wouldExceed(getTotalPoints(player), oldAmount, newAmount, MAX_TOTAL_POINTS);
 	}
 
-	public static boolean wouldExceedTotalPoints(Player player, OldMove oldMove, OldMove newMove){
+	public static boolean wouldExceedTotalPoints(Player player, MoveWrapper oldMove, MoveWrapper newMove){
 		return wouldExceedTotalPoints(player, oldMove.getCost(), newMove.getCost());
 	}
 
-	public static boolean wouldExceedTotalPoints(Player player, Abilities oldAbility, Abilities newAbilitiy){
-		return wouldExceedTotalPoints(player, oldAbility.getCost(), newAbilitiy.getCost());
+	public static boolean wouldExceedTotalPoints(Player player, AbilityWrapper oldAbility, AbilityWrapper newAbilitiy){
+		return wouldExceedTotalPoints(player, (oldAbility == null) ? 0 : oldAbility.getCost(), newAbilitiy.getCost());
 	}
 
-	public static boolean wouldExceedTotalPoints(Player player, Abilities newAbility){
+	public static boolean wouldExceedTotalPoints(Player player, AbilityWrapper newAbility){
 		return wouldExceedTotalPoints(player, player.getAbility(), newAbility);
 	}
 
