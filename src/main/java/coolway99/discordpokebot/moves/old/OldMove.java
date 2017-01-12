@@ -126,13 +126,13 @@ public abstract class OldMove{
 	}
 
 	public Types getType(OldAbilities ability){
-		switch(ability){
+		/*switch(ability){
 			case NORMALIZE: return Types.NORMAL;
 			case AERILATE: return Types.FLYING;
 
 			default:
 				break;
-		}
+		}*/
 		return this.type;
 	}
 

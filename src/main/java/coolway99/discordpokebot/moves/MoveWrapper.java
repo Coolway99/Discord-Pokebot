@@ -1,6 +1,5 @@
 package coolway99.discordpokebot.moves;
 
-import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
 import coolway99.discordpokebot.states.Types;
@@ -8,6 +7,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sx.blah.discord.handle.obj.IChannel;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -106,9 +106,9 @@ public class MoveWrapper{
 		return this.accuracy;
 	}
 
-	public int getAccuracy(Context context, Player attacker, Player defender){
+	public int getAccuracy(IChannel channel, Player attacker, Player defender){
 		if(this.accuracyFunction == null) return this.accuracy;
-		return ((Number) this.accuracyFunction.call(this, context, attacker, defender)).intValue();
+		return ((Number) this.accuracyFunction.call(this, channel, attacker, defender)).intValue();
 	}
 
 	public BattlePriority getPriority(){
@@ -129,15 +129,15 @@ public class MoveWrapper{
 
 	/**
 	 * Tries to do the attack, this runs before accuracy is even checked
-	 * @param context The context we're doing this in
+	 * @param channel The channel we're doing this in
 	 * @param attacker The one using the attack
 	 * @param defender The one defending from the attack
 	 * @return false if we fail, true if we are able to attack
 	 */
 	@Contract(pure = true)
-	public boolean onTry(Context context, Player attacker, Player defender){
+	public boolean onTry(IChannel channel, Player attacker, Player defender){
 		if(this.onTryFunction == null) return true;
-		Boolean b = (Boolean) this.onTryFunction.call(this, context, attacker, defender);
+		Boolean b = (Boolean) this.onTryFunction.call(this, channel, attacker, defender);
 		if(b == null) return true;
 		return b;
 	}
@@ -150,27 +150,27 @@ public class MoveWrapper{
 	 * Can be null or a function
 	 */
 	@Contract(pure = true)
-	public boolean onBeforeAttack(Context context, Player attacker, Player defender){
+	public boolean onBeforeAttack(IChannel channel, Player attacker, Player defender){
 		if(this.onBeforeFunction == null) return true;
-		Boolean b = (Boolean) this.onBeforeFunction.call(this, context, attacker, defender);
+		Boolean b = (Boolean) this.onBeforeFunction.call(this, channel, attacker, defender);
 		if(b == null) return true;
 		return b;
 	}
 
 	/**
 	 * The main method for moves. This must always be defined
-	 * @param context The context this takes place in
+	 * @param channel The channel this takes place in
 	 * @param attacker The attacker, aka the one performing the attack
 	 * @param defender The defender, aka the one receiving the attack
 	 */
-	public void onAttack(Context context, Player attacker, Player defender){
+	public void onAttack(IChannel channel, Player attacker, Player defender){
 
 		if(this.onAttackFunction == null){
 			//The default attack function
-			MoveUtils.dealDamage(context.channel, attacker, this, defender);
+			MoveUtils.dealDamage(channel, attacker, this, defender);
 			return;
 		}
-		this.onAttackFunction.call(this, context, attacker, defender, context.battle);
+		this.onAttackFunction.call(this, channel, attacker, defender);
 	}
 
 	/**
@@ -179,21 +179,21 @@ public class MoveWrapper{
 	 * @param defender The one defending from the attack
 	 * If null or false, then it is skipped, otherwise it must be a function
 	 */
-	public void onSecondary(Context context, Player attacker, Player defender, int damageDealt){
+	public void onSecondary(IChannel channel, Player attacker, Player defender, int damageDealt){
 		if(this.onSecondaryFunction == null || !this.onSecondaryFunction.isFunction()) return;
-		this.onSecondaryFunction.call(this, context, attacker, defender, damageDealt);
+		this.onSecondaryFunction.call(this, channel, attacker, defender, damageDealt);
 	}
 
 //	/**
 //	 * Called when the enemy attempts to attack them, if defined this overrides
-//	 * @param context The context this takes place in
+//	 * @param channel The channel this takes place in
 //	 * @param moveID The id of the move being attempted
 //	 * @param attacker The attacking pokemon (one running the move)
 //	 * @param defender The defending pokemon (us, in this case)
-//	 * @param battle If needed, the battle context this takes place in
+//	 * @param battle If needed, the battle channel this takes place in
 //	 * @return True if this move can hit us, false if they can't
 //	 */
-//	public boolean willHit(Context context, String moveID, Player attacker, Player defender, Battle battle){
+//	public boolean willHit(IChannel channel, String moveID, Player attacker, Player defender, Battle battle){
 //		if(this.)
 //	}
 

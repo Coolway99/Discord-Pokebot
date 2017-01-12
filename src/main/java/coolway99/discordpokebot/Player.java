@@ -3,6 +3,8 @@ package coolway99.discordpokebot;
 import coolway99.discordpokebot.abilities.AbilityAPI;
 import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.battles.Battle;
+import coolway99.discordpokebot.items.ItemAPI;
+import coolway99.discordpokebot.items.ItemWrapper;
 import coolway99.discordpokebot.moves.MoveFlags;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.moves.MoveSet;
@@ -13,6 +15,7 @@ import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.SubStats;
 import coolway99.discordpokebot.states.Types;
 import coolway99.discordpokebot.storage.PlayerHandler;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
@@ -66,6 +69,11 @@ public class Player{
 	@NotNull
 	private AbilityWrapper ability = AbilityAPI.getDefaultAbility();
 	/**
+	 * The default item of the player
+	 */
+	@NotNull
+	private ItemWrapper item = ItemAPI.getDefaultItem();
+	/**
 	 * What nonvolatile effect is the player currently under?
 	 */
 	private Effects.NonVolatile nvEffect = Effects.NonVolatile.NORMAL;
@@ -89,7 +97,8 @@ public class Player{
 	public int lastMoveData = 0; //Can be used by moves for whatever they want, only used in battles
 	public Player lastTarget = null; //Only set in-battle. Null if there wasn't a target
 	public Player lastAttacker = null; //Only set in-battle. Null if there wasn't an attacker
-	//public Item modifiedItem = null; //This is instantiated during battle-time
+	@NotNull
+	public ItemWrapper modifiedItem = ItemAPI.getDefaultItem(); //This is instantiated during battle-time
 
 	public int counter = 0; //Used for Toxic, Sleep and Freeze
 
@@ -199,6 +208,29 @@ public class Player{
 		this.ability = ability;
 	}
 
+	@NotNull
+	public ItemWrapper getItem(){
+		return this.item;
+	}
+
+	@NotNull
+	public ItemWrapper getModifiedItem(){
+		return this.modifiedItem;
+	}
+
+	@Contract(value = "null -> false", pure = true)
+	public boolean hasItem(ItemWrapper item){
+		return item == this.modifiedItem;
+	}
+
+	public void setItem(@NotNull ItemWrapper item){
+		this.item = item;
+	}
+
+	public void usedItem(){
+		this.modifiedItem = ItemAPI.getDefaultItem();
+	}
+
 	/*public Item getItem(){
 		return this.heldItem;
 	}
@@ -292,6 +324,7 @@ public class Player{
 		StatHandler.changeStat(channel, this, stat, amount);
 	}
 
+	@Contract(pure = true)
 	public int damage(int amount){
 		int before = this.HP;
 		if(amount <= 0) return 0;
@@ -306,7 +339,8 @@ public class Player{
 		return before - this.HP;
 	}
 
-	public int damage(IChannel channel, int amount){
+	@Contract(pure = true)
+	public int damage(@NotNull IChannel channel, int amount){
 		if(amount <= 0){
 			Pokebot.sendMessage(channel, this.mention()+" didn't take any damage...");
 			return 0;
@@ -326,13 +360,15 @@ public class Player{
 		return dam;
 	}
 
+	@Contract(pure = true)
 	public int damage(float amount){
 		if(amount <= 0) return 0;
 		//Implicit Math.floor
 		return this.damage((int) (this.getMaxHP()* amount));
 	}
 
-	public int damage(IChannel channel, float amount){
+	@Contract(pure = true)
+	public int damage(@NotNull IChannel channel, float amount){
 		if(amount <= 0) return this.damage(channel, 0);
 		//Implicit Math.floor
 		return this.damage(channel, (int) (this.getMaxHP()* amount));

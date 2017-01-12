@@ -8,6 +8,7 @@ import coolway99.discordpokebot.states.Stats;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
+@Deprecated
 public class ItemBuilder{
 
 	private ItemTypes itemType = ItemTypes.ITEM;

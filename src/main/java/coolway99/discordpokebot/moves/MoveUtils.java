@@ -1,113 +1,72 @@
 package coolway99.discordpokebot.moves;
 
-import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
-import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Types;
 import sx.blah.discord.handle.obj.IChannel;
 
 public class MoveUtils{
 
-	public static int getDamage(Player attacker, MoveWrapper move, Player defender){
-		DamageCalculationHelper helper = new DamageCalculationHelper(attacker, move, defender);
 
-		AbilityWrapper ability = attacker.getModifiedAbility();
-		if(ability != null){
-			ability.onDamageModifier(helper, attacker, move, defender);
-		}
-		/*double modifier = (attacker.hasType(move.getType()) ? 1.5 : 1)//STAB
-						*Types.getTypeMultiplier(move, defender) //Effectiveness
-						//*getOtherModifiers(attacker, move, defender) TODO had to do with moves like gust
-						*((Pokebot.ran.nextInt(100-85+1)+85+1)/100D) //Random chance, it would be 85-99 if there wasn't the +1
-						*attacker.getModifiedAbility().onDamageModifier(attacker, move, defender);
-				;
-		/*
-		switch(attacker.getModifiedAbility()){
-			case ANALYTIC:{
-				modifier *= 1.3; //30% increase
-				break;
-			}
-			case BLAZE:{
-				if(move.getType() == Types.FIRE && attacker.HP < Math.floorDiv(attacker.getMaxHP(), 3)){
-					modifier *= 1.5;
-				}
-				break;
-			}
-			default:
-				break;
-		}
-		*//*
-		double a = ((2*attacker.level)+10D)/250D;
-		double b;
-		if(move.getCategory() == MoveCategory.SPECIAL){
-			b = attacker.getSpecialAttackStat();
-			b /= defender.getSpecialDefenseStat();
-		} else {
-			b = attacker.getAttackStat();
-			b /= defender.getDefenseStat();
-		}
-		//power = (int) getPowerChange(attacker, move, defender, power); TODO has to do with abilities
-		double ret = ((a*b*power)+2)*modifier;
-		return (int) ret; //implicit math.floor*/
-		return helper.computeDamage();
+	public static DamageCalculator getDamage(IChannel channel, Player attacker, MoveWrapper move, Player defender){
+		DamageCalculator damageCalc = new DamageCalculator(attacker, move, defender);
+		attacker.getModifiedAbility().onDamageModifier(channel, damageCalc);
+		defender.getModifiedItem().onDamageModifier(channel, damageCalc);
+		//TODO items
+		return damageCalc;
 	}
 
 	//A helper method to combine the two
 	public static int dealDamage(IChannel channel, Player attacker, MoveWrapper move, Player defender){
-		return defender.damage(channel, getDamage(attacker, move, defender));
-	}
-
-	//A helper method to combine the two
-	public static int dealDamage(Player attacker, MoveWrapper move, Player defender){
-		return defender.damage(getDamage(attacker, move, defender));
+		return defender.damage(getDamage(channel, attacker, move, defender).getDamage());
 	}
 
 	public static int getTimesHit(int offset, float... chances){
 		float ran = Pokebot.ran.nextFloat()*100;
 		float i = 0;
 		int times = offset;
-		for(int x = 0; x < chances.length; x++){
+		for(float chance : chances){
 			times++;
-			i += chances[x];
+			i += chance;
 			if(ran <= i) return times;
 		}
 		return chances.length+offset;
 	}
 
-	public static void standardMultiHit(Context context, Player attacker, MoveWrapper move, Player defender){
-		multiHitMove(context, attacker, move, defender, 1, 1/3F, 1/3F, 1/6F, 1/6F);
+	public static void standardMultiHit(IChannel channel, Player attacker, MoveWrapper move, Player defender){
+		multiHitMove(channel, attacker, move, defender, 1, 1/3F, 1/3F, 1/6F, 1/6F);
 	}
 
-	public static void multiHitMove(Context context, Player attacker, MoveWrapper move, Player defender,
+	public static void multiHitMove(IChannel channel, Player attacker, MoveWrapper move, Player defender,
 									int offset, float... times){
 		int hits = getTimesHit(offset, times);
 		int damage = 0;
 		for(int x = 0; x < hits; x++){
-			damage += dealDamage(attacker, move, defender);
+			damage += getDamage(channel, attacker, move, defender).getDamage();
 		}
-		Messages.multiHit(context.channel, defender, hits, damage);
+		Messages.multiHit(channel, defender, hits, damage);
 		if(defender.has(Effects.NonVolatile.FAINTED)){
-			Messages.fainted(context.channel, defender);
+			Messages.fainted(channel, defender);
 		}
 	}
 
-	public static void chargeMove(Context context, Player attacker, MoveWrapper move, Player defender){
-		if(context.battle == null) attacker.lastMoveData = 1;
+	public static void chargeMove(IChannel channel, Player attacker, MoveWrapper move, Player defender){
+		if(attacker.battle == null) attacker.lastMoveData = 1;
 		switch(attacker.lastMoveData){
 			case 1:{
 				attacker.lastMoveData = 0;
-				Messages.usedMove(context.channel, attacker, move);
-				dealDamage(context.channel, attacker, move, defender);
+				Messages.usedMove(channel, attacker, move);
+				dealDamage(channel, attacker, move, defender);
 				break;
 			}
 			case 0:
 			default:{
 				attacker.lastMoveData = 1;
-				Pokebot.sendMessage(context.channel, String.format(move.getMessage(), attacker.mention()));
-				context.battle.propegateAttack(attacker);
+				Pokebot.sendMessage(channel, String.format(move.getMessage(), attacker.mention()));
+				//We assume we're in a battle due to the null check at the start of the function
+				attacker.battle.propagateAttack(attacker);
 			}
 		}
 	}
@@ -215,7 +174,14 @@ public class MoveUtils{
 		//We assume this is only called within-battle
 	}
 
+	public static void confuse(IChannel channel, Player defender){
+		//TODO More research into confusion
+		defender.set(Effects.Volatile.CONFUSION);
+		Messages.confused(channel, defender);
+	}
+
 	public static void doEffectDamage(IChannel channel, Player player){
+		player.getModifiedItem().onBeforeEffect(channel, player);
 		switch(player.getNV()){
 			case BURN:{
 				//TODO Check for ability heatproof
@@ -248,5 +214,6 @@ public class MoveUtils{
 			default:
 				break;
 		}
+		player.getModifiedItem().onAfterEffect(channel, player);
 	}
 }

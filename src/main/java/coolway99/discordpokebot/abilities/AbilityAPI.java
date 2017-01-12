@@ -5,7 +5,6 @@ import coolway99.discordpokebot.jsonUtils.JSONObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.script.ScriptException;
 import java.io.File;
@@ -14,14 +13,18 @@ import java.io.FileReader;
 import java.util.Collection;
 import java.util.TreeMap;
 
-//Static objects should face inwards to Pokebot
-//Non-static objects should face outwards to the javascript api
 public class AbilityAPI{
 
 	private static final TreeMap<String, AbilityWrapper> REGISTRY = new TreeMap<>(String::compareToIgnoreCase);
 
 	@NotNull
-	@Contract(value = "_, null -> fail", pure = true)
+	@Contract(pure = true)
+	public static AbilityWrapper getAbility(@NotNull String[] args){
+		return getAbility(0, args);
+	}
+
+	@NotNull
+	@Contract(pure = true)
 	public static AbilityWrapper getAbility(int offset, @NotNull String[] args){
 		String name = "";
 		for(int x = offset; x < args.length; x++){
@@ -31,11 +34,10 @@ public class AbilityAPI{
 		return getAbility(name);
 	}
 
-	@NotNull
 	@Contract(pure = true)
 	public static AbilityWrapper getAbility(String name){
-		AbilityWrapper ability = REGISTRY.get(name.toUpperCase());
-		if(ability == null) ability = REGISTRY.get(name.replaceAll(" ", "").toUpperCase());
+		AbilityWrapper ability = REGISTRY.get(name);
+		if(ability == null) ability = REGISTRY.get(name.replaceAll(" ", ""));
 		if(ability == null) return getDefaultAbility();
 		return ability;
 	}
@@ -49,11 +51,16 @@ public class AbilityAPI{
 	public static void setUpAbilities(){
 		System.out.println("Registering abilities");
 		File files = Pokebot.getResource("scripting/abilities/");
-		if(files == null){
+		if(files == null || !files.isDirectory()){
 			System.err.println("Error, unable to load any abilities");
 			return;
 		}
-		for(File file : files.listFiles()){
+		File[] abilList = files.listFiles();
+		if(abilList == null){
+			System.err.println("Error, no abilities found");
+			return;
+		}
+		for(File file : abilList){
 			if(file.isDirectory()) continue;
 			if(file.isHidden()) continue;
 			try{
@@ -65,24 +72,26 @@ public class AbilityAPI{
 				System.err.println("Unable to find file "+file.getName());
 			}
 		}
-		if(REGISTRY.get("None".toUpperCase()) == null){
+		//assert REGISTRY.get("None") != null
+		if(REGISTRY.get("None") == null){
 			System.err.println("No default ability named \"None\", exiting");
 			System.exit(12);
 		}
 	}
 
-	public static void register(ScriptObjectMirror abilObject){
+	public static void register(@NotNull ScriptObjectMirror abilObject){
 		AbilityWrapper ability = new AbilityWrapper(new JSONObject(abilObject));
 		REGISTRY.put(ability.getName(), ability);
 	}
 
-	public static void register(ScriptObjectMirror[] abilities){
+	public static void register(@NotNull ScriptObjectMirror[] abilities){
 		for(ScriptObjectMirror ability : abilities){
 			register(ability);
 		}
 	}
 
 	@NotNull
+	@Contract(pure = true)
 	public static AbilityWrapper getDefaultAbility(){
 		AbilityWrapper ability = getAbility("None");
 		return ability;

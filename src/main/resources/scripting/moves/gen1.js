@@ -21,8 +21,8 @@ API.MOVES.register([
 	power: 15,
 	pp: 10,
 	cost: 45,
-	onAttack: function(context, attacker, defender){
-		API.MOVES.UTILS.standardMultiHit(context, attacker, this, defender);
+	onAttack: function(channel, attacker, defender){
+		API.MOVES.UTILS.standardMultiHit(channel, attacker, this, defender);
 	},
 	description: "The target is slapped repeatedly, back and forth, two to five times in a row.",
 },
@@ -33,8 +33,8 @@ API.MOVES.register([
 	pp: 15,
 	cost: (18*3),
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.PUNCH_BASED],
-	onAttack: function(context, attacker, defender){
-		API.MOVES.UTILS.standardMultiHit(context, attacker, this, defender);
+	onAttack: function(channel, attacker, defender){
+		API.MOVES.UTILS.standardMultiHit(channel, attacker, this, defender);
 	},
 	description: "The target is hit with a flurry of punches that strike two to five times in a row.",
 },
@@ -51,8 +51,8 @@ API.MOVES.register([
 	power: 40,
 	pp: 20,
 	flags: [FLAGS.CAN_BE_MIRRORED],
-	onSecondary: function(context){
-		API.sendMessage(context.channel, "Coins scattered everywhere!");
+	onSecondary: function(channel){
+		API.sendMessage(channel.channel, "Coins scattered everywhere!");
 	},
 	description: "Numerous coins are hurled at the target to inflict damage.",
 },
@@ -64,9 +64,9 @@ API.MOVES.register([
 	pp: 15,
 	cost: 80,
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.PUNCH_BASED],
-	onSecondary: function(context, attacker, defender){
+	onSecondary: function(channel, attacker, defender){
 		if(API.diceRoll(10)){
-			API.MOVES.UTILS.burn(context.channel, defender);
+			API.MOVES.UTILS.burn(channel.channel, defender);
 		}
 	},
 	description: "The target is punched with a fiery fist. This may also leave the target with a burn.",
@@ -79,9 +79,9 @@ API.MOVES.register([
 	pp: 15,
 	cost: 80,
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.PUNCH_BASED],
-	onSecondary: function(context, attacker, defender){
+	onSecondary: function(channel, attacker, defender){
 		if(API.diceRoll(10)){
-			API.MOVES.UTILS.freeze(context.channel, defender);
+			API.MOVES.UTILS.freeze(channel.channel, defender);
 		}
 	},
 	description: "The target is punched with an icy fist. This may also leave the target frozen.",
@@ -94,9 +94,9 @@ API.MOVES.register([
 	pp: 15,
 	cost: 80,
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.PUNCH_BASED],
-	onSecondary: function(context, attacker, defender){
+	onSecondary: function(channel, attacker, defender){
 		if(API.diceRoll(10)){
-			API.MOVES.UTILS.paralyze(context.channel, defender);
+			API.MOVES.UTILS.paralyze(channel.channel, defender);
 		}
 	},
 	description: "The target is punched with an electrified fist. This may also leave the target with paralysis.",
@@ -115,16 +115,16 @@ API.MOVES.register([
 },
 {
 	name: "Guillotine",
-	accuracy: function(context, attacker, defender){
-		//When context == null, we're calling this to get the display accuracy of the move
-		if(context == null) return 30;
+	accuracy: function(channel, attacker, defender){
+		//When channel == null, we're calling this to get the display accuracy of the move
+		if(channel == null) return 30;
 		//onTry is ran before the accuracy check, therefore we know that this move will work
 		return (attacker.level - defender.level) + 30;
 	},
 	pp: 5,
 	cost: 120,
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.OHKO],
-	onTry: function(context, attacker, defender){
+	onTry: function(channel, attacker, defender){
 		return attacker.level >= defender.level;
 	},
 	power: 9999,
@@ -133,9 +133,8 @@ API.MOVES.register([
 {
 	name: "Razor Wind",
 	category: API.MOVES.CATEGORY.SPECIAL,
-	accuracy: function(context, attacker, defender){
-		if(context == null) return 100;
-		if(context.battle == null){
+	accuracy: function(channel, attacker, defender){
+		if(attacker == null){
 			return 100;
 		} else {
 			if(attacker.lastMoveData == 1){
@@ -150,8 +149,8 @@ API.MOVES.register([
 	cost: 100,
 	flags: [FLAGS.MAKES_CONTACT, FLAGS.CAN_BE_MIRRORED, FLAGS.REQUIRES_CHARGE],
 	critRatio: 2,
-	onAttack: function(context, attacker, defender){
-		API.MOVES.UTILS.chargeMove(context, attacker, this, defender);
+	onAttack: function(channel, attacker, defender){
+		API.MOVES.UTILS.chargeMove(channel, attacker, this, defender);
 	},
 	target: API.MOVES.TARGET.WILL_HIT_ADJACENT_FOES,
 	message: "%s is whipping up a whirlwind!",

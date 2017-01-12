@@ -5,11 +5,13 @@ import coolway99.discordpokebot.abilities.AbilityWrapper;
 import coolway99.discordpokebot.battles.Battle;
 import coolway99.discordpokebot.battles.BattleManager;
 import coolway99.discordpokebot.battles.SingleBattle;
+import coolway99.discordpokebot.items.ItemAPI;
+import coolway99.discordpokebot.items.ItemWrapper;
 import coolway99.discordpokebot.moves.AttackLogic;
-import coolway99.discordpokebot.moves.MoveFlags;
-import coolway99.discordpokebot.moves.MoveWrapper;
-import coolway99.discordpokebot.moves.MoveSet;
 import coolway99.discordpokebot.moves.MoveAPI;
+import coolway99.discordpokebot.moves.MoveFlags;
+import coolway99.discordpokebot.moves.MoveSet;
+import coolway99.discordpokebot.moves.MoveWrapper;
 import coolway99.discordpokebot.states.Effects;
 import coolway99.discordpokebot.states.Natures;
 import coolway99.discordpokebot.states.Position;
@@ -253,7 +255,7 @@ public class EventHandler{
 					Player player = PlayerHandler.getPlayer(author);
 					try{
 						AbilityWrapper ability = AbilityAPI.getAbility(1, args);
-						if(ability == AbilityAPI.getDefaultAbility() && !ability.getName().equals(args[1])){
+						if(ability == AbilityAPI.getDefaultAbility() && !ability.getName().toUpperCase().equals(args[1].toUpperCase())){
 							reply(message, "That's not an ability, list them with laa");
 							return;
 						}
@@ -270,12 +272,57 @@ public class EventHandler{
 				case "laa":{
 					StringBuilder builder = new StringBuilder("These are all the abilities I know:");
 					for(AbilityWrapper ability : AbilityAPI.getAllAbilities()){
+						if(ability == AbilityAPI.getDefaultAbility()) continue;
 						builder.append('\n');
 						builder.append(ability);
 						builder.append(" Cost:(").append(ability.getCost()).append(')');
 					}
 					Pokebot.sendPrivateMessage(author, builder.toString());
 					reply(message, "I sent you all the abilities I know");
+					return;
+				}
+				case "getitem":
+				case "gi":{
+					reply(message, mentionOrAuthor.mention()+" has a "
+							+PlayerHandler.getPlayer(mentionOrAuthor).getModifiedItem()+'!');
+					return;
+				}
+				case "setitem":
+				case "si":{
+					Player player = PlayerHandler.getPlayer(author);
+					if(player.inBattle()){
+						inBattleMessage(message);
+						return;
+					}
+					if(args.length < 2){
+						reply(message, "Use: <item>");
+						return;
+					}
+					ItemWrapper item = ItemAPI.getItem(1, args);
+					if(item == ItemAPI.getDefaultItem() && !item.getName().toUpperCase().equals(args[1].toUpperCase())){
+						reply(message, "That is not a valid item!");
+						return;
+					}
+
+					if(StatHandler.wouldExceedTotalPoints(player, player.getItem().getCost(), item.getCost())){
+						StatHandler.exceedWarning(channel, player);
+					}
+					player.setItem(item);
+					reply(message, "Set item to "+item);
+					return;
+				}
+				case "listallitems":
+				case "listallitem":
+				case "lai":{
+					StringBuilder builder = new StringBuilder("These are all the items I have:");
+					for(ItemWrapper item : ItemAPI.getAllItems()){
+						if(item == ItemAPI.getDefaultItem()) continue;
+						builder.append('\n');
+						builder.append(item);
+						builder.append("(").append(item.getCost()).append(')');
+					}
+					Pokebot.sendPrivateMessage(author, builder.toString());
+					reply(message, "I sent you all the items I have");
 					return;
 				}
 				case "sm":
@@ -517,10 +564,7 @@ public class EventHandler{
 						}
 						//They can hit the target, stats are in check, let's attack
 						if(set.useMove()){
-							Context context = new Context();
-							context.channel = channel;
-							context.move = set.getMove();
-							AttackLogic.attack(context, attacker, set.getMove(), defender);
+							AttackLogic.attack(channel, attacker, set.getMove(), defender);
 						}
 					} catch(NumberFormatException e){
 						reply(message, "That's not a number!");

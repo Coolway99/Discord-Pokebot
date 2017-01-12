@@ -1,6 +1,5 @@
 package coolway99.discordpokebot.battles;
 
-import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Messages;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.Pokebot;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class Battle{
 
 	public final IChannel channel;
-	protected final ArrayList<Player> participants;
+	public final ArrayList<Player> participants;
 	/**
 	 * Used to make kick those who are inactive from the battle
 	 */
@@ -26,15 +25,15 @@ public abstract class Battle{
 	/**
 	 * The set of attacks. It's a tree set, so when it's iterated through the top speed goes first
 	 */
-	protected final TreeSet<IAttack> attacks;
+	public final TreeSet<IAttack> attacks;
 	/**
 	 * The list of players who have already submitted an attack
 	 */
-	protected final ArrayList<Player> attackers;
+	public final ArrayList<Player> attackers;
 	/**
 	 * The list of players who's attacks are multi-turn
 	 */
-	protected final ArrayList<Player> propegateAttacks;
+	protected final ArrayList<Player> propagateAttacks;
 	protected int currentTurn = 0;
 	/**
 	 * Set the timeout for a turn on the battle
@@ -66,7 +65,7 @@ public abstract class Battle{
 		for(Player player : participants){
 			player.battle = this;
 		}
-		this.propegateAttacks = new ArrayList<>();
+		this.propagateAttacks = new ArrayList<>();
 	}
 
 	public void setupBattle(){
@@ -142,18 +141,16 @@ public abstract class Battle{
 		}
 	}
 
-	public void propegateAttack(Player attacker){
-		this.propegateAttacks.add(attacker);
+	public void propagateAttack(Player attacker){
+		this.propagateAttacks.add(attacker);
 	}
 
 	public abstract boolean checkPosition(IChannel channel, Player attacker, MoveSet moveSet, Player defender);
 
 	private void onStart(){
-		Context context = new Context();
-		context.channel = this.channel;
-		context.battle = this;
 		for(Player player : this.participants){
-			player.getModifiedAbility().onBegin(context, player);
+			player.modifiedItem = player.getItem();
+			player.getModifiedAbility().onBegin(this.channel, player);
 		}
 	}
 
@@ -191,11 +188,11 @@ public abstract class Battle{
 				}
 				return false;
 			});
-			if(this.propegateAttacks.isEmpty()){
+			if(this.propagateAttacks.isEmpty()){
 				this.attacks.clear();
 			} else {
 				this.attacks.removeIf(attack -> {
-					if(this.propegateAttacks.contains(attack.attacker)){
+					if(this.propagateAttacks.contains(attack.attacker)){
 						attack.unCancel();
 						return false;
 					}
@@ -203,8 +200,8 @@ public abstract class Battle{
 				});
 			}
 			this.attackers.clear();
-			this.attackers.addAll(this.propegateAttacks);
-			this.propegateAttacks.clear();
+			this.attackers.addAll(this.propagateAttacks);
+			this.propagateAttacks.clear();
 
 			if(!this.attackers.isEmpty()){
 				for(Player player : this.attackers){
@@ -356,10 +353,7 @@ public abstract class Battle{
 	}
 
 	public void onLeaveBattle(Player player){
-		Context context = new Context();
-		context.battle = this;
-		context.channel = this.channel;
-		player.getModifiedAbility().onEnd(context, player);
+		player.getModifiedAbility().onEnd(this.channel, player);
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 		this.attackers.remove(player);
@@ -368,10 +362,7 @@ public abstract class Battle{
 	}
 
 	protected void onSafeLeaveBattle(Player player){
-		Context context = new Context();
-		context.battle = this;
-		context.channel = this.channel;
-		player.getModifiedAbility().onEnd(context, player);
+		player.getModifiedAbility().onEnd(this.channel, player);
 		BattleManager.onExitBattle(player);
 		this.participants.remove(player);
 	}

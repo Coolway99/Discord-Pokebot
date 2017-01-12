@@ -1,6 +1,7 @@
 package coolway99.discordpokebot;
 
 import coolway99.discordpokebot.abilities.AbilityAPI;
+import coolway99.discordpokebot.items.ItemAPI;
 import coolway99.discordpokebot.misc.GameList;
 import coolway99.discordpokebot.moves.MoveAPI;
 import coolway99.discordpokebot.storage.ConfigHandler;
@@ -34,7 +35,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Pokebot{
-	public static final String VERSION = "dev-2.0.0 abilities-rewrite";
+	public static final String VERSION = "dev-2.0.0 items-implementation";
 	//TODO make the rest of these configs
 	public static final byte SAVE_DELAY = 1; //In minutes
 	public static final short MESSAGE_DELAY = 250;//secondsToMiliseconds(1);
@@ -63,6 +64,8 @@ public class Pokebot{
 			System.out.println("Web interface enabled on port "+config.PORT);
 			WebInterface.initWebInterface(config.REDIRECT_URL, config.PORT);
 		}
+		//Before everything, we want to make sure to check the API before logging in
+		Pokebot.setupEngine();
 		client = new ClientBuilder().withToken(config.TOKEN).build();
 		System.out.println("Built Client");
 		client.getDispatcher().registerListener(new GuildCreateHandler());
@@ -72,9 +75,9 @@ public class Pokebot{
 		System.out.println("Logging in");
 		//Timers moved to BotReadyHandler
 		//Now that the main thread is done doing its business and the bot is busy logging in...
-		Pokebot.setupEngine();
 		MoveAPI.setUpMoves();
 		AbilityAPI.setUpAbilities();
+		ItemAPI.setUpItems();
 		//Item.registerItems();
 	}
 
@@ -182,8 +185,10 @@ public class Pokebot{
 		try{
 			//noinspection ConstantConditions
 			Pokebot.engine.eval(new FileReader(Pokebot.getResource("scripting/engine.js")));
-		} catch(ScriptException | FileNotFoundException e){
+		} catch(RuntimeException | FileNotFoundException | ScriptException e){
 			e.printStackTrace();
+			System.err.println("Error initializing scripting engine");
+			System.exit(-100);
 		}
 	}
 
@@ -193,8 +198,6 @@ public class Pokebot{
 			URL url = Pokebot.class.getResource("../../"+path);
 			if(url == null){
 				System.err.println("File not found: "+path);
-				System.err.print("Full path: ");
-				System.err.println(url);
 				return null;
 			}
 			File file = new File(url.toURI());

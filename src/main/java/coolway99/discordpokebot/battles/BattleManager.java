@@ -89,7 +89,7 @@ public class BattleManager{
 			Pokebot.sendMessage(channel, "You don't have enough participants to start!");
 			return;
 		}
-		unstartedBattles.remove(battle);
+		unstartedBattles.remove(host);
 		runningBattles.add(battle);
 		battle.setupBattle();
 	}

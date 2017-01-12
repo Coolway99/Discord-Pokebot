@@ -4,6 +4,7 @@ import coolway99.discordpokebot.Pokebot;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.script.ScriptException;
@@ -13,14 +14,20 @@ import java.io.FileReader;
 import java.util.Collection;
 import java.util.TreeMap;
 
-//Static objects should face inwards to Pokebot
-//Non-static objects should face outwards to the javascript api
 public class MoveAPI{
 
 	private static final TreeMap<String, MoveWrapper> REGISTRY = new TreeMap<>(String::compareToIgnoreCase);
 
+	@Nullable
+	@Contract(pure = true)
+	public static MoveWrapper getMove(@NotNull String[] args){
+		return getMove(0, args);
+	}
+
 	//Used to be more intelligent to people using spaces
-	public static MoveWrapper getMove(int offset, String[] args){
+	@Nullable
+	@Contract(pure = true)
+	public static MoveWrapper getMove(int offset, @NotNull String[] args){
 		String name = "";
 		for(int x = offset; x < args.length; x++){
 			name += args[x];
@@ -31,9 +38,9 @@ public class MoveAPI{
 
 	@Nullable
 	@Contract(value = "null -> null", pure = true)
-	public static MoveWrapper getMove(String name){
-		MoveWrapper move = REGISTRY.get(name.toUpperCase());
-		if(move == null) move = REGISTRY.get(name.replaceAll(" ", "").toUpperCase());
+	public static MoveWrapper getMove(@NotNull String name){
+		MoveWrapper move = REGISTRY.get(name);
+		if(move == null) move = REGISTRY.get(name.replaceAll(" ", ""));
 		return move;
 	}
 

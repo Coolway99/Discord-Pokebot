@@ -1,14 +1,14 @@
 package coolway99.discordpokebot.abilities;
 
-import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.jsonUtils.JSONObject;
-import coolway99.discordpokebot.moves.DamageCalculationHelper;
+import coolway99.discordpokebot.moves.DamageCalculator;
 import coolway99.discordpokebot.moves.MoveWrapper;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sx.blah.discord.handle.obj.IChannel;
 
 //A wrapper to Abilities from JSON
 public class AbilityWrapper{
@@ -61,24 +61,21 @@ public class AbilityWrapper{
 
 	/**
 	 * Ran when we enter battle
-	 * @param context The context we're doing this in
+	 * @param channel The channel we're doing this in
 	 * @param player The player who has this ability
 	 */
-	public void onBegin(@NotNull Context context, @NotNull Player player){
+	public void onBegin(@NotNull IChannel channel, @NotNull Player player){
 		if(this.onBeginFunction == null) return;
-		this.onBeginFunction.call(this, context, player);
+		this.onBeginFunction.call(this, channel, player);
 	}
 
 	/**
-	 * Called as an adjustment (multiplying) how much damage the defender takes. It's only a modifier
-	 * @param damageCalc The pending calculation
-	 * @param attacker The one dealing the attack
-	 * @param move The move being used
-	 * @param defender The one defending from the move
+	 * Called as an adjustment to how much damage the defender takes.
+	 * @param damageCalc The pending calculation, contains the move, attacker, and defender, and all relevant information
 	 */
-	public void onDamageModifier(@NotNull DamageCalculationHelper damageCalc, Player attacker, MoveWrapper move, Player defender){
+	public void onDamageModifier(@NotNull IChannel channel, @NotNull DamageCalculator damageCalc){
 		if(this.onDamageModifierFunction == null) return;
-		this.onDamageModifierFunction.call(this, damageCalc, attacker, move, defender);
+		this.onDamageModifierFunction.call(this, channel, damageCalc);
 	}
 
 /*	/**
@@ -89,36 +86,37 @@ public class AbilityWrapper{
 	 * Can be null or a function
 	 *//*
 	@Contract(pure = true)
-	public boolean onBeforeAttack(Context context, Player attacker, Player defender){
+	public boolean onBeforeAttack(IChannel channel, Player attacker, Player defender){
 		if(this.onBeforeFunction == null) return true;
-		Boolean b = (Boolean) this.onBeforeFunction.call(this, context, attacker, defender);
+		Boolean b = (Boolean) this.onBeforeFunction.call(this, channel, attacker, defender);
 		if(b == null) return true;
 		return b;
 	}*/
 
 	/**
 	 * On attack, this is ran before moves
-	 * @param context The context this takes place in
+	 * @param channel The channel this takes place in
 	 * @param attacker The attacker, aka the one performing the attack
 	 * @param defender The defender, aka the one receiving the attack
 	 */
-	public void onAttack(@NotNull Context context, Player attacker, MoveWrapper move, Player defender){
+	public void onAttack(@NotNull IChannel channel, Player attacker, MoveWrapper move, Player defender){
 		if(this.onAttackFunction == null) return;
-		this.onAttackFunction.call(this, context, attacker, move, defender);
+		this.onAttackFunction.call(this, channel, attacker, move, defender);
 	}
 
-	public void onFaint(@NotNull Context context, @NotNull Player player){
+	public void onFaint(@NotNull IChannel channel, @NotNull Player player){
 		if(this.onFaintFunction == null) return;
-		this.onFaintFunction.call(this, context, player);
+		this.onFaintFunction.call(this, channel, player);
 	}
 
 	/**
 	 * OnEnd, ran after this player leaves the battle (I.E. switching out) or the ability is canceled somehow
+	 * @param channel The channel this is in
 	 * @param player The player who "owns" this ability
 	 */
-	public void onEnd(@NotNull Context context, @NotNull Player player){
+	public void onEnd(@NotNull IChannel channel, @NotNull Player player){
 		if(this.onEndFunction == null) return;
-		this.onEndFunction.call(this, context, player);
+		this.onEndFunction.call(this, channel, player);
 	}
 
 	@NotNull

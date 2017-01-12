@@ -1,6 +1,5 @@
 package coolway99.discordpokebot.battles;
 
-import coolway99.discordpokebot.Context;
 import coolway99.discordpokebot.Player;
 import coolway99.discordpokebot.moves.AttackLogic;
 import coolway99.discordpokebot.moves.MoveSet;
@@ -55,12 +54,8 @@ public class SingleBattle extends Battle{
 					+" went to attack, but there was no target!");
 			return;
 		}
-		Context context = new Context();
-		context.battle = this;
-		context.channel = this.channel;
-		context.move = attack.move.getMove();
 		//We already know the submitted move passes the positional check
-		AttackLogic.attack(context, attack.attacker, attack.move.getMove(), attack.defender);
+		AttackLogic.attack(this.channel, attack.attacker, attack.move.getMove(), attack.defender);
 		//TODO abilities
 		/*if(OldMove.attack(this.channel, attack)){
 			//if(attack.defender.lastMove.getMove() == Move.REGISTRY.get("DESTINY_BOND")){

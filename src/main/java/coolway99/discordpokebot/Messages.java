@@ -130,4 +130,20 @@ public class Messages{
 	public static void stopFlinching(IChannel channel, Player player){
 		Pokebot.sendMessage(channel, player.mention()+" stopped cringing!");
 	}
+
+	public static void confused(IChannel channel, Player defender){
+		Pokebot.sendMessage(channel, defender.mention()+" was confused!");
+	}
+
+	public static void isConfused(IChannel channel, Player attacker){
+		Pokebot.sendMessage(channel, attacker.mention()+" is confused!");
+	}
+
+	public static void confusedDamage(IChannel channel, Player attacker){
+		Pokebot.sendMessage(channel, attacker.mention()+" hurt their self by mistake!");
+	}
+
+	public static void snappedConfusion(IChannel channel, Player attacker){
+		Pokebot.sendMessage(channel, attacker.mention()+" snapped out of confusion!");
+	}
 }

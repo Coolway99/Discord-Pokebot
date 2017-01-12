@@ -1,7 +1,5 @@
 
 
-var MoveAPI = Java.type("coolway99.discordpokebot.moves.MoveAPI");
-var AbilityAPI = Java.type("coolway99.discordpokebot.abilities.AbilityAPI");
 var Pokebot = Java.type("coolway99.discordpokebot.Pokebot");
 
 var API = {
@@ -22,12 +20,15 @@ var API = {
 		TARGET: Java.type("coolway99.discordpokebot.moves.Target"),
 		UTILS: Java.type("coolway99.discordpokebot.moves.MoveUtils"),
 
-		register: MoveAPI.register,
+		register: Java.type("coolway99.discordpokebot.moves.MoveAPI").register,
 	},
 
 	ABILITIES:{
+		register: Java.type("coolway99.discordpokebot.abilities.AbilityAPI").register,
+	},
 
-		register: AbilityAPI.register,
+	ITEMS:{
+		register: Java.type("coolway99.discordpokebot.items.ItemAPI").register,
 	},
 
 	RANDOM: Pokebot.ran,
@@ -38,8 +39,6 @@ var API = {
 	sendMessage: Pokebot.sendMessage,
 };
 
-delete AbilityAPI;
-delete MoveAPI;
 delete Pokebot;
 Object.freeze(API);
 
